@@ -1,0 +1,22 @@
+local data = require ("main.data")
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	particlefx.play("#particlefx")
+	msg.post("main:/sound#menu_music", "play_sound", {gain = 0.3})    
+end
+
+function final(self)
+	particlefx.stop("#particlefx")
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("exit") then
+		msg.post("@system:", "exit", {code = 0})
+	elseif action_id == hash("shoot") and action.pressed then
+	    data.level = 1
+    	msg.post("main:/sound", "stop_sound")    
+    	msg.post("main:/sound#music", "play_sound", {gain = 0.3})    
+	    msg.post("main:/handler", "show_game")
+    end
+end

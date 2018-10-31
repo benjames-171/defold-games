@@ -1,0 +1,36 @@
+local data = require ("main.data")
+local enemies = require("game/enemies.enemy")
+local items = require ("game/items.items")
+
+function init(self)
+	self.angle = 0
+	
+	msg.post("main:/sound#fireball", "play_sound", {gain = data.sfxvol})					
+	particlefx.play("#particlefx")
+end
+
+function final(self)
+	particlefx.stop("#particlefx")
+end
+
+function update(self, dt)
+	self.angle = self.angle - 0.2
+
+	if self.angle < (6 * -math.pi) then
+		go.delete()
+	else
+		data.turn = 1
+	end
+	
+	local r = vmath.quat_rotation_z(self.angle)
+	go.set_rotation(r)	
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") and message.enter then
+		if message.group == hash("enemy") then
+			msg.post(message.other_id, "hit", {damage = 15})
+		end
+	end
+end
+

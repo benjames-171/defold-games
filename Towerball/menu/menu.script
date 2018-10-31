@@ -1,0 +1,17 @@
+local data = require ("main.data")
+
+local function setbg(self)
+	local sx,sy,w,h = tilemap.get_bounds("#bg")
+
+	for y = sy, h do
+		for x = sx, w do
+			tilemap.set_tile("#bg", "1", x, y, math.random(9, 13))
+		end
+	end
+end
+
+function init(self)
+	setbg(self)
+	data.state = data.STATE_MENU
+end
+

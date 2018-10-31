@@ -1,0 +1,43 @@
+local data = require ("main.data")
+
+function init(self)
+	msg.post("#camera", "acquire_camera_focus")
+	self.pos = vmath.vector3 (0,0,0)
+	self.target = vmath.vector3 (0,0,0)
+	self.offset = vmath.vector3 (56,100,0)
+end
+
+local function scroll_bounds(p)
+	if p.x < data.scrollbounds.x then p.x = data.scrollbounds.x end
+	if p.x > data.scrollbounds.z then p.x = data.scrollbounds.z end
+	if p.y < data.scrollbounds.y then p.y = data.scrollbounds.y end
+	if p.y > data.scrollbounds.w then p.y = data.scrollbounds.w end
+
+	return p
+end
+
+local function move(self)
+	local speed = 0.05
+	local v = vmath.vector3((self.target.x - self.pos.x) * speed, (self.target.y - self.pos.y) * speed, 0)
+	self.pos = self.pos + v
+end
+
+function update(self, dt)
+	move(self)
+	local p = self.pos - self.offset
+	data.actualpos = scroll_bounds(p)
+	go.set_position(data.actualpos)
+	data.actualpos = data.actualpos + self.offset
+	data.scrollpos = p
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("look_at") then
+		self.target = message.pos
+	elseif message_id == hash("snap_to") then
+		self.target = message.pos + self.offset
+		self.pos = message.pos + self.offset
+		go.set_position(scroll_bounds(message.pos))
+	end
+end
+

@@ -1,0 +1,43 @@
+local data = require ("main.data")
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	msg.post("main:/sound#music", "play_sound", {gain = 1.0})
+
+	self.valid = data.validsavegame()
+	if data.level <= 1 then self.valid = 0 end
+
+	if self.valid == 1 then
+		gui.set_text(gui.get_node("savegame"), string.format("LEVEL %d", data.level))
+		gui.set_color(gui.get_node("load"), vmath.vector4(1,1,1,1))
+	else
+		gui.set_text(gui.get_node("savegame"), "NO SAVED GAME")
+		gui.set_color(gui.get_node("load"), vmath.vector4(1,1,1,0.65))
+	end
+end
+
+function update(self, dt)
+end
+
+function on_message(self, message_id, message, sender)
+end
+
+local function processclick(self, x, y)
+	if gui.pick_node(gui.get_node("start"), x, y) then
+		data.level = 1
+		msg.post("main:/handler", "show_game")
+		msg.post("main:/sound#music", "stop_sound", {})	
+	elseif gui.pick_node(gui.get_node("load"), x, y) and self.valid == 1 then
+		msg.post("main:/handler", "show_game")
+		msg.post("main:/sound#music", "stop_sound", {})	
+	elseif gui.pick_node(gui.get_node("exit"), x, y) then
+		msg.post("@system:", "exit", {code = 0})		
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("clicktap") and action.pressed then
+		processclick(self, action.x, action.y)
+	end
+end
+

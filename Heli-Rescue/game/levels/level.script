@@ -1,0 +1,122 @@
+local data = require ("main.data")
+
+local function corner(self, x, y)
+	local tl = tilemap.get_tile("#tilemap", "world", x-1, y+1)
+	local tr = tilemap.get_tile("#tilemap", "world", x+1, y+1)
+	local bl = tilemap.get_tile("#tilemap", "world", x-1, y-1)
+	local br = tilemap.get_tile("#tilemap", "world", x+1, y-1)
+
+	local t = 0
+	if tl == 0 then t = 40
+	elseif tr == 0 then t = 39
+	elseif bl == 0 then t = 24
+	elseif br == 0 then t = 23
+	end
+	if t == 0 then
+		if math.random(5) == 1 then
+			tilemap.set_tile("#tilemap", "world", x, y, math.random(78,80))
+		end
+	else
+		tilemap.set_tile("#tilemap", "world", x, y, t)
+	end
+end
+
+local function tile(self, t, x, y)
+	local p = {
+		0,0,0,0,37,
+		0,0,0,1,38,
+		0,0,1,0,21,
+		0,0,1,1,19,
+		0,1,0,0,36,
+		0,1,0,1,1,
+		0,1,1,0,17,
+		0,1,1,1,18,
+		1,0,0,0,53,
+		1,0,0,1,51,
+		1,0,1,0,1,
+		1,0,1,1,35,
+		1,1,0,0,49,
+		1,1,0,1,50,
+		1,1,1,0,33,
+		1,1,1,1,1}
+
+	local b = tilemap.get_tile("#tilemap", "bottom", x, y)
+		
+	if t == 1 then
+		local n = tilemap.get_tile("#tilemap", "world", x, y+1)
+		local e = tilemap.get_tile("#tilemap", "world", x+1, y)
+		local s = tilemap.get_tile("#tilemap", "world", x, y-1)
+		local w = tilemap.get_tile("#tilemap", "world", x-1, y)
+
+		if n > 0 then n = 1 end
+		if e > 0 then e = 1 end
+		if s > 0 then s = 1 end
+		if w > 0 then w = 1 end
+		
+		if n == 1 and e == 1 and s == 1 and w == 1 then
+			corner(self, x, y) 
+		else
+			local c = 1
+			while p[c] ~= n or p[c+1] ~= e or p[c+2] ~= s or p[c+3] ~= w do
+				c = c + 5
+			end
+			tilemap.set_tile("#tilemap", "world", x, y, p[c+4])
+		end
+	elseif t == 0 and b == 0 then
+		if math.random(10) == 1 then
+			tilemap.set_tile("#tilemap", "bottom", x, y, math.random(94,96))
+		end
+	end
+end
+
+local function spawn_hostage(self, x, y)
+	local p = vmath.vector3(x, y, -0.5)
+	msg.post("common/view#radar", "blip", {xy = p})
+	factory.create("#hostage_factory", data.tile2world(p), nil, {})
+	data.num_hostages = data.num_hostages + 1
+end
+
+local function spawn_tank(self, x, y)
+	local p = vmath.vector3(x, y, -0.5)
+	factory.create("#tank_factory", data.tile2world(p), nil, {})
+end
+
+local function spawn_aagun(self, x, y)
+	local p = vmath.vector3(x, y, -0.5)
+	factory.create("#aagun_factory", data.tile2world(p), nil, {})
+end
+
+local function spawn_player(self, x, y)
+	data.basepos = data.tile2world(vmath.vector3(x, y, 0))
+	msg.post("common/player", "position", {pos = data.basepos})
+end
+
+local function parse(self)
+	data.num_hostages = 0
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	for y = sy+1, h+sy-2 do
+		for x = sx+1, w+sx-2 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			tile(self, t, x, y)
+
+			t = tilemap.get_tile("#tilemap", "control", x, y)
+			if t == 3 then spawn_hostage(self, x, y)
+			end
+
+			t = tilemap.get_tile("#tilemap", "top", x, y)
+			if t == 4 then spawn_tank(self, x, y)
+			elseif t == 6 then spawn_player(self, x, y)
+			elseif t == 7 then spawn_aagun(self, x, y)
+			elseif data.destructible_tile(t) then
+				tilemap.set_tile("#tilemap", "hits", x, y, math.random(10,30))
+			end
+		end
+	end
+end
+
+function init(self)
+	parse(self)
+end
+
+

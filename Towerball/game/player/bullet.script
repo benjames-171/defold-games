@@ -1,0 +1,52 @@
+go.property("velocity", vmath.vector3(0, 0, 0))
+
+function init(self)
+	self.life = 24
+end
+
+local function collisioncheck(self)
+	local p = go.get_position()
+	p.x = math.floor((p.x + 24) / 16)
+	p.y = math.floor((p.y + 16) / 16)
+
+	t = tilemap.get_tile("level#map", "main", p.x, p.y)
+	
+	if t == 4 then
+		tilemap.set_tile("level#map", "main", p.x, p.y, 0)
+		go.set_position(vmath.vector3((p.x * 16) - 16, (p.y * 16) - 8, p.z))
+		particlefx.play("#blockfx")
+		msg.post("main:/sound#break", "play_sound", {gain = 1.0})
+	elseif t == 18 then
+		tilemap.set_tile("level#map", "main", p.x, p.y, 0)
+		go.set_position(vmath.vector3((p.x * 16) - 16, (p.y * 16) - 8, p.z))
+		particlefx.play("#minefx")
+		msg.post("main:/sound#explode", "play_sound", {gain = 1.0})
+	end
+	
+	if t ~= 0 and t ~= 17 then go.delete() end
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	pos = pos + (self.velocity * dt)
+	go.set_position(pos)
+
+	collisioncheck(self)
+
+	self.life = self.life - 1
+	if self.life <= 0 then
+		go.delete()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("contact_point_response") then
+    	if message.group == hash("enemy") then
+    		go.delete()
+		elseif message.group == hash("platform") then
+			go.delete()
+		end
+	end
+end
+
+

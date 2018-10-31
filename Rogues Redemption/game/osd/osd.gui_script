@@ -1,0 +1,88 @@
+local data = require ("main.data")
+
+function init(self)
+	self.pickup = false
+	
+	if data.detail then	gui.set_enabled(gui.get_node("vig"), true)
+ 	else gui.set_enabled(gui.get_node("vig"), false)
+ 	end	
+end
+
+local function updatetoppanel(self)
+	gui.set_scale(gui.get_node("hp"), vmath.vector4(data.health / 100, 1, 1, 1))
+	gui.set_scale(gui.get_node("mp"), vmath.vector4(data.mana / 100, 1, 1, 1))
+	gui.set_scale(gui.get_node("xp"), vmath.vector4(data.xp / 100, 1, 1, 1))
+	gui.set_text(gui.get_node("level"), string.format("%d", data.plevel))
+	
+	if data.class == 2 then	gui.play_flipbook(gui.get_node("profileicon"), "wizardstatic")
+	elseif data.class == 3 then	gui.play_flipbook(gui.get_node("profileicon"), "warriorstatic")
+	else gui.play_flipbook(gui.get_node("profileicon"), "roguestatic")
+	end
+end
+
+local function updatebottompanel(self)
+	gui.play_flipbook(gui.get_node("left"), string.format("anim%02d", data.inv[data.INV_SLOT_LEFTHAND]))
+	gui.play_flipbook(gui.get_node("right"), string.format("anim%02d", data.inv[data.INV_SLOT_RIGHTHAND]))
+end
+
+function update(self, dt)
+	updatetoppanel(self)
+	updatebottompanel(self)
+end
+
+local function updatestatus(self, str, col)
+	if col == nil then col = vmath.vector4(1,1,1,1) end
+
+	--gui.set_text(gui.get_node("status1"), gui.get_text(gui.get_node("status2")))
+	--gui.set_color(gui.get_node("status1"), gui.get_color(gui.get_node("status2")))
+
+	gui.set_text(gui.get_node("status2"), gui.get_text(gui.get_node("status3")))
+	gui.set_color(gui.get_node("status2"), gui.get_color(gui.get_node("status3")))
+
+	gui.set_text(gui.get_node("status3"), gui.get_text(gui.get_node("status4")))
+	gui.set_color(gui.get_node("status3"), gui.get_color(gui.get_node("status4")))
+
+ 	gui.set_text(gui.get_node("status4"), str)
+	gui.set_color(gui.get_node("status4"), col)
+end
+
+local function fadecomplete(self, node)
+	data.depth = data.depth + 1
+	data.savegamefile(self)
+	if data.depth <= 26 then
+		msg.post("game:/loader", "new_level", {})
+	else
+		msg.post("view#osd_completed", "fade_in")
+	end	
+end
+
+local function gameovercomplete(self, node)
+	data.turn = -2
+end
+
+local function disablenode (self, node)
+ 	gui.set_enabled(node, false)
+end
+
+local function dead(self)
+	local str = string.format("ON LEVEL %d\n\nGAME TIME : %.2d:%.2d:%.2d\n\nTURNS TAKEN : %d",
+		data.depth, data.time/(60*60), data.time/60%60, data.time%60, data.turnstaken)
+
+	gui.set_text(gui.get_node("onlevel"), str)
+	gui.animate(gui.get_node("dead"), gui.PROP_COLOR, vmath.vector4(1, 1, 1, 1), gui.EASING_INOUTQUAD, 2.0)
+ 	gui.set_enabled(gui.get_node("fade"), true)
+	gui.animate(gui.get_node("fade"), gui.PROP_COLOR, vmath.vector4(0.5, 0, 0, 0.85), gui.EASING_INOUTQUAD, 2.0, 0.0, gameovercomplete)
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("update_status") then
+		updatestatus(self, message.status, message.color)
+	elseif message_id == hash("dead") then
+		dead(self)
+	elseif message_id == hash("fadein") then
+		gui.animate(gui.get_node("fade"), gui.PROP_COLOR, vmath.vector4(0, 0, 0, 0), gui.EASING_INOUTQUAD, 1.0, 0, disablenode)
+	elseif message_id == hash("fadeout") then
+	 	gui.set_enabled(gui.get_node("fade"), true)
+		gui.animate(gui.get_node("fade"), gui.PROP_COLOR, vmath.vector4(0, 0, 0, 1), gui.EASING_INOUTQUAD, 0.5, 0.0, fadecomplete)
+	end
+end

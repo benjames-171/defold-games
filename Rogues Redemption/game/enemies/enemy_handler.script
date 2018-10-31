@@ -1,0 +1,70 @@
+local data = require ("main.data")
+
+local TOTAL_ENEMY_TYPES = 14
+
+function init(self)
+	self.spawned_objects = {}
+	self.levelurl = string.format("level%d:/level#tilemap", data.level)
+	
+	sx, sy, w, h = tilemap.get_bounds(self.levelurl)
+	
+	local total = 8 + math.floor(data.depth / 4) 
+		
+	data.numenemies = total
+	
+	while total > 0 do
+		local c = false
+		local x, y
+		
+		while c == false do
+			x = math.random(sx, sx + w - 1)
+			y = math.random(sy, sy + h - 1)
+			
+			if data.istilespawnable(self, x, y) then c = true end 
+		end
+	
+		local pos = vmath.vector3((x*16) - 8, (y*16) - 8, 1)
+		local type = (data.depth/2) + math.random(2) - 1
+		type = math.floor(type + 0.5)
+		if type > TOTAL_ENEMY_TYPES then type = TOTAL_ENEMY_TYPES end
+				
+		addenemy(self, type, pos)
+		data.settile(self, pos.x, pos.y, "taken", 1)
+		total = total - 1
+	end
+end
+
+function addenemy(self, type, pos)
+	local enemy = factory.create("#enemy_factory", pos, nil, {type = type})
+	table.insert(self.spawned_objects, enemy)
+end
+
+function deleteenemy(self, id)
+	for k, v in ipairs(self.spawned_objects) do	
+		if (v == id) then
+			table.remove(self.spawned_objects,k)
+			return
+		end
+	end
+
+	data.numenemies = data.numenemies - 1
+
+	if data.numenemies == 0 then
+		msg.post("item_handler", "level_clear", {})
+	end
+	go.delete(id)
+end
+
+function deleteallenemies(self)
+	for k, v in pairs(self.spawned_objects) do
+		table.remove(self.spawned_objects, k)
+		go.delete(v)
+	end	
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("delete_enemy") then
+		deleteenemy (self, sender)
+	end
+end
+

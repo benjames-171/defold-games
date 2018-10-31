@@ -1,0 +1,3 @@
+function init(self)
+	msg.post("common/player", "set_position", {pos = go.get_position()})
+end

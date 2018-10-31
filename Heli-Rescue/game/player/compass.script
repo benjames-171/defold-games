@@ -1,0 +1,13 @@
+local data = require ("main.data")
+
+function init(self)
+end
+
+function update(self, dt)
+	go.set_position(data.playerpos)
+
+	local v = data.basepos - data.playerpos
+	local r = -math.atan2 (v.x, v.y) + (math.pi * 0.75)
+	go.set_rotation(vmath.quat_rotation_z(r))
+end
+

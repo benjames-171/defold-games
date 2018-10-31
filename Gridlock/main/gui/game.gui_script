@@ -1,0 +1,30 @@
+local data = require ("main.data")
+
+function init(self)
+	gui.set_enabled(gui.get_node("main"), false)
+end
+
+function update(self, dt)
+	gui.set_text(gui.get_node("levelnum"), string.format("%d", data.level))
+	gui.set_text(gui.get_node("turnsnum"), string.format("%d", data.turns))
+end
+
+local function processclick(self, x, y)
+	if gui.pick_node(gui.get_node("menu"), x, y) then
+		msg.post("#menu", "show", {})
+		msg.post("main:/sound#tap", "play_sound", {gain = 1.0})							
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("click") then
+		processclick(self, message.x, message.y)
+	elseif message_id == hash("show") then
+		gui.set_enabled(gui.get_node("main"), true)
+		gui.set_color(gui.get_node("main"), vmath.vector4(0,0,0,0))
+ 		gui.animate(gui.get_node("main"), gui.PROP_COLOR, vmath.vector4(0,0,0,1), gui.EASING_INOUTQUAD, 0.5) 	
+	elseif message_id == hash("hide") then
+		gui.set_enabled(gui.get_node("main"), false)
+	end
+end
+

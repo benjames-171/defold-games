@@ -1,0 +1,84 @@
+images {
+  image: "/assets/png/ball.png"
+}
+images {
+  image: "/assets/png/arrow.png"
+}
+images {
+  image: "/assets/png/osd.png"
+}
+images {
+  image: "/assets/png/pixel.png"
+}
+images {
+  image: "/assets/png/bg1.png"
+}
+images {
+  image: "/assets/png/hourglass.png"
+}
+images {
+  image: "/assets/png/button.png"
+}
+images {
+  image: "/assets/png/star.png"
+}
+images {
+  image: "/assets/png/starempty.png"
+}
+images {
+  image: "/assets/png/arrowdown.png"
+}
+images {
+  image: "/assets/png/arrowleft.png"
+}
+images {
+  image: "/assets/png/padlock.png"
+}
+images {
+  image: "/assets/png/three.png"
+}
+images {
+  image: "/assets/png/trees.png"
+}
+images {
+  image: "/assets/png/credits.png"
+}
+images {
+  image: "/assets/png/title.png"
+}
+images {
+  image: "/assets/png/arrowhead.png"
+}
+images {
+  image: "/assets/png/wheel.png"
+}
+images {
+  image: "/assets/png/buttonsmall.png"
+}
+images {
+  image: "/assets/png/cloud.png"
+}
+images {
+  image: "/assets/png/cloud2.png"
+}
+images {
+  image: "/assets/png/sky.png"
+}
+images {
+  image: "/assets/png/ufo.png"
+}
+images {
+  image: "/assets/png/wind.png"
+}
+images {
+  image: "/assets/png/ballwhite.png"
+}
+images {
+  image: "/assets/png/level.png"
+}
+images {
+  image: "/assets/png/message.png"
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0

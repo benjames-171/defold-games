@@ -1,0 +1,22 @@
+local data = require ("main.data")
+
+local startrot = {math.pi/2, 0, 0, 0, 0, 0, 0, 0, 0}
+
+function init(self)
+	local str = string.format("track%d:/spawnplayer", data.level)
+	msg.post("/common/player", "set_position", {pos = go.get_position(str)})
+	msg.post("/common/player", "set_rotation", {rot = startrot[data.level]})
+	
+	str = string.format("track%d:/spawnai1", data.level)
+	msg.post("/common/ai1", "set_position", {pos = go.get_position(str)})
+	msg.post("/common/ai1", "set_rotation", {rot = startrot[data.level]})
+
+	str = string.format("track%d:/spawnai2", data.level)
+	msg.post("/common/ai2", "set_position", {pos = go.get_position(str)})
+	msg.post("/common/ai2", "set_rotation", {rot = startrot[data.level]})
+
+	str = string.format("track%d:/spawnai3", data.level)
+	msg.post("/common/ai3", "set_position", {pos = go.get_position(str)})
+	msg.post("/common/ai3", "set_rotation", {rot = startrot[data.level]})
+end
+

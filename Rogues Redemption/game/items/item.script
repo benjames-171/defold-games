@@ -1,0 +1,32 @@
+local data = require ("main.data")
+go.property("item_num", 1)
+
+function init(self)
+	self.levelurl = string.format("level%d:/level#tilemap", data.level)
+
+	msg.post("#sprite", "play_animation", {id = hash(string.format("anim%02d", self.item_num))})
+
+	local pos = go.get_position()
+	pos.y = pos.y + 10
+	go.set_position(pos)
+
+	go.animate(go.get_id(), "position.y", go.PLAYBACK_ONCE_FORWARD, pos.y - 10, go.EASING_LINEAR, 0.2)
+end
+
+function update(self)
+	local pos = go.get_position()
+	
+	if data.gettile(self, pos.x, pos.y, "fog") == 0 then
+	    sprite.set_constant("#sprite",  "tint", vmath.vector4(1,1,1,1))
+	else
+	    sprite.set_constant("#sprite",  "tint", vmath.vector4(1,1,1,0))	
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") and message.enter then
+		if message.group == hash("player") then
+			msg.post("common/player#script", "pickup_hover", {num = self.item_num})
+		end
+	end
+end

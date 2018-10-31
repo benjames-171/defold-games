@@ -1,0 +1,84 @@
+images {
+  image: "/assets/graphics/walk.png"
+}
+images {
+  image: "/assets/graphics/bg.png"
+}
+images {
+  image: "/assets/graphics/dpad.png"
+}
+images {
+  image: "/assets/graphics/vig.png"
+}
+images {
+  image: "/assets/graphics/muzzle.png"
+}
+images {
+  image: "/assets/graphics/fire.png"
+}
+images {
+  image: "/assets/graphics/robot1.png"
+}
+images {
+  image: "/assets/graphics/bullet.png"
+}
+images {
+  image: "/assets/graphics/shadow.png"
+}
+images {
+  image: "/assets/graphics/credits.png"
+}
+images {
+  image: "/assets/graphics/crystal.png"
+}
+images {
+  image: "/assets/graphics/medi.png"
+}
+images {
+  image: "/assets/graphics/ammo.png"
+}
+images {
+  image: "/assets/graphics/sentry.png"
+}
+images {
+  image: "/assets/graphics/laser.png"
+}
+images {
+  image: "/assets/graphics/gun1.png"
+}
+images {
+  image: "/assets/graphics/gun2.png"
+}
+images {
+  image: "/assets/graphics/gun3.png"
+}
+images {
+  image: "/assets/graphics/gun4.png"
+}
+images {
+  image: "/assets/graphics/gun5.png"
+}
+images {
+  image: "/assets/graphics/pin.png"
+}
+images {
+  image: "/assets/graphics/shopbox.png"
+}
+images {
+  image: "/assets/graphics/shopcursor.png"
+}
+images {
+  image: "/assets/graphics/wayfinder.png"
+}
+images {
+  image: "/assets/graphics/arrow.png"
+}
+images {
+  image: "/assets/graphics/blackout.png"
+}
+images {
+  image: "/assets/graphics/shutter.png"
+}
+margin: 0
+extrude_borders: 0
+inner_padding: 0

@@ -1,0 +1,6 @@
+local data = require ("main.data")
+
+function init(self)
+	data.state = data.STATE_MAINMENU
+end
+

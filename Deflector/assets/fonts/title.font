@@ -1,0 +1,5 @@
+font: "/assets/fonts/FunkyRundkopfNF.ttf"
+material: "/builtins/fonts/font.material"
+size: 50
+outline_alpha: 1.0
+outline_width: 2.0

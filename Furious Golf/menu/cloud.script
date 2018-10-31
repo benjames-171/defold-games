@@ -1,0 +1,22 @@
+go.property("size", 0)
+
+function init(self)
+	local pos = go.get_position()
+	go.set_position(vmath.vector3(math.random(-150, 150), math.random(140, 180), pos.z))
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	
+	if self.size == 1 then pos.x = pos.x - 0.25
+	else pos.x = pos.x - 0.125
+	end
+	
+	if pos.x < -150 then
+		pos.x = math.random(120, 130) 
+		pos.y = math.random(140, 180)
+	end
+	
+	go.set_position(pos)
+end
+

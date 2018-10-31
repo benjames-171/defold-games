@@ -1,0 +1,4 @@
+font: "/assets/digital.ttf"
+material: "/builtins/fonts/font.material"
+size: 40
+antialias: 0

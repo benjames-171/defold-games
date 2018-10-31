@@ -1,0 +1,61 @@
+local data = require ("main.data")
+
+local SPEED = 50
+local MAX_UPSPEED = 25
+
+function init(self)
+	self.fired = false
+	self.upspeed = 0
+end
+
+local function respawn(self)
+	local pos = go.get_position()
+	pos.x = data.scrollpos.x + math.random(1000, 1500) 
+	pos.y = math.random(160, 220)
+	if data.playerpos.x > (500*16) or data.state ~= data.STATE_PLAYING
+		then pos.y = 1000
+	end
+	go.set_position(pos)
+	self.fired = false
+	self.upspeed = 0
+end
+
+local function fire(self)
+	local p = go.get_position()
+	p.y = p.y - 4
+	p.z = p.z - 0.1
+	local missile = factory.create("#missile_factory", p, nil, {angle = math.pi}, 1)
+	self.fired = true
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	
+	pos.x = pos.x - (SPEED * dt)
+	
+	pos.y = pos.y + (self.upspeed * dt)
+	
+	if pos.x - data.playerpos.x < 350 and
+	   pos.y < 720 and 
+	   not self.fired and 
+	   math.random(1,20) == 1 then
+		fire(self)
+		self.upspeed = math.random(0, MAX_UPSPEED)	
+	end
+	
+	if pos.x - data.scrollpos.x < -64 then 
+		respawn(self)
+		return
+	end
+		
+	go.set_position(pos)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		msg.post("explosion_air", "explode", {pos = go.get_position()})
+		msg.post("main:/sound#exp_large", "play_sound", {gain = 1.0})
+		respawn(self)
+		data.score = data.score + 500
+	end
+end

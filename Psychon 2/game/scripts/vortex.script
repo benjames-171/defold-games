@@ -1,0 +1,16 @@
+function init (self)
+	self.started = 0
+end
+
+function final(self)
+	particlefx.stop("#particlefx")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("start_vortex") and self.started == 0 then
+    	particlefx.play("#particlefx")
+    	self.started = 1
+	end
+end
+    	
+	

@@ -1,0 +1,37 @@
+local data = require ("main.data")
+
+local function istilestatic(self, x, y)
+	local r = false
+
+	local t = tilemap.get_tile("level#map", "main", x, y)
+	
+	if (t >= 7 and t <= 16) or (t >= 23 and t <= 25) then
+		r = true
+	end
+			
+	return r
+end
+
+function tilecheck(self)
+	local r = false
+	local p = go.get_position()
+	p.x = math.floor(p.x / 16) + 1
+	p.y = math.floor(p.y / 16) + 1
+			
+	local t = tilemap.get_tile("level#map", "main", p.x, p.y)
+						
+	if t >= 26 and t <= 32 then
+	elseif t ~= 0 then						
+		if not istilestatic(self, p.x, p.y) then	
+			tilemap.set_tile("level#map", "main", p.x, p.y, 0)		
+			local pos = vmath.vector3((p.x * 16) - 8, (p.y * 16) - 8, p.z)	
+			msg.post("explosion", "explode", {pos = pos})
+			data.score = data.score + 100			
+			
+			if p.x < 25 then msg.post("level", "sink_carrier", {}) end
+		end
+		r = true
+	end
+	
+	return r
+end

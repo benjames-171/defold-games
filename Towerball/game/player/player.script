@@ -1,0 +1,213 @@
+local data = require ("main.data")
+
+local GRAV = 5
+local HACCEL = 12
+local JUMP = 250
+local MAX = 250
+local BULLET = 300
+
+local function resetlevel(self)
+	sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+	go.set_position(vmath.vector3(64, 200, 1))
+	self.vel = vmath.vector3(0, 0, 0)
+	self.angle = 0
+	self.landed = 0
+	data.state = data.STATE_PLAYING
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	resetlevel(self)
+	self.timer = 0
+	data.lives = 3
+end
+
+local function move(self, dt)
+	local pos = go.get_position()
+	
+	self.vel.y = self.vel.y - GRAV
+	self.vel.x = self.vel.x * 0.9
+
+	if self.vel.x > MAX then self.vel.x = MAX
+	elseif self.vel.x < -MAX then self.vel.x = -MAX
+	end
+	if self.vel.y > MAX then self.vel.y = MAX
+	elseif self.vel.y < -MAX then self.vel.y = -MAX
+	end
+	
+	pos = pos + (self.vel * dt)
+	
+	go.set_position(pos)
+	
+	data.playerpos = vmath.vector3(pos.x, pos.y, pos.z)
+	
+	pos.x = 0
+	pos.y = pos.y - 120
+	
+	msg.post("view", "look_at", {pos = pos}) 
+end
+
+local function rotate(self)
+	self.angle = self.angle - (self.vel.x / 700)
+	
+	local r = vmath.quat_rotation_z(self.angle)
+	go.set_rotation(r, "#sprite")	
+	
+end
+
+local function drawbarrier (self, y)
+	local sx,sy,w,h = tilemap.get_bounds("level#map")
+	
+	for n = 2, w - 1 do
+		tilemap.set_tile("level#map", "main", n, y, 3)
+	end
+end
+
+local function levelcomplete(self)
+	data.score = data.score + data.heighttoscore()
+	data.level = data.level + 1
+	resetlevel(self)
+	msg.post("level", "generate", {})
+end
+	
+local function dead(self)
+	go.set_rotation(vmath.quat_rotation_z(0))
+	particlefx.play("#deadfx")
+	sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0))
+	msg.post("main:/sound#explode", "play_sound", {gain = 1.0})
+	data.lives = data.lives - 1
+	data.state = data.STATE_DEAD 
+	if data.lives <= 0 then	
+		msg.post("view#osd", "game_over", {})
+		self.timer = 250		 
+	else
+		self.timer = 150
+	end	
+end
+	
+local function collisioncheck(self)
+	local p = go.get_position()
+	p.x = math.floor((p.x + 24) / 16)
+	p.y = math.floor((p.y + 16) / 16)
+
+	t = tilemap.get_tile("level#map", "main", p.x, p.y)
+
+	if t == 17 then
+		tilemap.set_tile("level#map", "main", p.x, p.y, 0)
+		msg.post("main:/sound#pickup", "play_sound", {gain = 1.0})
+		drawbarrier(self, p.y - 3)	
+	elseif t == 18 then
+		tilemap.set_tile("level#map", "main", p.x, p.y, 0)
+		dead(self)
+	elseif t >= 5 and t <= 6 then
+		levelcomplete(self)
+	end
+end
+
+local function stateupdate(self)
+	if data.state == data.STATE_DEAD then
+		self.timer = self.timer - 1
+		if self.timer <= 0 then
+			if data.lives > 0 then
+				msg.post("level", "generate", {})
+				resetlevel(self)
+			else
+				msg.post("view", "look_at", {pos = vmath.vector3(0,0,0)})
+				msg.post("main:/handler", "show_menu", {}) 	
+			end
+		end
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		move(self, dt)
+		rotate(self)
+		collisioncheck(self)
+	end
+
+	stateupdate(self)
+	
+	if self.landed > 0 then self.landed = self.landed - 1 end
+end
+
+local function resolvecollision(self, message)
+	local correction = vmath.vector3(0,0,0)
+
+    if message.distance > 0 then
+        local proj = vmath.project(correction, message.normal * message.distance)
+        if proj < 1 then
+            local comp = (message.distance - message.distance * proj) * message.normal
+            go.set_position(go.get_position() + comp)
+
+			if message.normal.x == -1 and self.vel.x > 0 then self.vel.x = 0
+			elseif message.normal.x == 1 and self.vel.x < 0 then self.vel.x = 0
+			end
+			
+			if message.normal.y == -1 and self.vel.y > 0 then self.vel.y = 0
+			elseif message.normal.y == 1 and self.vel.y < 0 then
+				self.vel.y = 0
+				self.landed = 3
+			end
+        end
+    end
+end
+
+local function left(self)
+	self.vel.x = self.vel.x - HACCEL
+end
+
+local function right(self)
+	self.vel.x = self.vel.x + HACCEL
+end
+
+local function jump(self)
+	self.vel.y = JUMP
+	msg.post("main:/sound#jump", "play_sound", {gain = 1.0})	
+end
+
+local function fire(self)
+	local pos = go.get_position()
+	pos.z = 0
+	local rot = vmath.quat(0, 0, 0, 0)
+
+	factory.create("#bullet_factory", pos, rot, {velocity = vmath.vector3(-BULLET/5, BULLET, 0)}, 1)
+	factory.create("#bullet_factory", pos, rot, {velocity = vmath.vector3(0, BULLET, 0)}, 1)
+	factory.create("#bullet_factory", pos, rot, {velocity = vmath.vector3(BULLET/5, BULLET, 0)}, 1)
+	
+	msg.post("main:/sound#bullet", "play_sound", {gain = 1.0})
+end
+
+function on_input(self, action_id, action)
+	if data.state ~= data.STATE_PLAYING then return end
+
+	if action_id == hash("left") then left(self)
+	elseif action_id == hash("right") then right(self)
+	elseif action_id == hash("jump") and action.pressed and self.landed > 0 then jump(self)
+	elseif action_id == hash("fire") and action.pressed then fire(self)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("contact_point_response") then
+    	if message.group == hash("world") or message.group == hash("platform") then
+			resolvecollision(self, message)
+    	elseif message.group == hash("enemy") then
+			dead(self, message)
+		end
+	elseif message_id == hash("move") then
+		--self.vel.x = self.vel.x + message.x
+    elseif message_id == hash("left_jump") then
+    	if self.landed > 0 and message.pressed then jump(self) end
+    	left(self)
+	elseif message_id == hash("right_jump") then
+    	if self.landed > 0 and message.pressed then jump(self) end
+		right(self)
+	elseif message_id == hash("move_left") then
+		left(self)
+	elseif message_id == hash("move_right") then
+		right(self)
+	elseif message_id == hash("fire") then
+    	if message.pressed then fire(self) end
+    end
+end

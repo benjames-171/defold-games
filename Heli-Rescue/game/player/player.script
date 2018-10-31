@@ -1,0 +1,279 @@
+local data = require ("main.data")
+
+local POS_ACCEL = 0.1
+local POS_DRAG = 0.05
+
+local TURN_ACCEL = 0.006
+local TURN_DRAG = 0.0035
+local TURN_MAX = 0.05
+
+local STRAFE_ACCEL = 0.1
+local STRAFE_DRAG = 0.05
+local STRAFE_MAX = 1
+
+local MAX_VOL = 0.5
+
+local LADDER_TIME = 100
+local OFFSET = 20
+
+local MINIGUN_BURST = 50
+
+local function init_heli(self)
+	if data.heli == 1 then
+		self.max_speed = 1.1
+		self.fuel_drain = 0.01
+		self.damage = 3
+	elseif data.heli == 2 then
+		self.max_speed = 1.5
+		self.fuel_drain = 0.015
+		self.damage = 3.3
+	elseif data.heli == 3 then
+		self.max_speed = 1.3
+		self.fuel_drain = 0.007
+		self.damage = 3.6
+	end
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.angle = math.pi/2
+	self.angleadd = 0
+	self.strafe = 0
+	self.speed = 0
+	self.sound = 0
+	self.climb = 0
+	self.hover = false
+	self.safe = false
+	self.minigun = 0
+	self.helisound = string.format("main:/sound#heli%d", data.heli)
+	data.rescued = 0
+	data.onboard = 0
+	data.fuel = 100
+	data.ammo = 100
+	data.hull = 100
+	msg.post(self.helisound, "play_sound", {gain = self.sound})
+	msg.post("#heli", "play_animation", {id = hash(string.format("%d", data.heli))})
+	data.state = data.STATE_PLAYING
+	init_heli(self)
+end
+
+local function drag(self)
+	if self.speed > 0 then self.speed = self.speed - POS_DRAG
+		if self.speed < 0 then self.speed = 0 end
+	elseif self.speed < 0 then self.speed = self.speed + POS_DRAG
+		if self.speed > 0 then self.speed = 0 end
+	end
+
+	if self.angleadd > 0 then self.angleadd = self.angleadd - TURN_DRAG
+		if self.angleadd < 0 then self.angleadd = 0 end
+	elseif self.angleadd < 0 then self.angleadd = self.angleadd + TURN_DRAG
+		if self.angleadd > 0 then self.angleadd = 0 end
+	end
+
+	if self.strafe > 0 then self.strafe = self.strafe - STRAFE_DRAG
+		if self.strafe < 0 then self.strafe = 0 end
+	elseif self.strafe < 0 then self.strafe = self.strafe + STRAFE_DRAG
+		if self.strafe > 0 then self.strafe = 0 end
+	end
+
+end
+
+local function sound(self)
+	if data.state == data.STATE_PLAYING then
+		if self.sound < MAX_VOL then self.sound = self.sound + 0.01 end
+	else
+		if self.sound > 0 then self.sound = self.sound - 0.01 end
+		if self.sound < 0 then self.sound = 0 end
+	end
+
+	msg.post(self.helisound, "set_gain", {gain = self.sound})
+end
+
+local function move(self)
+	self.angle = self.angle + self.angleadd
+	go.set_rotation(vmath.quat_rotation_z(self.angle))
+
+	local v = vmath.vector3(math.cos(self.angle) * self.speed, math.sin(self.angle) * self.speed, 0)
+	local p = go.get_position()
+	local o = vmath.vector3(math.cos(self.angle) * OFFSET, math.sin(self.angle) * OFFSET, 0)
+	local s = vmath.vector3(math.cos(self.angle - math.pi/2) * self.strafe, math.sin(self.angle - math.pi/2) * self.strafe, 0)
+		
+	go.set_position(p + v + s)
+	msg.post("view#script", "look_at", { position = go.get_position() + o})
+	data.playerpos = go.get_position()
+	data.playerrot = self.angle
+end
+
+local function levelclear(self)
+	data.state = data.STATE_LEVELCLEAR
+	msg.post("view#message", "show", {})
+	msg.post("#co", "disable")
+end
+
+local function gameover(self)
+	data.state = data.STATE_GAMEOVER
+	msg.post("view#message", "show", {})
+	msg.post("#co", "disable")
+
+	if data.hull <= 0 then
+		msg.post(self.helisound, "stop_sound", {})
+		particlefx.play("#explosion_large")
+		msg.post(string.format("main:/sound#exp%d", math.random(1,3)), "play_sound", {gain = 1.0})
+		sprite.set_constant("#heli", "tint", vmath.vector4(1,1,1,0))
+		go.delete("blades")
+	end
+end
+
+local function hover(self)
+	data.hover = data.hover - 1
+
+	local p = data.world2tile(go.get_position())
+	local t = 0
+	if data.validtile(p.x, p.y)	then t = tilemap.get_tile(string.format("level%d:/level#tilemap", data.level), "top", p.x, p.y) end
+	if t == 6 then data.overbase = true
+	else data.overbase = false
+	end
+
+	if data.overbase then
+		if data.ammo < 100 then data.ammo = data.ammo + 0.5 end
+		if data.fuel < 100 then data.fuel = data.fuel + 0.5 end
+		if data.onboard > 0 then
+			if self.climb == 0 then msg.post("main:/sound#climb", "play_sound", {gain = 1.0}) end
+			self.climb = self.climb + 1
+			msg.post("view#gui", "progress", {num = self.climb, total = LADDER_TIME})
+			if self.climb >= LADDER_TIME then
+				data.rescued = data.rescued + 1
+				data.onboard = data.onboard - 1
+				self.climb = 0
+
+				if data.rescued == data.num_hostages then levelclear(self) end
+			end
+		end
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		move(self)
+		hover(self)
+		drag(self)
+		data.fuel = data.fuel - self.fuel_drain
+		if data.fuel <= 0 or data.hull <=0 then	gameover(self) end
+	end
+	sound(self)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("position") then
+		go.set_position(message.pos)
+	elseif message_id == hash("contact_point_response") and message.other_group == hash ("hostage") then
+		data.hover = 2
+	elseif message_id == hash("damage") then
+		data.hull = data.hull - self.damage
+	end
+end
+
+local function pause(self)
+	if data.state == data.STATE_PLAYING then
+		data.state = data.STATE_PAUSED
+		msg.post("view#gui", "pause", {})
+		msg.post("game:/loader", "set_time_step", {factor = 0, mode = 1})
+	elseif data.state == data.STATE_PAUSED then
+		data.state = data.STATE_PLAYING
+		msg.post("view#gui", "pause", {})
+		msg.post("game:/loader", "set_time_step", {factor = 1, mode = 1})
+	end
+end
+
+local function fire_cannon(self, pos)
+	data.ammo = data.ammo - 0.35
+	factory.create("#cannon_factory", pos, nil, {angle = self.angle, speed = 5, damage = 10})
+	msg.post("main:/sound#cannon", "play_sound", {gain = 1.0})
+end
+
+local function fire_minigun(self, pos, action)
+	data.ammo = data.ammo - 0.025
+	self.minigun = self.minigun + 1
+	if self.minigun%5 == 0 then
+		local r = (math.random(-math.pi, math.pi)) * (math.pi / 720)
+		factory.create("#minigun_factory", pos, nil, {angle = self.angle + r, speed = math.random(10,12), damage = 5})
+		msg.post("main:/sound#minigun", "play_sound", {gain = 0.3})
+	end
+end
+
+local function fire_rockets(self, pos)
+	data.ammo = data.ammo - 0.5
+	factory.create("#rocket_factory", pos, nil, {angle = self.angle, speed = 8, damage = 30})
+	msg.post("main:/sound#rocket", "play_sound", {gain = 1.0})
+end
+
+local function fire(self, action)
+	if action.pressed then self.safe = true end
+	if self.safe then
+		if data.ammo < 0 then data.ammo = 0 end
+		local p = go.get_position()
+		if data.heli == 1 then
+			if action.pressed then fire_cannon(self, p) end
+		elseif data.heli == 2 then
+			fire_minigun(self, p, action)
+		else
+			if action.pressed then fire_rockets(self, p) end
+		end
+	end
+end
+
+function input_playing (self, action_id, action)
+	if action_id == hash("forward") then
+		self.speed = self.speed + POS_ACCEL
+		if self.speed > self.max_speed then self.speed = self.max_speed end
+	elseif action_id == hash("back") then
+		self.speed = self.speed - POS_ACCEL
+		if self.speed < -self.max_speed/2 then self.speed = -self.max_speed/2 end
+	end
+
+	if action_id == hash("left") then
+		self.angleadd = self.angleadd + TURN_ACCEL
+		if self.angleadd > TURN_MAX then self.angleadd = TURN_MAX end
+	elseif action_id == hash("right") then
+		self.angleadd = self.angleadd - TURN_ACCEL
+		if self.angleadd < -TURN_MAX then self.angleadd = -TURN_MAX end
+	end
+
+	if action_id == hash("fire") and data.ammo > 0 then
+		fire(self, action)
+	end
+
+	if action_id == hash("strafe_left") then
+		self.strafe = self.strafe - STRAFE_ACCEL
+		if self.strafe < -STRAFE_MAX then self.strafe = -STRAFE_MAX end
+	elseif action_id == hash("strafe_right") then
+		self.strafe = self.strafe + STRAFE_ACCEL
+		if self.strafe > STRAFE_MAX then self.strafe = STRAFE_MAX end
+	end
+				
+	if action_id == hash("quit") and action.pressed then
+		msg.post("main:/sound", "stop_sound", {})
+		msg.post("main:/handler", "show_menu")		
+	end
+	
+--[[	if action_id == hash("end_level") then
+		data.rescued = data.num_hostages
+		data.onboard = 0
+		levelclear(self)
+	end--]]
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_PLAYING then
+		input_playing (self, action_id, action)
+	elseif data.state ~= data.STATE_PAUSED and action_id == hash("fire") and action.pressed then
+		msg.post("view#message", "continue", {})
+	end
+
+	if action_id == hash("pause") and action.pressed then pause(self) end
+end
+
+
+
+
+

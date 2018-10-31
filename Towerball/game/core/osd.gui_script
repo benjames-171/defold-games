@@ -1,0 +1,51 @@
+local data = require ("main.data")
+
+function init(self)
+end
+
+local function updatelives(self)
+	if data.lives >= 1 then	gui.set_enabled(gui.get_node("life1"), true)
+	else gui.set_enabled(gui.get_node("life1"), false)
+	end
+	if data.lives >= 2 then	gui.set_enabled(gui.get_node("life2"), true)
+	else gui.set_enabled(gui.get_node("life2"), false)
+	end
+	if data.lives >= 3 then	gui.set_enabled(gui.get_node("life3"), true)
+	else gui.set_enabled(gui.get_node("life3"), false)
+	end
+end
+	
+	
+function update(self, dt)
+	local s = data.score + data.heighttoscore()
+	gui.set_text(gui.get_node("score"), string.format("%06d", s))
+	updatelives(self)
+end
+
+local function disablenode(self, node)
+	gui.set_enabled(node, false)
+end
+
+local function showlevel(self)
+	local node = gui.get_node("level")
+ 	gui.set_enabled(node, true)
+	gui.set_color(node, vmath.vector4(1,196/255,0,1))
+	gui.set_text(node, string.format("TOWER %d", data.level))
+	gui.animate(node, gui.PROP_COLOR, vmath.vector4(1,196/255,1,0), gui.EASING_INOUTQUAD, 0.5, 1.0, disablenode)
+end
+
+local function gameover(self)
+	local node = gui.get_node("level")
+ 	gui.set_enabled(node, true)
+	gui.set_color(node, vmath.vector4(1,196/255,0,0))
+	gui.set_text(node, "GAME OVER")
+	gui.animate(node, gui.PROP_COLOR, vmath.vector4(1,196/255,0,1), gui.EASING_INOUTQUAD, 0.5)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show_level") then
+		showlevel(self)
+	elseif message_id == hash("game_over") then
+		gameover(self)
+	end
+end

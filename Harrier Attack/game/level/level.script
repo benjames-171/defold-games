@@ -1,0 +1,147 @@
+local data = require ("main.data")
+
+TILE_OCEAN = 23
+TILE_LAND = 16
+TILE_LANDTOP = 10
+TILE_LANDUP = 7
+TILE_LANDDOWN = 13
+
+local function ocean(self)
+	for n = 1, 100 do
+		tilemap.set_tile("#map", "main", self.p, 1, TILE_OCEAN + math.random(0, 2))
+		self.p = self.p + 1
+	end
+end
+
+local function placegroundtarget (self, x, y, e, ee, w)	
+	local t = math.random(49, 52)
+	local f = false
+	
+	if e == y and w == y and ee == y then 
+		tilemap.set_tile("#map", "main", x, y + 1, t)
+		if t == 52 then tilemap.set_tile("#map", "main", x + 1, y + 1, t + 1) end
+		f = true
+	end
+	
+	return f
+end
+
+local function land(self)
+	local len = 300
+	local a = {}
+	local gap = 0
+	
+	for n = 1, len do a[n] = math.random(0, 12)	end
+	for n = 1, 8 do a[n] = 2 end
+	for n = len - 8, len do a[n] = 3 end
+
+	for t = 1, 12 do
+		for n = 2, len - 1 do a[n] = (a[n-1] + a[n] + a[n+1]) / 3 end
+	end
+
+	for n = 1, len do a[n] = math.floor(a[n]) end
+
+	local start = self.p
+	
+	for n = 1, len do
+		for h = 1, a[n] do
+			tilemap.set_tile("#map", "main", self.p, h, TILE_LAND)
+		end
+		
+		self.p = self.p + 1
+	end
+
+	for n = 2, len - 2 do
+		if gap > 3 then
+			if placegroundtarget(self, start + n - 1, a[n], a[n + 1], a[n + 2], a[n - 1]) then
+				gap = 0
+			end
+		end
+		gap = gap + 1 
+	end
+end
+
+local function copy(self, source, dx, dy)
+	sx, sy, w, h = tilemap.get_bounds(source)
+	
+	for y = sy, h do
+		for x = sx, w do
+			local t = tilemap.get_tile(source, "main", x, y)
+			tilemap.set_tile("#map", "main", dx + x, dy + y, t)
+		end
+	end
+end
+
+local function town(self)
+	copy(self, "#town", self.p - 1, 0)
+	x, y, w, h = tilemap.get_bounds("#town")
+	self.p = self.p + w
+end
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#map")
+
+	for y = sy + 1, h - 1 do
+		for x = sx + 1, w - 1 do
+			local t = tilemap.get_tile("#map", "main", x, y)
+			if t == 16 then
+				local n = tilemap.get_tile("#map", "main", x, y + 1)
+				local e = tilemap.get_tile("#map", "main", x - 1, y)
+				local w = tilemap.get_tile("#map", "main", x + 1, y)
+				
+				if n == 16 then
+				else
+					if e == 0 and w == 0 then
+						tilemap.set_tile("#map", "main", x, y, 0)
+					elseif e == 0 then
+						tilemap.set_tile("#map", "main", x, y, math.random(7,9))
+					elseif w == 0 then
+						tilemap.set_tile("#map", "main", x, y, math.random(13,15))
+					else
+						tilemap.set_tile("#map", "main", x, y, math.random(10,12))
+					end
+				end					
+			end
+		end
+	end
+end
+
+local function generate(self)
+	self.p = 1
+	ocean(self)
+	copy(self, "#gunboat", 70, 1)
+	msg.post("launcher", "pos", {pos = vmath.vector3(71 * 16, 32, 1)})
+	copy(self, "#carrier", 12, 1)
+	land(self)
+	parse(self)
+	town(self)
+	copy(self, "#gunboat", self.p, 1)
+	msg.post("launcher1", "pos", {pos = vmath.vector3((self.p + 1) * 16, 32, 1)})
+	data.retcar = vmath.vector3(self.p + 40, 1, 0)
+	copy(self, "#carrier", data.retcar.x, data.retcar.y)
+	ocean(self)
+	ocean(self)
+end
+
+function init(self)
+	self.p = 1
+	generate(self)
+end
+
+local function sinkcarrier(self)
+	for n = 0, 10 do
+		tilemap.set_tile("#map", "main", data.retcar.x + n, data.retcar.y + 1, 0)
+		tilemap.set_tile("#map", "main", data.retcar.x + n, data.retcar.y + 2, 0)
+		tilemap.set_tile("#map", "main", data.retcar.x + n, data.retcar.y + 3, 0)
+	end
+	
+	data.nocarrier = true	
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("sink_carrier") then
+		sinkcarrier(self)
+	end
+end
+
+

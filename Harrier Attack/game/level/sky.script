@@ -1,0 +1,13 @@
+function init(self)
+	self.offset = vmath.vector3(240, 145, -1)
+end
+
+function update(self, dt)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("look_at") then	
+		go.set_position(message.pos + self.offset)
+	end
+end
+

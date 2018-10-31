@@ -1,0 +1,41 @@
+local data = require ("main.data")
+
+function init(self)
+	self.enabled = false
+
+    local sysinfo = sys.get_sys_info()
+    if sysinfo.system_name == "Android" then
+    	msg.post(".", "acquire_input_focus")
+	 	gui.set_enabled(gui.get_node("joypad"), true)
+	 	self.enabled = true
+ 	else
+	 	gui.set_enabled(gui.get_node("joypad"), false)
+	end	 	
+end
+
+local function processclick(self, x, y, pressed)
+	if gui.pick_node(gui.get_node("up"), x, y) then
+		msg.post("player", "move_up", {})
+	elseif gui.pick_node(gui.get_node("down"), x, y) then
+		msg.post("player", "move_down", {})
+	elseif gui.pick_node(gui.get_node("left"), x, y) then
+		msg.post("player", "move_left", {})
+	elseif gui.pick_node(gui.get_node("right"), x, y) then
+		msg.post("player", "move_right", {})
+	elseif gui.pick_node(gui.get_node("fire"), x, y) and pressed then
+		msg.post("player", "fire_rocket", {})
+	elseif gui.pick_node(gui.get_node("bomb"), x, y) and pressed then
+		msg.post("player", "drop_bomb", {})
+	elseif gui.pick_node(gui.get_node("eject"), x, y) and pressed then
+		msg.post("player", "eject", {})
+	end
+end
+
+function on_input(self, action_id, action)
+    if action_id == hash("tap") then
+        for i, tpoint in ipairs(action.touch) do
+            local pos = vmath.vector3(tpoint.x, tpoint.y, 0)
+            processclick(self, pos.x, pos.y, tpoint.pressed)
+        end
+    end
+end

@@ -1,0 +1,5 @@
+font: "/assets/visitor2.ttf"
+material: "/builtins/fonts/font.material"
+size: 170
+outline_alpha: 1.0
+outline_width: 8.0

@@ -1,0 +1,45 @@
+local data = require ("main.data")
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.cursor = 1
+	msg.post("sound#music", "play_sound", {gain = 1.0})
+end
+
+function update(self, dt)
+	local p
+
+	if self.cursor == 1 then
+		p = gui.get_position(gui.get_node"track1")
+	elseif self.cursor == 2 then
+		p = gui.get_position(gui.get_node"track2")
+	elseif self.cursor == 3 then
+		p = gui.get_position(gui.get_node"track3")
+	elseif self.cursor == 4 then
+		p = gui.get_position(gui.get_node"track4")
+	end
+	
+	local arrow = gui.get_position(gui.get_node("arrow"))
+	arrow.x = p.x
+	gui.set_position(gui.get_node("arrow"), arrow)
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("select") and action.pressed then
+		data.level = self.cursor
+		msg.post("sound", "stop_sound")
+		msg.post("main:/handler", "show_game", {})
+	elseif action_id == hash("turn_left") and action.pressed then
+		if self.cursor > 1 then
+			self.cursor = self.cursor - 1
+			msg.post("sound#beep", "play_sound", {gain = 1.0})
+		end
+	elseif action_id == hash("turn_right") and action.pressed then
+		if self.cursor < 4 then
+			self.cursor = self.cursor + 1
+			msg.post("sound#beep", "play_sound", {gain = 1.0})
+		end
+	elseif action_id == hash("exit") and action.pressed then
+		msg.post("@system:", "exit", {code = 0})
+	end
+end

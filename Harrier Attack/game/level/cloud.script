@@ -1,0 +1,19 @@
+local data = require ("main.data")
+
+go.property("size", 0)
+
+function update(self, dt)
+	local pos = go.get_position()
+	
+	if self.size == 1 then pos.x = pos.x - 0.25
+	else pos.x = pos.x - 0.125
+	end
+	
+	if pos.x - data.scrollpos.x < -64 then
+		pos.x = data.scrollpos.x + math.random(540, 590) 
+		pos.y = math.random(160, 220)
+	end
+	
+	go.set_position(pos)
+end
+

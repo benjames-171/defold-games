@@ -1,0 +1,102 @@
+local data = require ("main.data")
+
+local PROGRESS_TIME = 10
+local SHUTTER_TIME = 1.2
+local SHUTTER_EASING = gui.EASING_INOUTQUAD
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+local function clang(self, node)
+	msg.post("main:/sound#clang", "play_sound", {gain = 1.0})
+end
+
+local function open_shutter(self)
+	gui.animate(gui.get_node("top"), gui.PROP_POSITION, vmath.vector3(0,90,0), SHUTTER_EASING, SHUTTER_TIME, 0, disablenode)
+	gui.animate(gui.get_node("right"), gui.PROP_POSITION, vmath.vector3(180,0,0), SHUTTER_EASING, SHUTTER_TIME, 0, disablenode)
+	gui.animate(gui.get_node("bottom"), gui.PROP_POSITION, vmath.vector3(0,-90,0), SHUTTER_EASING, SHUTTER_TIME, 0, disablenode)
+	gui.animate(gui.get_node("left"), gui.PROP_POSITION, vmath.vector3(-180,0,0), SHUTTER_EASING, SHUTTER_TIME, 0, disablenode)
+	msg.post("main:/sound#servo", "play_sound", {gain = 1.0})
+end
+
+local function close_shutter(self)
+	gui.set_enabled(gui.get_node("top"), true)
+	gui.set_enabled(gui.get_node("right"), true)
+	gui.set_enabled(gui.get_node("bottom"), true)
+	gui.set_enabled(gui.get_node("left"), true)
+	gui.animate(gui.get_node("top"), gui.PROP_POSITION, vmath.vector3(0,0,0), SHUTTER_EASING, SHUTTER_TIME, 0, clang)
+	gui.animate(gui.get_node("right"), gui.PROP_POSITION, vmath.vector3(0,0,0), SHUTTER_EASING, SHUTTER_TIME)
+	gui.animate(gui.get_node("bottom"), gui.PROP_POSITION, vmath.vector3(0,0,0), SHUTTER_EASING, SHUTTER_TIME)
+	gui.animate(gui.get_node("left"), gui.PROP_POSITION, vmath.vector3(0,0,0), SHUTTER_EASING, SHUTTER_TIME)
+	msg.post("main:/sound#servo", "play_sound", {gain = 1.0})
+end
+
+function init(self)
+	self.time = -1
+	gui.set_enabled(gui.get_node("progress_bg"), false)
+	gui.set_text(gui.get_node("level"), string.format("GET READY!\nLEVEL %d", data.level))
+	gui.animate(gui.get_node("level"), gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.5, 1.5, disablenode)	
+	open_shutter(self)
+end
+
+local function update_status(self, status, col)
+	local node = gui.get_node("status")
+	gui.set_color(node, col)
+	gui.set_text(node, status)
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PAUSED then
+		update_status(self, "GAME PAUSED", vmath.vector4(231/255, 204/255, 114/255, 1))
+	elseif data.hover > 0 then
+		update_status(self, "HOLD STILL! HOSTAGE IS CLIMBING LADDER", vmath.vector4(231/255, 204/255, 114/255, 1))
+	elseif data.overbase and data.onboard > 0 then
+		update_status(self, "HOLD STILL! HOSTAGES ARE DISEMBARKING", vmath.vector4(231/255, 204/255, 114/255, 1))
+	elseif data.onboard + data.rescued == data.num_hostages and data.onboard > 0 then
+		update_status(self, "RETURN THE HOSTAGES TO BASE", vmath.vector4(96/255, 200/255, 96/255, 1))
+	elseif data.rescued == data.num_hostages then
+		update_status(self, "MISSION SUCCESS!", vmath.vector4(96/255, 200/255, 96/255, 1))
+	elseif data.fuel <= 30 then
+		update_status(self, "RETURN TO BASE TO REFUEL", vmath.vector4(206/255, 60/255, 60/255, 1))
+	elseif data.ammo <= 10 then	
+		update_status(self, "RETURN TO BASE TO REARM", vmath.vector4(231/255, 204/255, 114/255, 1))
+	else
+		update_status(self, "RESCUE THE HOSTAGES!", vmath.vector4(242/255, 242/255, 234/255, 1))
+	end
+
+	gui.set_scale(gui.get_node("fuel_bar"), vmath.vector3(1, data.fuel / 100, 1))
+	gui.set_scale(gui.get_node("ammo_bar"), vmath.vector3(1, data.ammo / 100, 1))
+	gui.set_scale(gui.get_node("hull_bar"), vmath.vector3(1, data.hull / 100, 1))
+
+	gui.set_text(gui.get_node("prison"), string.format("%d", data.num_hostages - data.onboard - data.rescued))
+	gui.set_text(gui.get_node("on_board"), string.format("%d", data.onboard))
+	gui.set_text(gui.get_node("rescued"), string.format("%d", data.rescued))
+
+	if self.time >= 0 then
+		self.time = self.time + 1
+		if self.time > PROGRESS_TIME then
+			self.time = -1
+			gui.animate(gui.get_node("progress_bg"), gui.PROP_POSITION, vmath.vector3(380, 14, 1), SHUTTER_EASING, 0.2, 0, disablenode)
+		end	
+	end
+end
+
+local function show_progress(self, num, tot)
+	local node = gui.get_node("progress_bg")
+
+	if not gui.is_enabled(node) then
+		gui.set_enabled(node, true)
+		gui.animate(node, gui.PROP_POSITION, vmath.vector3(380, 48, 1), SHUTTER_EASING, 0.1, 0, nil)
+	end
+
+	gui.set_scale(gui.get_node("progress"), vmath.vector3(num / tot, 1, 1))
+	self.time = 0
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("progress") then show_progress(self, message.num, message.total)
+	elseif message_id == hash("close_shutter") then close_shutter(self)
+	end
+end
+

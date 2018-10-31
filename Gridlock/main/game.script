@@ -1,0 +1,134 @@
+local data = require ("main.data")
+
+BLOCK_SIZE = 80
+GRID_SIZE = 8
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	math.randomseed(os.time())
+	local t = math.random(1, 5)
+	self.origin = go.get_position()
+	data.state = data.STATE_FRONT	
+	newlevel(self)	
+end
+
+function update(self, dt)
+	if data.state == data.STATE_LEVELCLEAR then
+--		tilemap.set_tile("#tilemap", "main", math.random(1, GRID_SIZE), math.random(1, GRID_SIZE), 0)
+	end	
+end
+
+local function checkcomplete(self)
+	local c = {0,0,0}
+	
+	for x = 1, GRID_SIZE do
+    	for y = 1, GRID_SIZE do
+    		local t = tilemap.get_tile("#tilemap", "main", x, y)    	
+			c[t] = c[t] + 1
+    	end
+	end
+
+	if c[1] == GRID_SIZE * GRID_SIZE or
+	   c[2] == GRID_SIZE * GRID_SIZE or
+	   c[3] == GRID_SIZE * GRID_SIZE then
+
+		msg.post("#clear", "show", {})
+		msg.post("main:/sound#clear", "play_sound", {gain = 1.0})					
+   end
+end
+
+local function istilevalid(x,y)
+	if x >= 1 and x <= GRID_SIZE and y >= 1 and y <= GRID_SIZE then
+		return true
+	else
+		return false
+	end
+end
+
+local function advancetile(x, y)
+	if istilevalid(x,y) then
+		local t = tilemap.get_tile("#tilemap", "main", x, y)
+		if t > 0 then
+			t = t + 1
+			if t > 3 then t = 1 end
+			tilemap.set_tile("#tilemap", "main", x, y, t)
+		end
+	end
+end
+
+local function clicktile(x, y)
+	advancetile(x, y)
+	advancetile(x+1, y)
+	advancetile(x-1, y)
+	advancetile(x, y+1)
+	advancetile(x, y-1)
+end
+
+local function processclick(self, x, y)
+	x = math.floor((x - self.origin.x) / BLOCK_SIZE) + 1
+	y = math.floor((y - self.origin.y) / BLOCK_SIZE) + 1
+		
+	if istilevalid(x, y) then
+		if tilemap.get_tile("#tilemap", "main", x, y) > 0 then
+			clicktile(x, y)
+			msg.post("main:/sound#tap", "play_sound", {gain = 1.0})			
+			data.turns = data.turns + 1
+			checkcomplete(self)
+		end
+	end
+end
+
+function newlevel(self)
+	local r = 1 --math.random(1,3)
+
+	for x = 1, GRID_SIZE do
+    	for y = 1, GRID_SIZE do
+			tilemap.set_tile("#tilemap", "main", x, y, r)    	
+    	end
+	end
+
+	for n = 1, 3 + (data.level/2) do
+		local rx = math.random(1, GRID_SIZE)
+		local ry = math.random(1, GRID_SIZE)	
+		for r = 1, math.random(1, 2) do
+			clicktile(rx, ry)
+		end 
+	end
+	
+	data.turns = 0
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("next_level") then
+		data.level = data.level + 1
+		newlevel(self)
+		data.state = data.STATE_PLAYING
+	elseif message_id == hash("restart") then
+		newlevel(self)
+	end		
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_FRONT then
+		if action_id == hash("tap") and action.pressed then
+			msg.post("#front", "click", {x = action.x, y = action.y})
+		end
+	elseif data.state == data.STATE_PLAYING then
+		if action_id == hash("tap") and action.pressed then
+			processclick(self, action.x, action.y)
+			msg.post("#osd", "click", {x = action.x, y = action.y})
+		end
+	elseif data.state == data.STATE_LEVELCLEAR then
+		if action_id == hash("tap") and action.pressed then
+			msg.post("#clear", "click", {x = action.x, y = action.y})
+		end
+	elseif data.state == data.STATE_MENU then
+		if action_id == hash("tap") and action.pressed then
+			msg.post("#menu", "click", {x = action.x, y = action.y})
+		end
+	elseif data.state == data.STATE_HELP then
+		if action_id == hash("tap") and action.pressed then
+			msg.post("#help", "click", {x = action.x, y = action.y})
+		end
+	end
+end

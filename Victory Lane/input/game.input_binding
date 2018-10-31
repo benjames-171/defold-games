@@ -1,0 +1,28 @@
+key_trigger {
+  input: KEY_UP
+  action: "accel"
+}
+key_trigger {
+  input: KEY_DOWN
+  action: "brake"
+}
+key_trigger {
+  input: KEY_LEFT
+  action: "turn_left"
+}
+key_trigger {
+  input: KEY_RIGHT
+  action: "turn_right"
+}
+key_trigger {
+  input: KEY_SPACE
+  action: "select"
+}
+key_trigger {
+  input: KEY_Q
+  action: "quit"
+}
+key_trigger {
+  input: KEY_ESC
+  action: "exit"
+}

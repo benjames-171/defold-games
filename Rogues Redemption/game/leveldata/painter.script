@@ -1,0 +1,154 @@
+local data = require ("main.data")
+
+function init(self)
+	local r = math.random(1,4)
+				
+	if r == 1 then
+		flip(self)
+	elseif r == 2 then
+		mirror(self)
+	elseif r == 3 then
+		flip(self)
+		mirror(self)
+	end
+
+	paint(self)
+	if data.detail then adddirt(self) end
+	msg.post("common/view#osd", "update_status", {status = string.format("Entered dungeon depth %d", data.depth)})
+end
+
+function paint(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local tilebase
+	local p = {
+		0,0,0,0,28,
+		0,0,0,1,29,
+		0,0,1,0,4,
+		0,0,1,1,2,
+		0,1,0,0,27,
+		0,1,0,1,3,
+		0,1,1,0,0,
+		0,1,1,1,1,		
+		1,0,0,0,52,
+		1,0,0,1,50,
+		1,0,1,0,51,
+		1,0,1,1,26,
+		1,1,0,0,48,
+		1,1,0,1,49,
+		1,1,1,0,24,
+		1,1,1,1,25}
+
+	local floorstyle = math.random(data.TILE_FLOOR_MIN + 1, data.TILE_FLOOR_MAX)
+	local corridorstyle = math.random(data.TILE_CORRIDOR_MIN + 1, data.TILE_CORRIDOR_MAX)
+	local specialstyle = data.TILE_SPECIAL_MIN + 1
+
+	local m = math.fmod(data.depth, 10)
+	
+	if m <= 3 then tilebase = 289
+	elseif m <= 6 then tilebase = 293
+	else tilebase = 297
+	end
+			
+				
+	for y = 1, h-2 do
+		for x = 1, w-2 do
+	
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+
+			if t > 0 then tilemap.set_tile("#tilemap", "fog", x, y, 1) end
+
+			if t == data.TILE_FLOOR_MIN then
+				tilemap.set_tile("#tilemap", "world", x, y, floorstyle)
+				if math.random(1,16) == 1 and data.detail then adddecor(self, x, y) end
+			elseif t == data.TILE_CORRIDOR_MIN then
+				tilemap.set_tile("#tilemap", "world", x, y, corridorstyle)
+			elseif t == data.TILE_SPECIAL_MIN then
+				tilemap.set_tile("#tilemap", "world", x, y, specialstyle)
+			elseif t == data.TILE_SPECIAL_CTR then
+				tilemap.set_tile("#tilemap", "world", x, y, specialstyle)
+				msg.post("/common/item_handler#script", "special", {pos = vmath.vector3(x, y, 0)})
+			elseif t >= 289 then
+				local n = tilemap.get_tile("#tilemap", "world", x, y+1)
+				local e = tilemap.get_tile("#tilemap", "world", x+1, y)
+				local s = tilemap.get_tile("#tilemap", "world", x, y-1)
+				local w = tilemap.get_tile("#tilemap", "world", x-1, y)
+
+				if n >= 265 then n = 1 else n = 0 end
+				if e >= 265 then e = 1 else e = 0 end
+				if s >= 265 then s = 1 else s = 0 end
+				if w >= 265 then w = 1 else w = 0 end
+				
+				local c = 1
+								
+				while p[c] ~= n or p[c+1] ~= e or p[c+2] ~= s or p[c+3] ~= w do
+					c = c + 5
+				end
+				
+				tilemap.set_tile("#tilemap", "world", x, y, tilebase + p[c+4])
+			end
+		end
+	end
+end
+
+function flip(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+					
+	for y = 1, h/2 do
+		for x = 1, w-1 do
+			local t1 = tilemap.get_tile("#tilemap", "world", x, y)
+			local t2 = tilemap.get_tile("#tilemap", "world", x, h-y)
+			tilemap.set_tile("#tilemap", "world", x, y, t2)
+			tilemap.set_tile("#tilemap", "world", x, h-y, t1)
+			
+			t1 = tilemap.get_tile("#tilemap", "items", x, y)
+			t2 = tilemap.get_tile("#tilemap", "items", x, h-y)
+			tilemap.set_tile("#tilemap", "items", x, y, t2)
+			tilemap.set_tile("#tilemap", "items", x, h-y, t1)		
+		end
+	end
+end
+
+function mirror(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+					
+	for y = 1, h-1 do
+		for x = 1, w/2 do
+			local t1 = tilemap.get_tile("#tilemap", "world", x, y)
+			local t2 = tilemap.get_tile("#tilemap", "world", w-x, y)
+			tilemap.set_tile("#tilemap", "world", x, y, t2)
+			tilemap.set_tile("#tilemap", "world", w-x, y, t1)
+
+			t1 = tilemap.get_tile("#tilemap", "items", x, y)
+			t2 = tilemap.get_tile("#tilemap", "items", w-x, y)
+			tilemap.set_tile("#tilemap", "items", x, y, t2)
+			tilemap.set_tile("#tilemap", "items", w-x, y, t1)
+		end
+	end
+end
+
+function adddecor(self, x, y)
+	tilemap.set_tile("#tilemap", "items", x, y, math.random(73,79))
+end
+
+function adddirt(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+					
+	for y = 1, h-1 do
+		local d = math.random(49, 72)
+		for x = 1, w-1 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			
+			if (t > 0) then
+				tilemap.set_tile("#tilemap", "dirt", x, y, d)
+				d = d + 1
+				if d > 72 then d = 49 end	
+			end
+		end
+	end
+end
+
+
+
+
+
+

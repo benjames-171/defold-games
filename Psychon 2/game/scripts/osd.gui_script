@@ -1,0 +1,241 @@
+local data = require ("game.scripts.data")
+local MAP_SCALE = 6
+	
+function init (self)
+	self.pixels = ""
+	self.waypoints = {}
+	self.timer = 150
+	self.statusfade = 1
+	self.minimap = 0
+	self.mapnode = nil
+    self.playerpos = vmath.vector3(0, 0, 0)
+    self.near_wp = 0
+	self.url_level = string.format("level%d:/world#tilemap", data.level)
+	
+	msg.post(".", "set_fade", {fade = 0})
+	msg.post(".", "update_status", {status = string.format("level %d", data.level)})
+
+	generate_minimap(self)
+end
+
+function update(self, dt)
+	msg.post ("/common/player", "get_position", {})
+
+	if self.minimap == 1 then
+		place_pin(self)
+	end
+
+	if data.wayfinder == 1 then
+		gui.set_color(gui.get_node("wayfinder"), vmath.vector4(1,1,1,0.25))
+		gui.set_color(gui.get_node("arrow"), vmath.vector4(1,1,1,0.5))
+		gui.set_color(gui.get_node("distance"), vmath.vector4(0.5,1,1,0.5))
+	else
+		gui.set_color(gui.get_node("wayfinder"), vmath.vector4(1,1,1,0))
+		gui.set_color(gui.get_node("arrow"), vmath.vector4(1,1,1,0))
+		gui.set_color(gui.get_node("distance"), vmath.vector4(1,1,1,0))
+	end
+
+	waypointfinder(self)
+
+	if self.timer > 0 then
+		self.timer = self.timer - 1
+	elseif self.statusfade > 0 then
+		self.statusfade = self.statusfade - 0.05
+		if (self.statusfade < 0) then
+			gui.set_text(gui.get_node("status"), "")
+		else
+			gui.set_color(gui.get_node("status"), vmath.vector4(0.25, 0.85, 1, self.statusfade))
+		end	
+	end
+end
+
+function refresh_minimapdata(self)
+   	local sx, sy, w, h = tilemap.get_bounds(self.url_level)
+   	
+	local solid = string.char(0xff) .. string.char(0xff) .. string.char(0xff) .. string.char(0xff)
+	local object = string.char(0x44) .. string.char(0x55) .. string.char(0x66) .. string.char(0xff)
+	local floor = string.char(0x00) .. string.char(0x00) .. string.char(0x00) .. string.char(0x00)
+
+	for y = sy + h - 1, sy, -1 do
+		for x = sx, sx + w - 1 do
+			local tile = tilemap.get_tile(self.url_level, "world", x, y)
+			local obj = tilemap.get_tile(self.url_level, "objects", x, y)
+			
+			if tile > 0 and tile < 512 then
+				self.pixels = self.pixels .. solid
+			elseif obj > 0 and obj < 512 then
+				self.pixels = self.pixels .. object
+			else
+				self.pixels = self.pixels .. floor
+			end		
+		end
+	end
+end
+
+function generate_minimap(self)
+	refresh_minimapdata(self)
+
+   	local x, y, w, h = tilemap.get_bounds(self.url_level)
+	local sx = (1280 - (w * MAP_SCALE)) / 2
+	local sy = 620 - (720 - (h * MAP_SCALE)) / 2
+		
+	if gui.new_texture("minimap", w, h, "rgba", self.pixels) then
+		mapnode = gui.new_box_node(vmath.vector3(sx, sy, 0), vmath.vector3(w, h, 0))
+		gui.set_scale(mapnode, vmath.vector3(MAP_SCALE, MAP_SCALE, 0))
+		gui.set_texture(mapnode, "minimap")
+		gui.set_pivot(mapnode, gui.PIVOT_NW)
+		gui.set_color(mapnode, vmath.vector4(1, 1, 1, 0))
+		gui.set_layer(mapnode, "back")
+	end
+end
+
+function refresh_minimap(self)
+	refresh_minimapdata(self)
+
+   	local sx, sy, w, h = tilemap.get_bounds(self.url_level)
+
+	gui.set_texture_data("minimap", w, h, "rgba", self.pixels)
+	gui.set_texture(mapnode, "minimap")
+end
+
+function resize_minimap(self)
+   	local x, y, w, h = tilemap.get_bounds(self.url_level)
+	local sx = (1280 - (w * MAP_SCALE)) / 2
+	local sy = 720 - (720 - (h * MAP_SCALE)) / 2
+
+	if self.minimap == 0 then
+		self.minimap = 1
+		gui.animate(mapnode, gui.PROP_SCALE, vmath.vector3(MAP_SCALE, MAP_SCALE, 0), gui.EASING_INOUTQUAD, 0.5)
+		gui.animate(mapnode, gui.PROP_POSITION, vmath.vector3(sx, sy, 0), gui.EASING_INOUTQUAD, 0.5)
+		gui.animate(mapnode, gui.PROP_COLOR, vmath.vector4(1, 1, 1, 1), gui.EASING_INOUTQUAD, 0.5)
+
+		gui.animate(gui.get_node("pin"), gui.PROP_COLOR, vmath.vector4(1, 1, 1, 1), gui.EASING_INOUTQUAD, 0.75)
+		gui.animate(gui.get_node("fade"), gui.PROP_COLOR, vmath.vector4(0, 0, 0, 0.7), gui.EASING_INOUTQUAD, 0.5)
+		place_pin(self)
+	else
+		self.minimap = 0
+		gui.animate(mapnode, gui.PROP_SCALE, vmath.vector3(MAP_SCALE, MAP_SCALE, 0), gui.EASING_INOUTQUAD, 0.5)
+		gui.animate(mapnode, gui.PROP_POSITION, vmath.vector3(sx, sy - 100, 0), gui.EASING_INOUTQUAD, 0.5)
+		gui.animate(mapnode, gui.PROP_COLOR, vmath.vector4(1, 1, 1, 0), gui.EASING_INOUTQUAD, 0.5)
+
+		gui.animate(gui.get_node("pin"), gui.PROP_COLOR, vmath.vector4(1, 1, 1, 0), gui.EASING_INOUTQUAD, 0.25)
+		gui.animate(gui.get_node("fade"), gui.PROP_COLOR, vmath.vector4(0, 0, 0, 0), gui.EASING_INOUTQUAD, 0.5)
+	end
+end
+
+function place_pin(self)
+   	local x, y, w, h = tilemap.get_bounds(self.url_level)
+
+   	local pos = gui.get_position(mapnode)
+
+	pos.x = pos.x - (x * MAP_SCALE) + MAP_SCALE
+	pos.x = pos.x + (self.playerpos.x / 16) * MAP_SCALE
+	
+	pos.y = pos.y - ((h + y) * MAP_SCALE) + MAP_SCALE
+	pos.y = pos.y + (self.playerpos.y / 16) * MAP_SCALE
+
+	pos.z = 1
+	
+	gui.set_position(gui.get_node("pin"), pos)
+end
+
+function showgun(self, gun)
+	gui.set_color(gui.get_node("gun1"), vmath.vector4(1, 1, 1, 0))
+	gui.set_color(gui.get_node("gun2"), vmath.vector4(1, 1, 1, 0))
+	gui.set_color(gui.get_node("gun3"), vmath.vector4(1, 1, 1, 0))
+	gui.set_color(gui.get_node("gun4"), vmath.vector4(1, 1, 1, 0))
+	gui.set_color(gui.get_node("gun5"), vmath.vector4(1, 1, 1, 0))
+	
+	if gun == 1 then
+		gui.set_color(gui.get_node("gun1"), vmath.vector4(1, 1, 1, 1))
+	elseif gun == 2 then
+		gui.set_color(gui.get_node("gun2"), vmath.vector4(1, 1, 1, 1))
+	elseif gun == 3 then
+		gui.set_color(gui.get_node("gun3"), vmath.vector4(1, 1, 1, 1))
+	elseif gun == 4 then
+		gui.set_color(gui.get_node("gun4"), vmath.vector4(1, 1, 1, 1))
+	elseif gun == 5 then
+		gui.set_color(gui.get_node("gun5"), vmath.vector4(1, 1, 1, 1))
+	end
+end
+
+function waypointfinder (self)
+	local s = 999999
+	local shortest = vmath.vector3(0,0,0)
+	local total = 0
+
+	for n = 1, 5 do
+		if self.waypoints[n].z ~= 0 then
+			total = total + 1
+		end
+	end
+
+	for n = 1, 5 do
+
+		local i = self.playerpos - self.waypoints[n]
+		local d = math.sqrt((i.x * i.x) + (i.y * i.y))
+		
+		if d < s and self.waypoints[n].z ~= 0 then
+			if self.waypoints[n].z == 973 or total == 1 then
+				s = d
+				shortest = i
+				self.near_wp = n
+			end
+		end
+	end	
+	
+	local a = -math.atan2 (shortest.x, shortest.y)
+	gui.set_rotation(gui.get_node("arrow"), vmath.vector3(0, 0, math.deg(a)))
+	
+	local str = string.format("%.1fM", s / 16)
+	gui.set_text(gui.get_node("distance"), str)
+end
+
+function on_message(self, message_id, message, sender)
+    if(message_id == hash("update_ammo")) then
+	    local score = string.format("%d/300", message.ammo)
+		gui.set_text(gui.get_node("ammo"), score)
+		if (message.ammo > 0) then
+			gui.set_color(gui.get_node("ammo"), vmath.vector4(1, 1, 1, 1))
+		else
+			gui.set_color(gui.get_node("ammo"), vmath.vector4(1, 0, 0, 1))
+		end		
+    elseif(message_id == hash("update_status")) then
+		gui.set_text(gui.get_node("status"), message.status)
+		gui.set_color(gui.get_node("status"), vmath.vector4(1, 1, 1, 1))
+		self.timer = 100
+		self.statusfade = 1
+	elseif(message_id == hash("update_credits")) then
+	    local credits = string.format("%d", message.credits)
+		gui.set_text(gui.get_node("credits"), credits)
+	elseif(message_id == hash("update_health")) then
+	    local health = string.format("%d%%", message.health)
+		gui.set_text(gui.get_node("health"), health)
+	elseif(message_id == hash("update_fragments")) then
+	    local fragments = string.format("%d/4", message.fragments)
+		gui.set_text(gui.get_node("fragments"), fragments)
+	elseif message_id == hash("set_fade") then
+		local node = gui.get_node("fade")
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(0, 0, 0, message.fade), gui.EASING_INOUTQUAD, 1)
+	elseif message_id == hash("game_over") then
+		local node = gui.get_node("gameover")
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(0.5, 0, 0, 1), gui.EASING_INOUTQUAD, 2)
+	elseif message_id == hash("update_gun") then
+		showgun (self, message.gun)
+	elseif message_id == hash("resize_minimap") then
+		resize_minimap(self)
+	elseif message_id == hash("refresh_minimap") then
+		refresh_minimap(self)
+	elseif message_id == hash("position") then
+		self.playerpos = message.position
+	elseif message_id == hash("waypoints") then
+		self.waypoints = message.wp
+	elseif message_id == hash("collected") then
+		print("collected", self.near_wp, self.waypoints[self.near_wp])
+		self.waypoints[self.near_wp].z = 0
+	end
+end
+
+
+
+

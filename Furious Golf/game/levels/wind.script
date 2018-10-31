@@ -1,0 +1,15 @@
+function init (self)
+	particlefx.play("#pfx")
+end
+
+local function wind(self, sender)
+	local f = vmath.vector3(0,200,0)
+	msg.post("common/arrow", "wind", {force = f})
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		wind(self, sender)
+	end
+end
+

@@ -1,0 +1,85 @@
+local data = require ("main.data")
+
+local ROTATE_SPEED = 0.1
+
+function init(self)
+    self.playerpos = vmath.vector3(0, 0, 0)
+    self.angle = 0
+    self.targetangle = 0
+    self.timer = 1
+    self.lineofsight = false
+    
+    sprite.set_constant("#sprite",  "tint", data.get_tint())
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	msg.post ("/common/player", "get_position", {})
+
+	if math.abs(pos.y - self.playerpos.y) > 90 then return end
+	if math.abs(pos.x - self.playerpos.x) > 160 then return end
+
+	local v = pos - self.playerpos
+	self.targetangle = -math.atan2 (v.x, v.y) - (math.pi / 2)
+	
+	physics.ray_cast(pos, self.playerpos, {hash("world"), hash("player")})
+
+	if math.abs(self.angle - self.targetangle) > math.pi then
+		if self.targetangle > self.angle then
+			self.targetangle = self.targetangle - (math.pi * 2)
+		else
+			self.targetangle = self.targetangle + (math.pi * 2)
+		end
+	end
+
+	if self.lineofsight then		
+	    if (self.angle < self.targetangle) then
+	    	self.angle = self.angle + ROTATE_SPEED
+	    elseif (self.angle > self.targetangle) then
+	    	self.angle = self.angle - ROTATE_SPEED
+		end
+	
+		local diff
+		
+		if self.angle > self.targetangle then
+			diff = self.angle - self.targetangle
+		else
+			diff = self.targetangle - self.angle
+		end
+	
+		if diff < ROTATE_SPEED then
+			self.angle = self.targetangle
+		end
+	end
+
+	local r = vmath.quat_rotation_z(self.angle)
+	go.set_rotation(r, "#sprite")
+	
+	if self.timer == 0 and self.lineofsight then
+		local p = go.get_position()
+		local bullet = factory.create("#bullet_factory", p, nil, {angle = self.angle}, 1)
+		msg.post("main:/sound#shot", "play_sound", {gain = 0.25})
+	end
+		
+	self.lineofsight = false
+
+	self.timer = self.timer + 1
+	
+	local d = data.level * 4
+	if d > 40 then d = 40 end
+	if self.timer > (60 - d) then self.timer = 0 end	
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("bullet_hit") then
+		particlefx.play("#particlefx")
+		msg.post("main:/sound#explode", "play_sound", {gain = 1.0})		
+		go.delete()
+	elseif message_id == hash("position") then
+		self.playerpos = message.position
+	elseif message_id == hash("ray_cast_response") then
+		if message.group == hash("player") then
+			self.lineofsight = true
+		end
+	end
+end

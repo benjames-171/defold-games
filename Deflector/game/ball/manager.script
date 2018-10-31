@@ -1,0 +1,45 @@
+local data = require ("main.data")
+
+function init(self)
+	self.balls = {}
+end
+
+function final(self)
+end
+
+function update(self, dt)
+	if data.numballs <= 0 and data.state == data.STATE_PLAYING then
+		data.state = data.STATE_LEVELCLEAR
+		msg.post("main:/sound#complete", "play_sound", {gain = 1.0})
+		msg.post("view", "clear", {})
+	end
+end
+
+local function delete_balls(self)
+	for k, v in pairs(self.balls) do
+		table.remove(self.balls, k)
+		go.delete(v)
+	end	
+end
+
+local function resetballs(self)
+	data.numballs = 0 
+	for k, v in pairs(self.balls) do
+		msg.post(v, "reset", {})
+		data.numballs = data.numballs + 1	
+	end	
+end
+
+local function addball(self, pos, vel)
+	local newball = factory.create("#ball_factory", pos, nil, {startvel = vel}, 1)
+	table.insert(self.balls, newball)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("add") then
+		addball(self, message.position, message.velocity)
+	elseif message_id == hash("reset") then
+		resetballs(self)
+	end
+end
+

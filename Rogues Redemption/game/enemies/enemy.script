@@ -1,0 +1,204 @@
+local data = require ("main.data")
+local enm = require ("game/enemies.enemy")
+local itm = require ("game/items.items")
+
+go.property("type", 0)
+
+function init(self)
+	self.levelurl = string.format("level%d:/level#tilemap", data.level)
+	self.lineofsight = false
+	self.alert = false
+    self.target = go.get_position()
+	self.health = enm.getenemypower(self.type)
+	self.frozen = 0
+	self.dead = 0
+	
+	msg.post("#sprite", "play_animation", {id = hash(string.format("anim%02d", self.type))})
+
+	str = msg.url()
+	pos = go.get_position()
+	table.insert(enm.en_url, str)
+	table.insert(enm.en_xy, pos)
+	table.insert(enm.en_vis, false)
+end
+
+function hidehealthbar(self)
+    sprite.set_constant("#healthbar",  "tint", vmath.vector4(1,1,1,0))
+end	 
+
+function showhealthbar(self)
+	hidehealthbar(self)
+
+    sprite.set_constant("#healthbar",  "tint", vmath.vector4(1,1,1,1))	
+	
+	t = self.health / (enm.getenemypower(self.type) / 10)
+	
+	msg.post("#healthbar", "play_animation", {id = hash(string.format("anim%02d", t))})
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+
+	if self.dead > 0 then 
+		hidehealthbar(self)
+		return
+	end
+
+	if self.frozen > 0 and data.turn == 17 then
+		self.frozen = self.frozen - 1
+
+		if self.frozen == 0 then
+			msg.post("#sprite", "play_animation", {id = hash(string.format("anim%02d", self.type))})
+		end
+		
+		return
+	end
+
+	physics.ray_cast(pos, data.playerpos, {hash("world"), hash("player")})
+
+	if math.abs(pos.x - data.playerpos.x) <=16 and 
+	   math.abs(pos.y - data.playerpos.y) <=16 then
+		self.lineofsight = true
+		self.alert = true
+	end
+
+	if data.gettile(self, pos.x, pos.y, "fog") == 0 and self.lineofsight then
+	    sprite.set_constant("#sprite",  "tint", vmath.vector4(1,1,1,1))
+	    if self.alert then showhealthbar(self) end
+	    enm.setvisible(msg.url(), true)
+	else
+	    sprite.set_constant("#sprite",  "tint", vmath.vector4(1,1,1,0))
+	    hidehealthbar(self)	
+	    enm.setvisible(msg.url(), false)
+	end
+	
+	if (math.abs(pos.x - data.playerpos.x) > data.sneak or 
+	   math.abs(pos.y - data.playerpos.y) > data.sneak) and not self.alert then
+		self.lineofsight = false
+	end	
+	
+	if self.lineofsight and data.turn == 17 and data.invisible == 0 then
+		if pos.x > data.playerpos.x then
+			self.target.x = pos.x - 16
+			sprite.set_hflip("#sprite", true)
+		elseif pos.x < data.playerpos.x then
+			self.target.x = pos.x + 16
+			sprite.set_hflip("#sprite", false)
+		end
+					
+		if pos.y > data.playerpos.y then self.target.y = pos.y - 16
+		elseif pos.y < data.playerpos.y then self.target.y = pos.y + 16 end
+		
+		if self.target.x == data.playerpos.x and self.target.y == data.playerpos.y then
+			self.target = pos
+			local d = enm.getenemydamage(self.type)
+			d = d + math.random(d/2)
+			msg.post("common/player", "hit", {damage = d, type = self.type})
+			
+			if self.type == 4 or self.type == 7 or self.type == 10 then
+				if math.random(1,25) == 2 then
+					msg.post("common/player", "poison", {poison = 10})
+				end
+			end
+		end
+		
+		if data.istilefree(self, self.target.x, self.target.y) == false then
+			self.target = pos
+		end
+		
+		local c = enm.enemyontile(msg.url(), self.target)
+		if c ~= nil and c~= msg.url() then
+			self.target = pos
+		end
+				
+		data.enemyturn = data.enemyturn + 1
+	end
+
+	if pos.x > self.target.x then pos.x = pos.x - 1
+	elseif pos.x < self.target.x then pos.x = pos.x + 1 end
+	if pos.y > self.target.y then pos.y = pos.y - 1
+	elseif pos.y < self.target.y then pos.y = pos.y + 1	end
+
+	self.lineofsight = false
+	
+	updateposition(self, pos)
+end
+
+function updateposition(self, pos)
+	go.set_position(pos)
+	enm.setposition(msg.url(), self.target)
+end
+
+function hit(self, damage, silent)
+	if silent == false then
+		msg.post("main:/sound#punch", "play_sound", {gain = data.sfxvol})					
+		particlefx.play("#hit")
+	end
+	
+	self.health = self.health - damage
+	self.alert = true
+	
+	if self.health <=0 then
+		self.health = 0
+		sprite.set_constant("#sprite", "tint", vmath.vector4(1, 0.25, 0.25, 1))
+		go.animate("#sprite", "tint.w", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_INOUTQUAD, 1, 0, dead)
+		enm.delete(msg.url())
+		msg.post("#co", "disable", {})
+		msg.post("common/view#osd", "update_status", {status = string.format("Killed %s %s", enm.getenemynamedeterminer(self.type), enm.getenemyname(self.type))})
+		self.dead = 1
+		p = go.get_position()
+		p.z = 0.6
+		go.set_position(p)
+		msg.post("common/player", "increase_xp", {xp = 10})
+		data.fightswon = data.fightswon + 1
+
+		if data.numenemies == 1 and data.depth == 26 then
+			msg.post("common/item_handler", "drop_item", {pos = go.get_position(), num = itm.getnum("AMULET OF YENDOR")})		
+			msg.post("common/item_handler", "open_exit", {})		
+		elseif math.random(10) == 1 then
+			randomdrop(self)
+		end
+	end
+end
+
+function dead(self, node)
+	msg.post("common/enemy_handler", "delete_enemy", {})
+end
+
+function randomdrop(self)
+	local drop = 0
+
+	if math.random(1,2) == 1 then
+		if data.itemininv(itm.getnum("SILVER KEY")) == false then drop = itm.getnum("SILVER KEY") end
+	elseif data.itemininv(itm.getnum("GOLD KEY")) == false then drop = itm.getnum("GOLD KEY")
+	end
+
+	if drop == 0 then drop = math.random(itm.getnum("BREAD"), itm.getnum("RADISHES")) end
+	
+	msg.post("common/item_handler", "drop_item", {pos = go.get_position(), num = drop})
+end
+
+function freeze (self, time)
+	self.frozen = time
+	msg.post("main:/sound#freeze", "play_sound", {gain = data.sfxvol})	
+	msg.post("#sprite", "play_animation", {id = hash(string.format("freeze%02d", self.type))})	
+	msg.post("common/view#osd", "update_status", {status = string.format("You FROZE %s %s", enm.getenemynamedeterminer(self.type), enm.getenemyname(self.type))})
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("ray_cast_response") then
+		if message.group == hash("player") then
+			self.lineofsight = true
+		end
+	elseif message_id == hash("hit") then
+		hit(self, message.damage, false)
+	elseif message_id == hash("hit_silent") then
+		hit(self, message.damage, true)
+	elseif message_id == hash("freeze") then
+		if self.frozen == 0 then freeze(self, message.time) end
+	elseif message_id == hash("vampire") then
+		hit(self, message.damage, false)
+		particlefx.play("#vampirefx")
+	end
+end
+

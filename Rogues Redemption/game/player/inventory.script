@@ -1,0 +1,165 @@
+local data = require ("main.data")
+local itm = require ("game/items.items")
+
+function pickup(self, num)
+	if itm.getname(num) == "GOLD" then
+		local g = 5 + math.random(1,35)
+		data.gold = data.gold + g
+		msg.post("view#osd", "update_status", {status = string.format("Picked up %s %s +%d", itm.getnamedeterminer(num), itm.getname(num), g)})
+		msg.post("#script", "picked_up", {})
+		return
+	elseif itm.getname(num) == "HEALTH DROPLET" then
+		data.health = data.health + itm.getedible(num)
+		msg.post("view#osd", "update_status", {status = string.format("Picked up %s %s +%d", itm.getnamedeterminer(num), itm.getname(num), itm.getedible(num))})
+		msg.post("#script", "picked_up", {})
+		return
+	elseif itm.getname(num) == "MANA DROPLET" then
+		data.mana = data.mana + itm.getedible(num)
+		msg.post("view#osd", "update_status", {status = string.format("Picked up %s %s +%d", itm.getnamedeterminer(num), itm.getname(num), itm.getedible(num))})
+		msg.post("#script", "picked_up", {})
+		return
+	end
+
+	local n = 1
+
+	while data.inv[n] > 1 and n < data.INV_SIZE do
+		n = n + 1
+	end
+
+	if n <= data.INV_SIZE then
+		data.inv[n] = num
+		local str = string.format("Picked up %s %s", itm.getnamedeterminer(num), itm.getname(num))
+		msg.post("view#osd", "update_status", {status = str})
+		msg.post("#script", "picked_up", {})
+	end
+end
+
+function pickupitem(self, num)
+	local e = false
+
+	if data.invfull(self) and itm.getclass(num) ~= itm.CLASS_NOHOLD then
+		msg.post("view#osd", "update_status", {status = "Your satchel is full", color = vmath.vector4(1,0.5,0,1)})
+		msg.post("main:/sound#alarm", "play_sound", {gain = data.sfxvol})									
+	else
+		pickup(self, num)
+		msg.post("main:/sound#pickup", "play_sound", {gain = data.sfxvol/2})							
+	end					
+end
+
+function dropcurrentitem(self)
+	local p = vmath.vector3(data.playerpos.x + 16, data.playerpos.y, 1)
+	
+	if data.istilefree(self, p.x, p.y) == false then
+		p = vmath.vector3(data.playerpos.x - 16, data.playerpos.y, 1)
+		if data.istilefree(self, p.x, p.y) == false then
+			p = vmath.vector3(data.playerpos.x, data.playerpos.y + 16, 1)
+			if data.istilefree(self, p.x, p.y) == false then
+				p = vmath.vector3(data.playerpos.x, data.playerpos.y - 16, 1)
+				if data.istilefree(self, p.x, p.y) == false then
+					msg.post("view#osd", "update_status", {"No space to drop item"})
+					return
+				end
+			end
+		end
+	end
+
+	msg.post("item_handler", "drop_item", {pos = p, num = data.inv[self.viewslot]})
+	local str = string.format("Dropped %s %s", itm.getnamedeterminer(data.inv[self.viewslot]), itm.getname(data.inv[self.viewslot]))
+	msg.post("view#osd", "update_status", {status = str})
+	msg.post("main:/sound#movement", "play_sound", {gain = data.sfxvol/2})								
+	data.inv[self.viewslot] = 1
+end
+
+function equip(self)
+	local item = data.inv[self.viewslot]
+	local class = itm.getclass(item)
+	
+	msg.post("view#osd", "update_status", {status = string.format("Equipped %s", itm.getname(item))})	
+	msg.post("main:/sound#movement", "play_sound", {gain = data.sfxvol/2})								
+	
+	if class == itm.CLASS_RHAND or class == itm.CLASS_SPELL then
+		local temp = data.inv[data.INV_SLOT_RIGHTHAND]
+		data.inv[data.INV_SLOT_RIGHTHAND] = data.inv[self.viewslot]
+		data.inv[self.viewslot] = temp
+	elseif class == itm.CLASS_LHAND then
+		local temp = data.inv[data.INV_SLOT_LEFTHAND]
+		data.inv[data.INV_SLOT_LEFTHAND] = data.inv[self.viewslot]
+		data.inv[self.viewslot] = temp
+	elseif class == itm.CLASS_ARMOUR then
+		local temp = data.inv[data.INV_SLOT_ARMOUR]
+		data.inv[data.INV_SLOT_ARMOUR] = data.inv[self.viewslot]
+		data.inv[self.viewslot] = temp
+	elseif class == itm.CLASS_HELMET then
+		local temp = data.inv[data.INV_SLOT_HELMET]
+		data.inv[data.INV_SLOT_HELMET] = data.inv[self.viewslot]
+		data.inv[self.viewslot] = temp
+	elseif class == itm.CLASS_AMULET then
+		local temp = data.inv[data.INV_SLOT_AMULET]
+		data.inv[data.INV_SLOT_AMULET] = data.inv[self.viewslot]
+		data.inv[self.viewslot] = temp
+	elseif class == itm.CLASS_RING then
+		local temp = data.inv[data.INV_SLOT_RING]
+		data.inv[data.INV_SLOT_RING] = data.inv[self.viewslot]
+		data.inv[self.viewslot] = temp
+	elseif class == itm.CLASS_GLOVES then
+		local temp = data.inv[data.INV_SLOT_GLOVES]
+		data.inv[data.INV_SLOT_GLOVES] = data.inv[self.viewslot]
+		data.inv[self.viewslot] = temp
+	elseif class == itm.CLASS_BOOTS then
+		local temp = data.inv[data.INV_SLOT_BOOTS]
+		data.inv[data.INV_SLOT_BOOTS] = data.inv[self.viewslot]
+		data.inv[self.viewslot] = temp
+	end
+end
+
+function unequip (self)
+	if data.invfull(self) then
+		msg.post("view#osd", "update_status", {status = "Your satchel is full", color = vmath.vector4(1,0.5,0,1)})
+		msg.post("main:/sound#alarm", "play_sound", {gain = data.sfxvol})									
+	else
+		local n = data.getemptyslot()
+	
+		data.inv[n] = data.inv[self.viewslot]
+		data.inv[self.viewslot] = 1
+		
+		msg.post("view#osd", "update_status", {status = string.format("Unequipped %s", itm.getname(data.inv[n]))})			
+		msg.post("main:/sound#movement", "play_sound", {gain = data.sfxvol/2})								
+	end					
+end
+
+function useitem(self)
+	local item = data.inv[self.viewslot]
+	local edible = itm.getedible(item)
+	local class = itm.getclass(item)
+
+	if class == itm.CLASS_POTION then
+		usepotion(self, item)		
+		data.inv[self.viewslot] = 0
+	elseif edible ~= 0 then
+		data.health = data.health + edible
+		data.hunger = data.hunger + (edible * 2)
+		msg.post("view#osd", "update_status", {status = string.format("You eat %s %s", itm.getnamedeterminer(item), itm.getname(item))})
+		msg.post("main:/sound#eat", "play_sound", {gain = data.sfxvol})							
+		data.inv[self.viewslot] = 0
+	elseif class == itm.CLASS_SCROLL then
+		usescroll(self, item)
+		data.inv[self.viewslot] = 0
+	end
+end
+
+function usepotion(self, item)
+	local edible = itm.getedible(item)
+
+	if itm.getname(item) == "HEALTH POTION" then data.health = data.health + edible
+	elseif itm.getname(item) == "MANA POTION" then data.mana = data.mana + edible
+	elseif itm.getname(item) == "EXPERIENCE POTION" then data.xp = data.xp + edible
+	elseif itm.getname(item) == "POISON ANTIDOTE" then
+		self.poison = 0
+		particlefx.stop("#poison")		
+	elseif itm.getname(item) == "STRENGTH SOLUTION" then self.extrapower = 50
+	elseif itm.getname(item) == "PROTECTION SOLUTION" then self.extradefence = 50
+	end
+	
+	msg.post("main:/sound#drink", "play_sound", {gain = data.sfxvol})							
+	msg.post("view#osd", "update_status", {status = string.format("You drink %s %s", itm.getnamedeterminer(item), itm.getname(item))})
+end

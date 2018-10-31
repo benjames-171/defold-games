@@ -1,0 +1,33 @@
+function init(self)
+	self.vel = math.random(20,40)
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	pos.x = pos.x + (self.vel * dt)
+	go.set_position(pos)
+end
+
+local function resolvecollision(self, message)
+	local correction = vmath.vector3(0,0,0)
+
+    if message.distance > 0 then
+        local proj = vmath.project(correction, message.normal * message.distance)
+        if proj < 1 then
+            local comp = (message.distance - message.distance * proj) * message.normal
+            go.set_position(go.get_position() + comp)
+        end
+    end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.group == hash("world") then
+			resolvecollision(self, message)
+			self.vel = -self.vel
+		elseif message.group == hash("player") then
+			msg.post("player", "move", {x = self.vel * 0.2})
+		end
+	end
+end
+

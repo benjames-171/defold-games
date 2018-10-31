@@ -1,0 +1,18 @@
+image: "/assets/graphics/walk.png"
+tile_width: 16
+tile_height: 16
+tile_margin: 0
+tile_spacing: 0
+material_tag: "tile"
+animations {
+  id: "move"
+  start_tile: 1
+  end_tile: 5
+  playback: PLAYBACK_LOOP_PINGPONG
+}
+animations {
+  id: "static"
+  start_tile: 3
+  end_tile: 3
+  playback: PLAYBACK_NONE
+}

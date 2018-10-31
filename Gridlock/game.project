@@ -1,0 +1,31 @@
+[project]
+title = Gridlock
+version = 0.1
+
+[bootstrap]
+main_collection = /main/main.collectionc
+
+[input]
+game_binding = /input/game.input_bindingc
+
+[display]
+width = 720
+height = 1280
+
+[physics]
+scale = 0.02
+
+[script]
+shared_state = 1
+
+[android]
+app_icon_36x36 = /assets/png/icon36.png
+app_icon_48x48 = /assets/png/icon48.png
+app_icon_72x72 = /assets/png/icon72.png
+app_icon_96x96 = /assets/png/icon96.png
+app_icon_144x144 = /assets/png/icon144.png
+app_icon_192x192 = /assets/png/icon192.png
+package = com.onesevenone.gridlock
+immersive_mode = 0
+version_code = 2
+

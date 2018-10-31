@@ -1,0 +1,29 @@
+local function show(self, pos)
+	go.set_position(pos)
+	sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+end
+
+local function hide(self)
+	sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0))
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	if pos.y > 0 then
+		pos = pos + (self.vel * dt)
+		go.set_position(pos)
+	else
+		hide(self)
+	end
+end
+
+function init(self)
+	self.vel = vmath.vector3(40, -100, 0)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then show(self, message.pos)
+	elseif message_id == hash("hide") then hide(self)
+	end	
+end
+

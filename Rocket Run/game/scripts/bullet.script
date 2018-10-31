@@ -1,0 +1,33 @@
+go.property("angle", 0)
+local speed = 2
+local damage = 10
+
+function init(self)
+    self.position = go.get_position()
+	self.velocity = vmath.vector3(math.cos(self.angle) * speed, math.sin(self.angle) * speed, 0)
+	self.delete = false
+	particlefx.play("#trail")
+end
+
+function final(self)
+	particlefx.stop("#trail")
+end
+
+function update(self, dt)
+   self.position = self.position + self.velocity
+   go.set_position(self.position)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if (message.group == hash("world")) then
+			particlefx.play("#spark")
+        	msg.post("main:/sound#pop", "play_sound", {gain = 0.25})			
+			go.delete()
+		elseif (message.group == hash("player")) then
+			particlefx.play("#spark")
+			msg.post("/common/player", "bullet_hit", {power = damage})
+			go.delete()
+    	end
+  	end
+end

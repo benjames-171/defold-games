@@ -1,0 +1,30 @@
+images {
+  image: "/assets/png/ball.png"
+}
+images {
+  image: "/assets/png/play.png"
+}
+images {
+  image: "/assets/png/reset.png"
+}
+images {
+  image: "/assets/png/quit.png"
+}
+images {
+  image: "/assets/png/stop.png"
+}
+images {
+  image: "/assets/png/backplate.png"
+}
+images {
+  image: "/assets/png/button.png"
+}
+images {
+  image: "/assets/png/exit.png"
+}
+images {
+  image: "/assets/png/playfast.png"
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0

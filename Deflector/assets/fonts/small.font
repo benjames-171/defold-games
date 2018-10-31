@@ -1,0 +1,4 @@
+font: "/assets/fonts/Square.ttf"
+material: "/builtins/fonts/font.material"
+size: 15
+extra_characters: "\302\251"

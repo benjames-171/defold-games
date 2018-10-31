@@ -1,0 +1,58 @@
+local data = require ("main.data")
+
+go.property("angle", 0)
+local SPEED = 4
+local LIFE = 60
+
+function init(self)
+	self.life = LIFE
+	self.velocity = vmath.vector3(math.cos(self.angle) * SPEED, math.sin(self.angle) * SPEED, 0)
+	--particlefx.play("#smoke")
+	msg.post("main:/sound#cannon", "play_sound", {gain = 1.0})
+end
+
+local function impact(self, p)
+	msg.post("main:/sound#hit", "play_sound", {gain = 1.0})
+	particlefx.play("#explosion_small")
+	go.delete()
+end
+
+local function explode(self, p)
+	msg.post("common/effects", "explosion", {pos = p, f = true})
+	go.delete()
+end
+
+local function collision(self, message)
+	local p = data.world2tile(go.get_position())
+
+	if data.validtile(p.x, p.y) then
+		local t = tilemap.get_tile("level#tilemap", "top", p.x, p.y)
+		if data.destructible_tile(t) then
+			local h = tilemap.get_tile("level#tilemap", "hits", p.x, p.y)
+			h = h - 1
+			if h <=0 then
+				explode(self, data.tile2world(p))
+			else
+				impact(self, p)
+				tilemap.set_tile("level#tilemap", "hits", p.x, p.y, h)
+			end
+		end
+	end
+end
+
+function update(self, dt)
+	self.life = self.life - 1
+	if self.life <= 0 then go.delete() end
+	local p = go.get_position() + self.velocity
+	if data.onscreen(p) then
+		go.set_position(p)
+		collision(self)
+	else go.delete()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") and message.other_group == hash("enemy") then
+		go.delete()
+	end
+end

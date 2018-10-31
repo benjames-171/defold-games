@@ -1,0 +1,301 @@
+local data = require ("main.data")
+
+local ROTATE_SPEED = 0.05
+local ACCEL = 0.06
+local GRAVITY = 0.02
+local MAX_SPEED = 1.5
+local FUEL_ECONOMY = 0.03
+
+local ID_ARTIFACT = 0
+local ID_ENERGY_S = 1
+local ID_ENERGY = 2
+local ID_FUEL = 3
+
+function init(self)
+	msg.post(".", "acquire_input_focus")	
+	
+	data.fuel = 100
+	data.shield = 100
+	data.artifacts = 0
+
+	self.spawned_objects = {}
+	self.angle = math.pi/2
+	self.velocity = vmath.vector3(0,1,0)
+	self.thrust = false
+	self.thrustfxon = 0
+	self.volume = 0.0
+	self.lockout = false
+	self.pickuptimeout = 0
+	self.fadetime = 0
+	self.outoffuel = 0
+
+	msg.post("#co", "enable")
+	msg.post("osd", "fade_in", {})
+	msg.post("osd", "update_status", {status = string.format("LEVEL %d", data.level)})
+	msg.post("osd", "tint", {})
+	msg.post("main:/sound#thrust", "play_sound", {gain = self.volume})
+	sprite.set_constant("/land", "tint", vmath.vector4(1,1,1,0))	
+end
+
+function delete_lasers(self)
+	for k, v in pairs(self.spawned_objects) do
+		table.remove(self.spawned_objects, k)
+		go.delete(v)
+	end	
+end
+
+function final(self)
+    delete_lasers(self)
+end
+
+function delete_laser(self, id)
+	for k, v in ipairs(self.spawned_objects) do
+		if (v == id) then
+			table.remove(self.spawned_objects,k)
+			go.delete(v)
+			return
+		end
+	end
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+
+	--tilemap.set_tile(string.format("level%d:/level#tilemap", data.level), "top", (pos.x + 8) / 16, (pos.y - 12) / 16, 129)
+
+
+	checkfordead(self)
+	checkforlanding(self, pos)
+	checkfuel(self)
+	updatethrust(self, pos)
+
+	msg.post("view", "look_at", { position = go.get_position() })    
+
+	local r = vmath.quat_rotation_z(self.angle)
+	go.set_rotation(r, "#sprite")
+
+	if self.pickuptimeout > 0 then
+		self.pickuptimeout = self.pickuptimeout - 1
+	end
+
+	if self.fadetime > 0 then
+		self.fadetime = self.fadetime - 1
+		if self.fadetime == 1 then
+			msg.post("main:/sound#thrust", "stop_sound")
+			if data.level <= 6 then
+				msg.post("game:/loader", "new_level", {level = data.level})
+			else		
+				returntomenu()
+			end
+		end
+	end
+
+	if self.lockout and data.fuel > 0 then return end
+
+	updatevelocity(self, pos)
+
+    self.correction = vmath.vector3()	
+end
+
+function checkforlanding(self, pos)
+	if self.velocity.x == 0 and self.velocity.y == 0 and self.angle == math.pi/2
+		and data.artifacts >= 4 and self.lockout == false then
+		t = tilemap.get_tile(string.format("level%d:/level#tilemap", data.level), "world", (pos.x + 8) / 16, (pos.y - 8) / 16)
+		if t == 50 then
+			self.lockout = true
+			msg.post("#co", "disable")	
+			sprite.set_constant("/land", "tint", vmath.vector4(1,1,1,0))		
+			msg.post("osd", "level_clear", {})
+			msg.post("main:/sound#hiss", "play_sound", {gain = 1.0})		
+			particlefx.play("#smoke")
+			data.fuel = data.fuel + 0.1
+		end
+	end
+end
+
+function checkfordead(self)
+	if data.shield < 1 and self.lockout == false then
+		data.shield = 0
+		self.lockout = true
+		particlefx.play("#explodefx")
+		msg.post("#co", "disable")
+		msg.post("main:/sound#explode", "play_sound", {gain = 1.0})
+		msg.post("osd", "game_over", {})		
+		sprite.set_constant("#ship", "tint", vmath.vector4(1,1,1,0))
+	end
+end
+
+function checkfuel(self)
+	if data.fuel <= 0 and self.lockout == false then
+		if self.outoffuel < 200 then
+			self.outoffuel = self.outoffuel + 1
+		else	
+			self.lockout = true
+			msg.post("osd", "out_of_fuel", {})
+		end
+	end
+end
+
+function updatevelocity(self, pos)
+	self.velocity.y = self.velocity.y - GRAVITY
+
+	if self.velocity.x > MAX_SPEED then	self.velocity.x = MAX_SPEED
+	elseif self.velocity.x < -MAX_SPEED then self.velocity.x = -MAX_SPEED end
+	if self.velocity.y > MAX_SPEED then	self.velocity.y = MAX_SPEED
+	elseif self.velocity.y < -MAX_SPEED then self.velocity.y = -MAX_SPEED end
+
+    go.set_position(pos + self.velocity)
+end
+
+function updatethrust (self)
+	if self.thrust then
+		local v = vmath.vector3(math.cos(self.angle) * ACCEL, math.sin(self.angle) * ACCEL, 0)
+		self.velocity = self.velocity + v
+		if self.thrustfxon == 0 then
+			particlefx.play("#thrustfx")
+			self.thrustfxon = 5
+		end
+		if self.volume < 0.25 then
+			self.volume = self.volume + 0.05
+		end				
+	else	
+		if self.thrustfxon > 0 then
+			self.thrustfxon = self.thrustfxon - 1
+			if self.thrustfxon == 0	then
+				particlefx.stop("#thrustfx")
+			end
+		end
+		if self.volume > 0.0 then
+			self.volume = self.volume - 0.1
+		end				
+	end	
+
+	msg.post("main:/sound#thrust", "set_gain", {gain = self.volume})
+
+	self.thrust = false
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("contact_point_response") then
+		if (message.group == hash("world") or message.group == hash("enemy")) then
+	        if message.distance > 0 then
+	        	local v1 = go.get_position()
+	            local proj = vmath.project(self.correction, message.normal * message.distance)
+	            if proj < 1 then
+	                local comp = (message.distance - message.distance * proj) * message.normal
+	                go.set_position(go.get_position() + comp)
+	                self.correction = self.correction + comp
+	            end
+	            t = math.abs(self.velocity.x) + math.abs(self.velocity.y)
+	            if t > 1.25 then
+	            	msg.post("main:/sound#thud_heavy", "play_sound", {gain = 1.0})
+	            	data.shield = data.shield - 10
+	        	elseif t > 0.7 then
+	            	msg.post("main:/sound#thud_light", "play_sound", {gain = 1.0})
+	            	data.shield = data.shield - 5
+	            end
+	
+	            local v2 = go.get_position()
+	            self.velocity = v2 - v1
+	            self.velocity.x = self.velocity.x / 2
+	            self.velocity.y = self.velocity.y / 2
+	
+				if self.velocity.x < 0.2 and self.velocity.y < 0.2 then
+					if math.abs(self.angle - (math.pi/2)) < 0.2 then
+	    	        	self.angle = math.pi/2
+		        	end
+	        	end 
+			end
+        elseif message.group == hash("mine") then
+			msg.post(message.other_id, "bullet_hit", {})    		
+        	data.shield = data.shield - 50
+        end
+	elseif message_id == hash("pickup") then
+		if self.pickuptimeout > 0 then return end
+		self.pickuptimeout = 4
+		if message.pickup == ID_ARTIFACT then
+			data.artifacts = data.artifacts + 1
+        	msg.post("main:/sound#pickup", "play_sound", {gain = 0.2})			
+        	go.delete(sender)
+    		if data.artifacts == 4 then
+    			sprite.set_constant("/land", "tint", vmath.vector4(1,1,1,1))	
+    		end
+			msg.post("osd", "update_status", {status = "COLLECTED AN ARTEFACT"})	
+		elseif message.pickup == ID_ENERGY_S and data.shield < 100 then
+			data.shield = data.shield + 10
+			if data.shield > 100 then data.shield = 100 end
+        	msg.post("main:/sound#pickup2", "play_sound", {gain = 0.2})
+        	go.delete(sender)
+			msg.post("osd", "update_status", {status = "+10 SHIELD"})	        	
+		elseif message.pickup == ID_ENERGY then
+			data.shield = 100
+        	msg.post("main:/sound#pickup2", "play_sound", {gain = 0.2})			
+        	go.delete(sender)
+			msg.post("osd", "update_status", {status = "SHIELD RECHARGED"})	        	
+		elseif message.pickup == ID_FUEL then
+			data.fuel = 100
+        	msg.post("main:/sound#pickup2", "play_sound", {gain = 0.2})			
+        	go.delete(sender)
+			msg.post("osd", "update_status", {status = "FUEL REPLENISHED"})	        	
+		end
+    elseif message_id == hash("delete_laser") then
+		local laser = message.laser
+		delete_laser(self, laser)	
+	elseif message_id == hash("get_position") then
+		local pos = go.get_position()
+		msg.post (sender, "position", {position = pos})
+	elseif message_id == hash("set_position") then
+		go.set_position(message.pos)
+	elseif message_id == hash("bullet_hit") and self.lockout == false then
+		data.shield = data.shield - message.power
+		msg.post("main:/sound#hit", "play_sound", {gain = 0.25})		
+	end
+end
+
+function returntomenu(self)
+	msg.post("view", "look_at", { position = vmath.vector3(160,90,0) })    
+	msg.post("main:/handler", "show_menu", {})
+	msg.post("main:/sound", "stop_sound")
+end
+
+function on_input(self, action_id, action)
+	if self.lockout then
+		if action_id == hash("shoot") and action.pressed then		
+			if data.shield > 0 and data.fuel > 0 then
+				if self.fadetime == 0 then
+					data.level = data.level + 1
+					msg.post("osd", "fade_out", {})
+					self.fadetime = 14	
+				end
+			else
+				returntomenu(self)
+			end
+		end
+	return
+	end
+
+	if action_id == hash("thrust") then
+		if data.fuel > 0 then
+			self.thrust = true
+			data.fuel = data.fuel - FUEL_ECONOMY
+			if data.fuel < 0 then data.fuel = 0 end
+		end
+	elseif action_id == hash("rotate_left") then
+		self.angle = self.angle + ROTATE_SPEED
+		if self.angle > math.pi then
+			self.angle = self.angle - (math.pi * 2)
+		end
+	elseif action_id == hash("rotate_right") then
+		self.angle = self.angle - ROTATE_SPEED
+		if self.angle < -math.pi then
+			self.angle = self.angle + (math.pi * 2)
+		end
+	elseif action_id == hash("shoot") and action.pressed then
+		local p = go.get_position()
+		local laser = factory.create("#laser_factory", p, nil, {angle = -self.angle}, 1)
+		table.insert(self.spawned_objects, laser)
+		msg.post("main:/sound#laser", "play_sound", {gain = 1.0})	
+	elseif action_id == hash("quit") and action.pressed then
+		returntomenu(self)
+	end
+end

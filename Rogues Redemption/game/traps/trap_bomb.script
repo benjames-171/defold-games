@@ -1,0 +1,32 @@
+local data = require ("main.data")
+
+function init(self)
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+
+	if data.gettile(self, pos.x, pos.y, "fog") == 0 then
+	    sprite.set_constant("#sprite",  "tint", vmath.vector4(1,1,1,1))
+	else
+	    sprite.set_constant("#sprite",  "tint", vmath.vector4(1,1,1,0))
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+        if message.enter then
+        	if message.group == hash("player") or message.group == hash ("enemy") then
+				particlefx.play("#explosion")				
+				msg.post("main:/sound#explosion", "play_sound", {gain = data.sfxvol})							
+        		msg.post(message.other_id, "hit", {damage = 20})
+        		go.delete()
+
+				if message.group == hash("player") then
+					msg.post("common/player", "poison", {poison = 25})
+				end		
+    		end
+        end
+    end
+end
+

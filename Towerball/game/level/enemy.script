@@ -1,0 +1,18 @@
+function init(self)
+	self.origin = go.get_position()
+	self.tick = math.random(0, math.pi)
+end
+
+function update(self, dt)
+	self.tick = self.tick + 0.05
+	local p = vmath.vector3(self.origin.x + (math.sin(self.tick) * 48),
+		self.origin.y + (math.sin(self.tick * 2) * 12), self.origin.z)
+	
+	go.set_position(p)
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("contact_point_response") and message.group == hash("player") then
+		self.origin = vmath.vector3(0, 0, 0)
+	end
+end

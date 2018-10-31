@@ -1,0 +1,642 @@
+local data = require ("game.scripts.data")
+local MOVE_SPEED = 64 
+local MAX_AMMO = 300
+local STRAFE_SPEED = 1.5
+
+function init(self)
+	self.velocity = vmath.vector3(0, 0, 0)
+	self.spawned_objects = {}
+	self.angle = 270
+	self.shoot = 0
+	self.strafe = 1
+	self.strafe_angle = 0
+	self.fragments = 0
+	self.grunt = 0
+	self.fade = 1
+	self.fadein = -0.5
+	self.gain = 0.0
+	self.gameover = 0
+	self.levelclear = 0
+	self.shop = 0
+	self.loadingwait = 0
+	self.damage = {5,6,8,9,50}
+	self.start_time = os.time()
+	msg.post(".", "acquire_input_focus")
+	sprite.set_constant("#muzzle", "tint", vmath.vector4(1, 1, 1, 0))
+	msg.post("game:/loader", "get_level")
+	msg.post("sounds#ambience", "play_sound", {gain = 0.0})
+	msg.post("sounds#teleport", "play_sound", {gain = 1.0})
+    particlefx.play("#teleporterfx")	
+	updategui(self)
+--	msg.post("@system:", "toggle_profile")
+	
+	if data.level == 1 then
+		data.holding = 1
+		data.credits = 500
+		data.health = 100
+		data.wayfinder = 0
+		data.ammo = {100,0,0,0,0}
+		data.weapons = {1,0,0,0,0}
+		updategui(self)
+	end
+end
+
+function delete_bullets(self)
+	for k, v in pairs(self.spawned_objects) do
+		table.remove(self.spawned_objects, k)
+		go.delete(v)
+	end	
+end
+
+function final(self)
+    msg.post(".", "release_input_focus")
+	particlefx.stop("#deathfx")
+	particlefx.stop("#teleporterfx")
+    delete_bullets(self)
+end
+
+function delete_bullet(self, id)
+	for k, v in ipairs(self.spawned_objects) do
+		if (v == id) then
+			table.remove(self.spawned_objects,k)
+			go.delete(v)
+			return
+		end
+	end	
+end
+
+function updategui(self)
+	for n = 1, 5 do
+		if (data.ammo[n] > MAX_AMMO) then
+			data.ammo[n] = MAX_AMMO
+		end
+	end
+
+	if data.holding == 1 then
+		msg.post("view#gui", "update_ammo", {ammo = data.ammo[1]})
+	elseif data.holding == 2 then
+		msg.post("view#gui", "update_ammo", {ammo = data.ammo[2]})
+	elseif data.holding == 3 then
+		msg.post("view#gui", "update_ammo", {ammo = data.ammo[3]})
+	elseif data.holding == 4 then
+		msg.post("view#gui", "update_ammo", {ammo = data.ammo[4]})
+	elseif data.holding == 5 then
+		msg.post("view#gui", "update_ammo", {ammo = data.ammo[5]})
+	end
+
+	msg.post("view#gui", "update_credits", {credits = data.credits})
+	msg.post("view#gui", "update_health", {health = data.health})
+	msg.post("view#gui", "update_fragments", {fragments = self.fragments})
+	msg.post("view#gui", "update_gun", {gun = data.holding})
+end
+
+function selectbestweapon(self)
+	if data.weapons[5] == 1 and data.ammo[5] > 0 then
+		data.holding = 5
+	elseif data.weapons[4] == 1 and data.ammo[4] > 0 then
+		data.holding = 4
+	elseif data.weapons[3] == 1 and data.ammo[3] > 0 then
+		data.holding = 3
+	elseif data.weapons[2] == 1 and data.ammo[2] > 0 then
+		data.holding = 2
+	elseif data.weapons[1] == 1 and data.ammo[1] > 0 then
+		data.holding = 1
+	end
+	
+	updategui(self)
+end
+
+function checkpickups(self)
+	local pos = go.get_position()
+	
+	pos.x = (pos.x + 8) / 16
+	pos.y = (pos.y + 8) / 16
+
+	local tile = tilemap.get_tile(self.url_level, hash("objects"), pos.x, pos.y)
+	
+	if tile == 961 then
+		tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+		msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+		msg.post("view#gui", "update_status", {status = "picked up the handgun"})
+		data.weapons[1] = 1
+		data.ammo[1] = data.ammo[1] + 50
+		data.holding = 1
+		updategui(self)
+	elseif tile == 962 then
+		tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+		msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+		msg.post("view#gui", "update_status", {status = "picked up the machine gun"})
+		data.weapons[2] = 1
+		data.ammo[2] = data.ammo[2] + 100
+		data.holding = 2
+		updategui(self)
+	elseif tile == 963 then
+		tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+		msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+		msg.post("view#gui", "update_status", {status = "picked up the uzi"})
+		data.weapons[3] = 1
+		data.ammo[3] = data.ammo[3] + 100
+		data.holding = 3
+		updategui(self)
+	elseif tile == 964 then
+		tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+		msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+		msg.post("view#gui", "update_status", {status = "picked up the assault rifle"})
+		data.weapons[4] = 1
+		data.ammo[4] = data.ammo[4] + 100
+		data.holding = 4
+		updategui(self)
+	elseif tile == 965 then
+		tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+		msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+		msg.post("view#gui", "update_status", {status = "Picked up the shotgun"})
+		data.weapons[5] = 1
+		data.ammo[5] = data.ammo[5] + 18
+		data.holding = 5
+		updategui(self)
+	elseif tile == 966 then
+		if data.ammo[1] < MAX_AMMO then
+			tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+			msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+			msg.post("view#gui", "update_status", {status = "picked up handgun ammo"})
+			data.ammo[1] = data.ammo[1] + 50
+			updategui(self)
+		else
+			msg.post("view#gui", "update_status", {status = "handgun ammo maxed"})
+		end
+	elseif tile == 967 then
+		if data.ammo[2] < MAX_AMMO then
+			tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+			msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+			msg.post("view#gui", "update_status", {status = "picked up machine gun ammo"})
+			data.ammo[2] = data.ammo[2] + 50
+			updategui(self)
+		else
+			msg.post("view#gui", "update_status", {status = "machine gun ammo maxed"})
+		end
+	elseif tile == 968 then
+		if data.ammo[3] < MAX_AMMO then
+			tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+			msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+			msg.post("view#gui", "update_status", {status = "picked up uzi ammo"})
+			data.ammo[3] = data.ammo[3] + 50
+			updategui(self)
+		else
+			msg.post("view#gui", "update_status", {status = "uzi ammo maxed"})
+		end
+	elseif tile == 969 then
+		if data.ammo[4] < MAX_AMMO then
+			tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+			msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+			msg.post("view#gui", "update_status", {status = "picked up assault rifle ammo"})
+			data.ammo[4] = data.ammo[4] + 50
+			updategui(self)
+		else
+			msg.post("view#gui", "update_status", {status = "assault rifle ammo maxed"})
+		end
+	elseif tile == 970 then
+		if data.ammo[5] < MAX_AMMO then
+			tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+			msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+			msg.post("view#gui", "update_status", {status = "picked up shotgun shells"})
+			data.ammo[5] = data.ammo[5] + 50
+			updategui(self)
+		else
+			msg.post("view#gui", "update_status", {status = "shotgun shells maxed"})
+		end
+	elseif tile == 971 then
+		tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+		msg.post("sounds#coin", "play_sound", {gain = 1.0})
+		msg.post("view#gui", "update_status", {status = "collected 10 credits"})
+		data.credits = data.credits + 10
+		updategui(self)
+	elseif tile == 972 then
+		tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+		msg.post("sounds#coin", "play_sound", {gain = 1.0})
+		msg.post("view#gui", "update_status", {status = "collected 50 credits"})
+		data.credits = data.credits + 50
+		updategui(self)
+	elseif tile == 973 then
+		tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+		msg.post("view#gui", "collected", {})
+		self.fragments = self.fragments + 1
+
+		if self.fragments < 4 then
+			msg.post("sounds#fragment", "play_sound", {gain = 0.5})
+			msg.post("view#gui", "update_status", {status = "found a crystal fragment"})
+		else
+			msg.post("sounds#fragment", "play_sound", {gain = 0.5})
+			msg.post("view#gui", "update_status", {status = "teleporter activated!"})
+			msg.post(string.format("level%d:/vortex", data.level), "start_vortex", {})
+		end
+		updategui(self)
+	elseif tile == 974 then
+		if data.health < 100 then
+			tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+			msg.post("sounds#health", "play_sound", {gain = 1.0})
+			msg.post("view#gui", "update_status", {status = "used a medi-kit"})
+			data.health = 100
+			updategui(self)
+		else
+			msg.post("view#gui", "update_status", {status = "health already at maximum"})
+		end
+	elseif tile == 975 then
+		if data.health < 100 then
+			tilemap.set_tile(self.url_level, hash("objects"), pos.x, pos.y, 0)
+			msg.post("sounds#health", "play_sound", {gain = 1.0})
+			msg.post("view#gui", "update_status", {status = "used a ration"})
+			data.health = data.health + 25
+			if data.health > 100 then data.health = 100	end
+			updategui(self)
+		else
+			msg.post("view#gui", "update_status", {status = "health already at maximum"})
+		end
+	end
+
+	tile = tilemap.get_tile(self.url_level, hash("world"), pos.x, pos.y)
+
+	if tile == 614 and self.fragments >= 4 and self.levelclear == 0 then
+		levelclear(self)
+	end
+end
+
+function levelclear(self)
+	msg.post("view#levelclear", "fadein")
+	msg.post("sounds#teleport", "play_sound", {gain = 1.0})
+	msg.post("#co", "disable")
+    particlefx.play("#teleporterfx")	
+	self.levelclear = 1
+	local time = (os.time() - self.start_time)
+	msg.post("view#levelclear", "set_time", {t = time})
+end
+
+function nextlevel(self)
+	msg.post("view#levelclear", "loading")
+	self.loadingwait = 1
+end
+
+function loadnext(self)
+	data.level = data.level + 1
+
+	if data.level == 3 then data.level = 4 end
+
+	if data.level > 6 then
+		msg.post("main:/handler", "show_menu", {})
+	else
+		msg.post("game:/loader", "new_level", {level = data.level})
+	end
+
+	msg.post("sounds", "stop_sound")
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+
+	if self.loadingwait > 0 then
+		self.loadingwait = self.loadingwait + 1
+		
+		if self.loadingwait > 60 then
+			loadnext(self)
+			self.loadingwait = 0
+		end
+
+		if self.gain > 0 then
+			self.gain = self.gain - 0.01
+			msg.post("sounds#ambience", "set_gain", {gain = self.gain})
+		end
+	elseif self.gain < 0.4 then
+		self.gain = self.gain + 0.001
+		msg.post("sounds#ambience", "set_gain", {gain = self.gain})
+	end
+
+    go.set_position(pos + self.velocity * dt)
+
+	msg.post("/common/view", "look_at", { position = pos })
+
+	if (self.velocity.x == 0 and self.velocity.y == 0) then
+		msg.post("#sprite", "play_animation", {id = hash("static")})
+	end
+	if (self.velocity.x == 0 and self.velocity.y > 0) then
+		self.angle = 270
+	elseif (self.velocity.x > 0 and self.velocity.y > 0) then
+		self.angle = 315
+	elseif (self.velocity.x > 0 and self.velocity.y == 0) then
+		self.angle = 0
+	elseif (self.velocity.x > 0 and self.velocity.y < 0) then
+		self.angle = 45
+	elseif (self.velocity.x == 0 and self.velocity.y < 0) then
+		self.angle = 90
+	elseif (self.velocity.x < 0 and self.velocity.y < 0) then
+		self.angle = 135
+	elseif (self.velocity.x < 0 and self.velocity.y == 0) then
+		self.angle = 180
+	elseif (self.velocity.x < 0 and self.velocity.y > 0) then
+		self.angle = 225
+	end
+
+	self.velocity = vmath.vector3(0, 0, 0)
+    self.correction = vmath.vector3()
+
+	local a
+	if self.strafe == STRAFE_SPEED then
+		a = self.strafe_angle
+	else
+		a = self.angle
+	end
+
+	local r = vmath.quat_rotation_z(math.rad(-a))
+	go.set_rotation(r, "#sprite")
+
+	if (data.holding == 1 and data.ammo[1] > 0) or
+	(data.holding == 2 and data.ammo[2] > 0) or
+	(data.holding == 3 and data.ammo[3] > 0) or
+	(data.holding == 4 and data.ammo[4] > 0) or
+	(data.holding == 5 and data.ammo[5] > 0) then
+		if (self.shoot % 4 > 0) or self.shoot == 0 then
+			sprite.set_constant("#muzzle", "tint", vmath.vector4(1, 1, 1, 0))
+		else
+			local p = go.get_position()
+			local bullet = factory.create("#bullet_factory", p, nil, {angle = a}, 1)
+			table.insert(self.spawned_objects, bullet)
+			msg.post(bullet, "set_power", {power = self.damage[data.holding]})
+			sprite.set_constant("#muzzle", "tint", vmath.vector4(1, 1, 1, 1))
+			if data.holding == 5 then
+				particlefx.play("#muzzlefx")
+			end
+			
+			if data.holding == 1 then
+				data.ammo[1] = data.ammo[1] - 1
+			elseif data.holding == 2 then
+				data.ammo[2] = data.ammo[2] - 1
+			elseif data.holding == 3 then
+				data.ammo[3] = data.ammo[3] - 1
+			elseif data.holding == 4 then
+				data.ammo[4] = data.ammo[4] - 1
+			elseif data.holding == 5 then
+				data.ammo[5] = data.ammo[5] - 1
+			end
+			
+			updategui(self)
+		end
+	else 
+		sprite.set_constant("#muzzle", "tint", vmath.vector4(1, 1, 1, 0))
+		self.shoot = 0
+	end
+
+	if self.shoot > 0 then
+		self.shoot = self.shoot - 1
+	end	
+	
+	checkpickups(self)
+	
+	if self.grunt > 0 then
+		self.grunt = self.grunt + 1
+		if self.grunt > 50 then
+			self.grunt = 0
+		end
+	end
+	
+	
+	if self.fade < 1 then
+		self.fade = self.fade + 0.05
+	end
+	
+	sprite.set_constant("#sprite", "tint", vmath.vector4(1, self.fade, self.fade, 1))
+
+	if self.levelclear == 0 then
+		if self.fadein < 1 then
+			self.fadein = self.fadein + 0.01	
+			sprite.set_constant("#sprite", "tint", vmath.vector4(1, 1, 1, self.fadein))
+		end
+	else
+		if self.fadein > 0 then
+			self.fadein = self.fadein - 0.04	
+		end
+	
+		sprite.set_constant("#sprite", "tint", vmath.vector4(1, 1, 1, self.fadein))
+	end
+	
+	
+	if data.health <= 0 and self.gameover == 0 then
+		self.gameover = 1
+	    particlefx.play("#deathfx")
+		msg.post("sounds#ambience", "set_gain", {gain = 0.0})
+		msg.post("sounds#gameover", "play_sound", {gain = 1.0})
+		msg.post(".", "disable")
+		msg.post("view#gui", "game_over", {})
+	end
+	
+	if self.gameover > 0 then
+		self.gameover = self.gameover + 1
+	end
+
+	if self.levelclear > 0 then
+		self.levelclear = self.levelclear + 1
+	end
+
+end
+
+function playerhit (self, damage)
+	data.health = data.health - damage
+	self.fade = 0
+	if self.grunt == 0 then	    		
+		if math.random(0,1) == 0 then
+    		msg.post("sounds#grunt", "play_sound", {gain = 1.0})
+		else
+    		msg.post("sounds#grunt2", "play_sound", {gain = 1.0})
+		end
+		self.grunt = 1
+	end			
+
+	updategui(self)
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("contact_point_response") and
+	(message.group == hash("enemy") or message.group == hash("world")) then
+        if message.distance > 0 then
+            local proj = vmath.project(self.correction, message.normal * message.distance)
+            if proj < 1 then
+                local comp = (message.distance - message.distance * proj) * message.normal
+                go.set_position(go.get_position() + comp)
+                self.correction = self.correction + comp
+            end
+        end
+		if message.group == hash("enemy") then
+			playerhit(self, 0.25)
+        end
+	elseif message_id == hash("delete_bullet") then
+		local bullet = message.bullet
+		delete_bullet(self, bullet)	
+	elseif message_id == hash("get_position") then
+		local pos = go.get_position()
+		msg.post (sender, "position", {position = pos})
+	elseif message_id == hash("laser_hit") then
+		playerhit(self, message.power)
+	elseif message_id == hash("shop_closing") then
+		msg.post("#co", "enable")
+		self.shop = 0
+		updategui(self)		
+	elseif message_id == hash("spawn_pos") then
+		go.set_position(message.p)
+	elseif message_id == hash("set_level") then
+		self.url_level = string.format("level%d:/world#tilemap", data.level)
+	end
+end
+
+function gameover (self)
+	data.level = 1
+	msg.post("main:/handler", "show_menu", {})
+end
+
+function on_input(self, action_id, action)
+	if self.levelclear > 100 then
+		if action_id == hash("fire") and action.pressed then
+			nextlevel(self)
+		end
+		return
+	end
+	
+	if self.shop == 1 or self.fadein < 0.7 then return end
+
+	if self.gameover > 1 then
+		if action_id == hash("fire") and action.pressed and self.gameover > 100 then
+			gameover()
+		end
+
+		return
+	end
+	
+	if action_id == hash("fire") and action.pressed then
+	
+		local pos = go.get_position()
+		local tile = tilemap.get_tile(self.url_level, hash("world"), (pos.x + 8) / 16, (pos.y + 8) / 16)
+
+		if tile == 687 or tile == 688 or tile == 689 then
+			msg.post("view#shopgui", "showshop", {})
+			msg.post("#co", "disable")
+			self.shop = 1
+			return
+		end
+	
+		if data.holding == 1 then
+			if data.ammo[1] > 0 then
+				self.shoot = 4
+    			msg.post("sounds#handgun", "play_sound", {gain = 1.0})
+			else
+    			msg.post("sounds#click", "play_sound", {gain = 1.0})
+    			selectbestweapon(self)
+			end
+		elseif data.holding == 2 then
+			if data.ammo[2] > 0 then
+				self.shoot = 12
+	    		msg.post("sounds#machinegun", "play_sound", {gain = 1.0})
+			else
+    			msg.post("sounds#click", "play_sound", {gain = 1.0})
+    			selectbestweapon(self)
+			end
+		elseif data.holding == 3 then
+			if data.ammo[3] > 0 then
+				self.shoot = 12
+    			msg.post("sounds#machinegun2", "play_sound", {gain = 1.0})
+			else
+    			msg.post("sounds#click", "play_sound", {gain = 1.0})
+    			selectbestweapon(self)
+			end
+		elseif data.holding == 4 then
+			if data.ammo[4] > 0 then
+				self.shoot = 12
+    			msg.post("sounds#machinegun3", "play_sound", {gain = 1.0})
+			else
+    			msg.post("sounds#click", "play_sound", {gain = 1.0})
+    			selectbestweapon(self)
+			end
+		elseif data.holding == 5 then
+			if data.ammo[5] > 0 then
+				self.shoot = 4
+    			msg.post("sounds#shotgun", "play_sound", {gain = 1.0})
+			else
+    			msg.post("sounds#click", "play_sound", {gain = 1.0})
+    			selectbestweapon(self)
+			end
+		end
+	end
+
+    if action_id == hash("move_up") then
+    	self.velocity.y = MOVE_SPEED / self.strafe
+		if action.pressed then
+			msg.post("#sprite", "play_animation", {id = hash("move")})
+		end
+    elseif action_id == hash("move_down") then
+    	self.velocity.y = -MOVE_SPEED / self.strafe
+		if action.pressed then
+			msg.post("#sprite", "play_animation", {id = hash("move")})
+		end
+	end		
+	
+    if action_id == hash("move_left") then
+    	self.velocity.x = -MOVE_SPEED / self.strafe
+		if action.pressed then
+			msg.post("#sprite", "play_animation", {id = hash("move")})
+		end
+    elseif action_id == hash("move_right") then
+    	self.velocity.x = MOVE_SPEED / self.strafe
+		if action.pressed then
+			msg.post("#sprite", "play_animation", {id = hash("move")})
+		end
+	end		
+
+	if action_id == hash("weapon_1") and data.weapons[1] == 1 and action.pressed then
+		data.holding = 1
+		msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+		msg.post("view#gui", "update_status", {status = "switched to handgun"})		
+		updategui(self)
+	elseif action_id == hash("weapon_2") and data.weapons[2] == 1 and action.pressed then
+		data.holding = 2
+		msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+		msg.post("view#gui", "update_status", {status = "switched to machine gun"})		
+		updategui(self)
+	elseif action_id == hash("weapon_3") and data.weapons[3] == 1 and action.pressed then
+		data.holding = 3
+		msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+		msg.post("view#gui", "update_status", {status = "switched to uzi"})		
+		updategui(self)
+	elseif action_id == hash("weapon_4") and data.weapons[4] == 1 and action.pressed then
+		data.holding = 4
+		msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+		msg.post("view#gui", "update_status", {status = "switched to assault rifle"})		
+		updategui(self)
+	elseif action_id == hash("weapon_5") and data.weapons[5] == 1 and action.pressed then
+		data.holding = 5
+		msg.post("sounds#ammo", "play_sound", {gain = 1.0})
+		msg.post("view#gui", "update_status", {status = "switched to shotgun"})		
+		updategui(self)
+	end
+	
+	if action_id == hash("quit_game") then
+		gameover(self)
+	end	
+	
+	--if action_id == hash("end_level") and action.pressed then
+		--levelclear(self)
+	--end
+	
+	if action_id == hash("strafe") then
+		if action.pressed then
+			self.strafe = STRAFE_SPEED
+			self.strafe_angle = self.angle
+		elseif action.released then
+			self.strafe = 1
+		end
+	end
+		
+	if action_id == hash("minimap") and action.pressed then
+		msg.post("view#gui", "resize_minimap", {})
+	end
+	
+    if action_id == hash("touch") and #action.touch > 1 and #action.touch < 4 then
+        for i, tpoint in ipairs(action.touch) do
+            local pos = vmath.vector3(tpoint.screen_x, tpoint.screen_y, 0)
+        end
+    end	
+end

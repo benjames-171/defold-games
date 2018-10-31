@@ -1,0 +1,82 @@
+local data = require ("main.data")
+
+local SCALE = 300
+local HOLETIME = 50
+
+function init(self)
+	self.force = vmath.vector3(0, 0, 0)	
+	self.holetime = HOLETIME
+	data.state = data.STATE_PLAYING
+	self.pfx = false
+end
+
+local function hole_check(self)
+	local p = go.get_position()
+	p.x = math.floor((p.x + data.TILE_SIZE) / data.TILE_SIZE)
+	p.y = math.floor((p.y + data.TILE_SIZE) / data.TILE_SIZE)
+
+	t = tilemap.get_tile("level#tilemap", "world", p.x, p.y)
+
+	--if t ~= 0 then print(t) end
+
+	if t == 2 then
+		if self.holetime <= 0 then
+			msg.post("common/view#message", "show", {})
+			data.state = data.STATE_LEVELCLEAR
+			self.holetime = 1
+		else
+			self.holetime = self.holetime - 1
+		end
+	else
+		self.holetime = HOLETIME
+	end
+
+	if t == 3 or t == 4 then
+		msg.post("main:/sound#splash", "play_sound", {gain = 1.0})
+		msg.post("common/splash", "water", {pos = go.get_position()})
+		msg.post("common/arrow", "resetball", {})
+	elseif t == 8 or t == 9 then
+		msg.post("main:/sound#tsss", "play_sound", {gain = 1.0})
+		msg.post("common/splash", "lava", {pos = go.get_position()})
+		msg.post("common/arrow", "resetball", {})
+	elseif t == 10 or t == 11 then
+		msg.post("main:/sound#squelch", "play_sound", {gain = 1.0})
+		msg.post("common/splash", "slime", {pos = go.get_position()})
+		msg.post("common/arrow", "resetball", {})
+	end
+end
+
+function update(self, dt)
+	data.ballpos = go.get_position()
+	if data.state == data.STATE_PLAYING then
+		hole_check(self)
+	end
+end
+
+function final(self)
+	particlefx.stop("#trails")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("fire") then
+		local f = (go.get_position() - message.pos)
+		local len = math.sqrt((f.x * f.x) + (f.y * f.y))
+		f.x = f.x / len
+		f.y = f.y / len
+		if len > data.MAX_POWER then len = data.MAX_POWER end
+		len = (len / data.POWER_DIVISOR) * SCALE
+		self.force = -(f * len)
+		msg.post("#co", "apply_force", {force = self.force, position = go.get_world_position()})
+	elseif message_id == hash("trailson") then
+		if self.pfx == false then
+			particlefx.play("#trails") 
+			self.pfx = true
+		end
+	elseif message_id == hash("trailsoff") then
+		if self.pfx == true then
+			particlefx.stop("#trails")
+			self.pfx = false
+		end
+	end
+end
+

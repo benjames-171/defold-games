@@ -1,0 +1,35 @@
+function init(self)
+	self.time = 0
+	self.position = 0
+	sprite.set_constant("#red", "tint", vmath.vector4(0,0,0,0))
+	sprite.set_constant("#green", "tint", vmath.vector4(0,0,0,0))
+	msg.post("common/view#osd", "fadein", {})
+end
+
+
+function update(self, dt)
+	self.time = self.time + 1
+	
+	if self.time == 150 then
+		sprite.set_constant("#red", "tint", vmath.vector4(1,1,1,1))
+		msg.post("common/sound#horn", "play_sound", {gain = 1.0})
+	elseif self.time == 300 then
+		sprite.set_constant("#red", "tint", vmath.vector4(0,0,0,0))
+		sprite.set_constant("#green", "tint", vmath.vector4(1,1,1,1))
+		msg.post("common/sound#horn", "play_sound", {gain = 1.0})
+		msg.post("common/sound#music", "play_sound", {gain = 0.25})
+		msg.post("common/player#script", "start", {})
+		msg.post("common/ai1#script", "start", {})
+		msg.post("common/ai2#script", "start", {})
+		msg.post("common/ai3#script", "start", {})
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("finished") then
+		self.position = self.position + 1
+		if message.ai == 0 then
+			msg.post("common/view#osd", "finished", {p = self.position})
+		end
+	end
+end

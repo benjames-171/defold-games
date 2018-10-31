@@ -1,0 +1,22 @@
+local data = require ("main.data")
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	data.scrollbounds = vmath.vector4((sx-1) * data.TILE_SIZE, (sy-4) * data.TILE_SIZE, (sx+w-15) * data.TILE_SIZE, (sy+h-26) * data.TILE_SIZE)
+	
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "control", x, y)
+			if t == 1 then
+				data.startpos = vmath.vector3((x*data.TILE_SIZE)-4, (y*data.TILE_SIZE)-6, 0)
+			end
+		end
+	end
+end
+
+function init(self)
+	parse(self)
+	msg.post("common/view#gui", "panel")
+	msg.post("common/view#fade", "show")
+end

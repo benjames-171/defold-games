@@ -1,0 +1,66 @@
+local data = require ("main.data")
+
+local function updatetoggles(self)
+	if data.sfxvol > 0 then gui.set_text(gui.get_node("buttontext1"), "SOUND FX : ON")
+	else gui.set_text(gui.get_node("buttontext1"), "SOUND FX : OFF")
+	end
+
+	if data.musicvol > 0 then gui.set_text(gui.get_node("buttontext2"), "MUSIC : ON")
+	else gui.set_text(gui.get_node("buttontext2"), "MUSIC : OFF")
+	end
+end
+
+function init(self)
+	gui.set_color(gui.get_node("gamemenu"), vmath.vector4(1,1,1,0))
+ 	gui.set_enabled(gui.get_node("gamemenu"), false)
+	
+	updatetoggles(self)
+end
+
+local function disablenode (self, node)
+ 	gui.set_enabled(node, false)
+end
+
+local function toggle(self)
+	if data.state == data.STATE_GAMEMENU then
+		gui.animate(gui.get_node("gamemenu"), gui.PROP_COLOR, vmath.vector4(0,0,0,0), gui.EASING_INOUTQUAD, 0.25, 0, disablenode)
+		data.state = data.STATE_INGAME
+	else
+	 	gui.set_enabled(gui.get_node("gamemenu"), true)
+		gui.animate(gui.get_node("gamemenu"), gui.PROP_COLOR, vmath.vector4(0,0,0,1), gui.EASING_INOUTQUAD, 0.25)
+		data.state = data.STATE_GAMEMENU
+	end
+end
+
+local function processclick(self, x, y)
+	if gui.pick_node(gui.get_node("button1"), x, y) then
+		data.sfxvol = 1 - data.sfxvol
+		updatetoggles(self)
+		return
+	elseif gui.pick_node(gui.get_node("button2"), x, y) then
+		data.musicvol = 1 - data.musicvol
+		msg.post("main:/sound#music", "stop_sound", {})
+		msg.post("main:/sound#music", "play_sound", {gain = data.musicvol/4})
+		updatetoggles(self)
+		return
+	elseif gui.pick_node(gui.get_node("button3"), x, y) then
+		data.savegamefile(self)
+		msg.post("view", "look_at", { position = vmath.vector3(56, 100, 0) })    	
+    	msg.post("main:/handler", "show_menu")
+    	msg.post("main:/sound#music", "stop_sound", {})	   	
+		return
+	elseif gui.pick_node(gui.get_node("button4"), x, y) then
+		toggle(self)
+		return
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("toggle") then
+		toggle(self)
+	elseif message_id == hash("click") then
+		processclick(self, message.x, message.y)
+	end
+end
+
+

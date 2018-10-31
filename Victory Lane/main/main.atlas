@@ -1,0 +1,51 @@
+images {
+  image: "/assets/car.png"
+}
+images {
+  image: "/assets/car2.png"
+}
+images {
+  image: "/assets/tree.png"
+}
+images {
+  image: "/assets/bridge.png"
+}
+images {
+  image: "/assets/tree2.png"
+}
+images {
+  image: "/assets/greenlights.png"
+}
+images {
+  image: "/assets/redlights.png"
+}
+images {
+  image: "/assets/bridge2.png"
+}
+images {
+  image: "/assets/greenlights2.png"
+}
+images {
+  image: "/assets/redlights2.png"
+}
+images {
+  image: "/assets/bg.png"
+}
+images {
+  image: "/assets/track1.png"
+}
+images {
+  image: "/assets/track2.png"
+}
+images {
+  image: "/assets/track3.png"
+}
+images {
+  image: "/assets/track4.png"
+}
+images {
+  image: "/assets/arrow.png"
+}
+margin: 0
+extrude_borders: 0
+inner_padding: 0

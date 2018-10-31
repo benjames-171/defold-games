@@ -1,0 +1,34 @@
+local data = require ("main.data")
+
+function init(self)
+	gui.set_color(gui.get_node("textbg"), vmath.vector4(1,1,1,0))
+	local str = "HEALTH\nMANA\nGOLD\nFOOD\nATTACK\nDEFENCE\nSNEAK"
+	gui.set_text(gui.get_node("bodytext"), str)
+ 	gui.set_enabled(gui.get_node("textbg"), false)
+end
+
+local function disablenode (self, node)
+ 	gui.set_enabled(node, false)
+end
+
+local function toggle(self)
+	if data.state == data.STATE_PROFILE then
+		gui.animate(gui.get_node("textbg"), gui.PROP_COLOR, vmath.vector4(1, 1, 1, 0), gui.EASING_INOUTQUAD, 0.25, 0, disablenode)
+		data.state = data.STATE_INGAME
+	else
+	 	gui.set_enabled(gui.get_node("textbg"), true)	
+		gui.animate(gui.get_node("textbg"), gui.PROP_COLOR, vmath.vector4(1, 1, 1, 1), gui.EASING_INOUTQUAD, 0.25)
+		local anim = {"roguestatic", "wizardstatic", "warriorstatic"}
+		gui.play_flipbook(gui.get_node("icon"), anim[data.class])
+		gui.set_text(gui.get_node("class"), string.format("%s STATS", data.classnames[data.class]))
+		data.state = data.STATE_PROFILE
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("toggle") then
+		toggle(self)
+	elseif message_id == hash("data") then
+		gui.set_text(gui.get_node("values"), message.data)
+	end
+end

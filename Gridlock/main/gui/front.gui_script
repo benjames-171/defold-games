@@ -1,0 +1,30 @@
+local data = require ("main.data")
+
+local function show(self)
+ 	gui.set_enabled(gui.get_node("front"), true)
+	data.state = data.STATE_FRONT 	
+end
+
+local function processclick(self, x, y)
+	if gui.pick_node(gui.get_node("newgame"), x, y) then
+		data.level = 1
+		msg.post("#script", "restart", {})
+		msg.post("#osd", "show", {})
+		msg.post("main:/sound#tap", "play_sound", {gain = 1.0})			
+		gui.set_enabled(gui.get_node("front"), false)
+		data.state = data.STATE_PLAYING
+	elseif gui.pick_node(gui.get_node("help"), x, y) then
+	 	gui.set_enabled(gui.get_node("front"), false)
+		msg.post("#help", "show", {})
+		msg.post("main:/sound#tap", "play_sound", {gain = 1.0})			
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	elseif message_id == hash("click") then
+		processclick(self, message.x, message.y)
+	end
+end
+

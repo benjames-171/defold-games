@@ -1,0 +1,147 @@
+local data = require ("game.scripts.data")
+local ROTATE_SPEED = 0.1
+local PERSIST = 60
+
+function init(self)
+    self.position = go.get_position()
+    self.velocity = vmath.vector3(0, 0, 0)
+    self.correction = vmath.vector3()
+    self.playerpos = vmath.vector3(0, 0, 0)
+	self.speed = 0
+	self.targetspeed = 0
+	self.angle = 0
+	self.targetangle = 0
+	self.shoot = 0
+	self.health = 16 + (data.level * 2)
+	self.smoking = 0
+	self.timer = 0
+	self.moving = 0
+    self.lineofsight = 0
+	self.url_level = string.format("level%d:/world#tilemap", data.level)
+	msg.post("#co", "disable")	
+end
+
+function final(self)
+	particlefx.stop("#particlefx")
+end
+
+function updateidle(self, dt)      
+    if self.timer == 0 then
+		self.targetangle = math.random(2 * math.pi) - math.pi
+	end
+	
+	self.timer = self.timer + 1
+
+	if self.timer > 200 then
+		self.timer = 0
+	end
+end
+
+function updatetarget(self, dt)
+	local pos = go.get_position()
+	local v = pos - self.playerpos
+	self.targetangle = -math.atan2 (v.x, v.y) - (math.pi / 2)
+	
+	if math.abs(self.angle - self.targetangle) > math.pi then
+		if self.targetangle > self.angle then
+			self.targetangle = self.targetangle - (math.pi * 2)
+		else
+			self.targetangle = self.targetangle + (math.pi * 2)
+		end
+	end
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	msg.post ("/common/player", "get_position", {})
+
+	if math.abs(pos.y - self.playerpos.y) > 90 or math.abs(pos.x - self.playerpos.x) > 160 then
+		msg.post("#co", "disable")	
+		return
+	else
+		msg.post("#co", "enable")	
+	end
+	
+	physics.ray_cast(pos, self.playerpos, {hash("player"), hash("world"), hash("objects")})
+
+    if (self.speed < self.targetspeed) then
+    	self.speed = self.speed + 2
+    elseif (self.speed > self.targetspeed) then
+    	self.speed = self.speed - 0.5
+	end
+
+    if (self.angle < self.targetangle) then
+    	self.angle = self.angle + ROTATE_SPEED
+    elseif (self.angle > self.targetangle) then
+    	self.angle = self.angle - ROTATE_SPEED
+	end
+	
+	if math.abs (self.angle - self.targetangle) < ROTATE_SPEED
+	or math.abs (self.targetangle - self.angle) < ROTATE_SPEED then
+		self.angle = self.targetangle
+	end
+
+	if self.lineofsight > 1 then
+		if self.moving == 0 then
+			msg.post("#sprite", "play_animation", {id = hash("move")})
+			self.moving = 1
+		end
+		self.targetspeed = 50
+
+		if self.lineofsight == PERSIST then
+			updatetarget(self, dt)
+		end
+
+		self.lineofsight = self.lineofsight - 1
+	else
+		if self.moving == 1 then
+			msg.post("#sprite", "play_animation", {id = hash("static")})
+			self.moving = 0
+		end
+
+		self.targetspeed = 0
+		updateidle(self, dt)
+	end
+
+	local r = vmath.quat_rotation_z(self.angle)
+	go.set_rotation(r, "#sprite")
+
+	self.velocity = vmath.vector3(math.cos(self.angle) * self.speed, math.sin(self.angle) * self.speed, 0)
+    go.set_position(pos + self.velocity * dt)
+    
+	self.correction = vmath.vector3()
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("contact_point_response") then
+        if message.group == hash("world") 
+        or message.group == hash("player")
+        or message.group == hash("enemy") then
+	        if message.distance > 0 then
+	            local proj = vmath.project(self.correction, message.normal * message.distance)
+	            if proj < 1 then
+	                local comp = (message.distance - message.distance * proj) * message.normal
+	                go.set_position(go.get_position() + comp)
+	                self.correction = self.correction + comp
+	            end
+	        end
+		end
+	elseif message_id == hash("bullet_hit") then
+		self.health = self.health - message.power
+
+		if self.health < 1 then
+    		local pos = go.get_position()
+			local explosion = factory.create("#explosion_factory", pos, nil, {}, 1)
+			msg.post("/common/spawn", "delete_enemy", {enemy = go.get_id()})
+		elseif self.smoking == 0 and self.health < 10 then
+		    self.smoking = 1
+		    particlefx.play("#particlefx")
+		end
+	elseif message_id == hash("position") then
+		self.playerpos = message.position
+	elseif message_id == hash("ray_cast_response") then
+		if message.group == hash("player") then
+			self.lineofsight = PERSIST
+		end
+	end
+end

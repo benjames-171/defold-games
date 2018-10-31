@@ -1,0 +1,14 @@
+function init(self)
+	self.angle = 0
+end
+
+function update(self, dt)
+	self.angle = self.angle + 0.1
+	if self.angle > math.pi then
+		self.angle = self.angle - math.pi*2
+	end
+	
+	local r = vmath.quat_rotation_z(self.angle)
+	go.set_rotation(r, "#sprite")
+end
+

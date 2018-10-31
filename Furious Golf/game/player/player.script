@@ -1,0 +1,202 @@
+local data = require ("main.data")
+
+local MOVE_THRESHOLD = 0.1
+
+local function reset_ball(self)
+	self.dragging = false
+	self.moving = false
+	self.stilltime = 1
+	if self.ball ~= nil then go.delete(self.ball) end
+	local v = self.resetpos
+	if v == nil then v = data.startpos end
+	self.ball = factory.create("#factory", v, vmath.quat(0,0,0,0), {}, 1)
+	self.resetpos = nil
+end
+
+local function reset_level(self)
+	self.resetpos = nil
+	reset_ball(self)
+	data.strokes = 0
+	msg.post("view#gui", "panel")
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.ball = nil
+	self.resetpos = nil
+	self.freelook = false
+	self.freelookpos = vmath.vector3(0,0,0)
+	self.origin = vmath.vector3(0,0,0)
+	self.endpos = vmath.vector3(0,0,0)
+	self.lastballpos = vmath.vector3(0,0,0)
+end
+
+local function drag(self)
+	sprite.set_constant("#sprite", "tint", vmath.vector4(1, 1, 1, 1))
+	local v = self.endpos - self.origin
+	local a = -math.atan2 (v.x, v.y)
+	local r = vmath.quat_rotation_z(a)
+	go.set_rotation(r, "#sprite")
+	local len = math.sqrt((v.x * v.x) + (v.y * v.y))
+	if len == 0 then len = 0.1 end
+	go.set_scale(vmath.vector3(1, len/32, 1))
+	msg.post("arrowhead", "pos", {pos = v + data.ballpos, rot = r})
+	if len > data.MAX_POWER then len = data.MAX_POWER end
+	local n = 1-(len/data.MAX_POWER)
+	msg.post("view#gui", "power", {power = n})
+end
+
+function update(self, dt)
+	if self.ball == nil then reset_level(self) end
+
+	go.set_position(data.ballpos)
+
+	if self.dragging then
+		drag(self)
+	else
+		sprite.set_constant("#sprite", "tint", vmath.vector4(1, 1, 1, 0))
+		msg.post("view#gui", "power", {power = 1})
+		go.set_position(vmath.vector3(0,0,0), "arrowhead")
+	end
+
+	local pos = go.get_position()
+	local diff = vmath.vector3(math.abs(pos.x - self.lastballpos.x), math.abs(pos.y - self.lastballpos.y), 0)
+
+	if diff.x > MOVE_THRESHOLD or diff.y > MOVE_THRESHOLD then
+		self.moving = true
+		self.stilltime = 10
+	else
+		self.moving = false
+		if self.stilltime > 0 then self.stilltime = self.stilltime - 1 end
+	end
+
+	if self.stilltime == 0 and data.state == data.STATE_PLAYING then
+		msg.post("view#gui", "status", {status = false})
+		msg.post(self.ball, "trailsoff")
+	else
+		msg.post("view#gui", "status", {status = true})
+		msg.post(self.ball, "trailson")
+	end
+		
+	self.lastballpos.x = pos.x
+	self.lastballpos.y = pos.y
+
+	if self.freelook then
+		msg.post("view", "snap_to", {pos = self.freelookpos})
+	else
+		msg.post("view", "look_at", {pos = data.ballpos})
+	end
+end
+
+local function screentoworld(x, y)
+	return vmath.vector3((x / data.SCALE) + data.scrollpos.x, (y / data.SCALE) + data.scrollpos.y, 0)
+end
+
+
+local function launch_ball(self, action)
+	self.resetpos = data.ballpos
+	msg.post("main:/sound#hit", "play_sound", {gain = 1.0})
+
+	local p = screentoworld(action.x, action.y) + (data.ballpos - self.origin)
+	if p.x == data.ballpos.x and p.y == data.ballpos.y then
+		p.y = p.y + 1
+	end
+	
+	msg.post(self.ball, "fire", {pos = p})
+	data.strokes = data.strokes + 1
+	if data.strokes > 99 then data.strokes = 99 end
+	msg.post("view#gui", "panel")
+end
+
+local function mulligan(self)
+	if self.resetpos ~= nil then
+		reset_ball(self)
+		self.resetpos = nil
+		data.strokes = data.strokes - 1
+		msg.post("view#gui", "panel")
+	end
+end
+
+local function validlaunch(self, action)
+	local p = screentoworld(action.x, action.y)
+	local v = false
+	local t = 3
+
+	if math.abs(p.x - self.origin.x) > t or math.abs(p.y - self.origin.y) > t then
+		v = true 
+	end
+	return v
+end
+
+local function multi_touch(self, action_id, action)
+	local t = 0
+		for i, tpoint in ipairs(action.touch) do
+		t = t + 1
+	end
+	return t
+end
+
+local function input_playing(self, action_id, action)
+	local t = 0
+	
+	if action_id == hash("multi") then
+		t = (multi_touch(self, action_id, action))
+	end
+
+	if action_id == hash("tap") or t == 1 then
+		if action.pressed then
+			if self.dragging == false then
+				self.origin = screentoworld(action.x, action.y)
+			end
+			self.dragging = true
+			self.freelook = false
+		elseif action.released and self.dragging then
+			self.dragging = false
+			if validlaunch(self, action) then
+				launch_ball(self, action)
+			end
+		end
+	elseif (action_id == hash("scroll") or t > 1) and self.dragging == false then
+		if action.pressed then
+			self.freelook = true
+			self.freelookpos = data.scrollpos
+		elseif action.released then
+			self.freelook = false
+		end
+	end
+
+	if self.freelook then
+		self.freelookpos.x = self.freelookpos.x - (action.dx / data.SCALE / 2)
+		self.freelookpos.y = self.freelookpos.y - (action.dy / data.SCALE / 2)
+	end
+
+		if self.dragging then
+		self.endpos = screentoworld(action.x, action.y)
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("skip") and action.pressed then
+		msg.post("view#message", "show", {})
+		data.state = data.STATE_LEVELCLEAR
+	end
+
+	if data.state == data.STATE_PLAYING and self.moving == false and action.y > 96 then
+		input_playing(self, action_id, action)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("resetlevel") then
+		reset_level(self)
+	elseif message_id == hash("resetball") then
+		reset_ball(self)
+	elseif message_id == hash("mulligan") then
+		mulligan(self)
+	elseif message_id == hash("wind") then
+		msg.post(self.ball, "apply_force", {force = message.force, position = go.get_world_position()})
+	end
+end
+
+
+

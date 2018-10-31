@@ -1,0 +1,158 @@
+function init(self)
+	msg.post(".", "set_fade", {fade = 0})
+	msg.post(".", "acquire_input_focus")
+	msg.post("sound#music", "play_sound", {gain = 1.0})   
+	particlefx.play("background#particlefx")
+	self.fade = 1
+	self.select = 1
+	self.screen = 1
+	self.started = 0
+	self.time = 0
+end
+
+function final(self)
+	particlefx.stop("background#particlefx")
+end
+
+function update(self)
+	if self.fade <= 0 then	
+		msg.post("main:/handler", "show_game")
+	elseif self.fade < 1 then
+		self.fade = self.fade - 0.01		
+		msg.post("sound#music", "set_gain", {gain = self.fade})
+	end
+	
+	if self.screen == 1	then
+		self.time = self.time + 1
+	end
+	
+	if self.time == 500 then
+		self.time = 0
+		self.screen = 2
+		updatescreen(self)
+		updatemenu(self, self.select)
+	end
+end
+
+function updatescreen (self)
+	local node = gui.get_node("title")
+	gui.animate(node, gui.PROP_COLOR, vmath.vector4(0, 0, 0, 0), gui.EASING_INOUTQUAD, 0.5)
+	node = gui.get_node("menu")
+	gui.animate(node, gui.PROP_COLOR, vmath.vector4(0, 0, 0, 0), gui.EASING_INOUTQUAD, 0.5)
+	gui.animate(node, gui.PROP_POSITION, vmath.vector4(0, -100, 0, 0), gui.EASING_INOUTQUAD, 0.5)
+	node = gui.get_node("controls")
+	gui.animate(node, gui.PROP_COLOR, vmath.vector4(0, 0, 0, 0), gui.EASING_INOUTQUAD, 0.5)
+	gui.animate(node, gui.PROP_POSITION, vmath.vector4(0, -100, 0, 0), gui.EASING_INOUTQUAD, 0.5)
+	node = gui.get_node("credits")
+	gui.animate(node, gui.PROP_COLOR, vmath.vector4(0, 0, 0, 0), gui.EASING_INOUTQUAD, 0.5)
+	gui.animate(node, gui.PROP_POSITION, vmath.vector4(0, -100, 0, 0), gui.EASING_INOUTQUAD, 0.5)
+
+	if self.screen == 1 then
+		node = gui.get_node("title")
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(0, 0, 0, 1), gui.EASING_INOUTQUAD, 0.5)
+	elseif self.screen == 2 then
+		node = gui.get_node("menu")
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(0, 0, 0, 1), gui.EASING_INOUTQUAD, 0.5)
+		gui.animate(node, gui.PROP_POSITION, vmath.vector4(0, 0, 0, 0), gui.EASING_INOUTQUAD, 0.5)
+	elseif self.screen == 3 then
+		node = gui.get_node("controls")
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(0, 0, 0, 1), gui.EASING_INOUTQUAD, 0.5)
+		gui.animate(node, gui.PROP_POSITION, vmath.vector4(0, 0, 0, 0), gui.EASING_INOUTQUAD, 0.5)
+	elseif self.screen == 4 then
+		node = gui.get_node("credits")
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(0, 0, 0, 1), gui.EASING_INOUTQUAD, 0.5)
+		gui.animate(node, gui.PROP_POSITION, vmath.vector4(0, 50, 0, 0), gui.EASING_INOUTQUAD, 0.5)
+	end
+end
+
+function updatemenu(self, item)
+	node = gui.get_node("text1")
+	gui.animate(node, gui.PROP_SCALE, vmath.vector3(1, 1, 1), gui.EASING_INOUTQUAD, 0.2)
+	node = gui.get_node("text2")
+	gui.animate(node, gui.PROP_SCALE, vmath.vector3(1, 1, 1), gui.EASING_INOUTQUAD, 0.2)
+	node = gui.get_node("text3")
+	gui.animate(node, gui.PROP_SCALE, vmath.vector3(1, 1, 1), gui.EASING_INOUTQUAD, 0.2)
+	node = gui.get_node("text4")
+	gui.animate(node, gui.PROP_SCALE, vmath.vector3(1, 1, 1), gui.EASING_INOUTQUAD, 0.2)
+	
+	if item == 1 then
+		node = gui.get_node("text1")
+		gui.animate(node, gui.PROP_SCALE, vmath.vector3(1.5, 1.5, 1), gui.EASING_INOUTQUAD, 0.2)
+	elseif item == 2 then
+		node = gui.get_node("text2")
+		gui.animate(node, gui.PROP_SCALE, vmath.vector3(1.5, 1.5, 1), gui.EASING_INOUTQUAD, 0.2)
+	elseif item == 3 then
+		node = gui.get_node("text3")
+		gui.animate(node, gui.PROP_SCALE, vmath.vector3(1.5, 1.5, 1), gui.EASING_INOUTQUAD, 0.2)
+	elseif item == 4 then
+		node = gui.get_node("text4")
+		gui.animate(node, gui.PROP_SCALE, vmath.vector3(1.5, 1.5, 1), gui.EASING_INOUTQUAD, 0.2)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("set_fade") then
+		local node = gui.get_node("fade")
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(0, 0, 0, message.fade), gui.EASING_INOUTQUAD, 1)
+	end
+end
+    	
+function on_input(self, action_id, action)
+	if self.started == 1 then return end
+
+	if (action_id == hash("click") and action.pressed) 
+	or (action_id == hash("touch") and action.pressed) then
+		if self.screen == 2 then
+			if gui.pick_node(gui.get_node("text"), action.x, action.y) then
+				msg.post("menu#gui", "set_fade", {fade = 1})
+				self.fade = 0.99
+				self.screen = 1
+				self.select = 1
+				self.started = 1
+				updatescreen(self)	
+			end
+		else
+			self.screen = 2
+			updatescreen(self)
+			updatemenu(self, self.select)
+		end
+	end
+
+	if (action_id == hash("start") and action.pressed) then
+		msg.post("sound#menuselect", "play_sound", {gain = 0.4})	
+		if self.screen == 2 then
+			if self.select == 1 then
+				msg.post("menu#gui", "set_fade", {fade = 1})
+				self.fade = 0.99
+				self.screen = 1
+				self.select = 1
+				self.started = 1
+				updatescreen(self)		
+			elseif self.select == 2 then
+				self.screen = 3
+				updatescreen(self)
+			elseif self.select == 3 then
+				self.screen = 4
+				updatescreen(self)
+			elseif self.select == 4 then
+				msg.post("@system:", "exit", {code = 0})				
+			end
+		else
+			self.screen = 2
+			updatescreen(self)
+			updatemenu(self, self.select)
+		end
+	elseif (action_id == hash("menu_up") and action.pressed) then
+		if self.select > 1 then
+			self.select = self.select - 1
+			msg.post("sound#menumove", "play_sound", {gain = 1.0})	
+			updatemenu(self, self.select)
+		end
+	elseif (action_id == hash("menu_down") and action.pressed) then
+		if self.select < 4 then
+			self.select = self.select + 1
+			msg.post("sound#menumove", "play_sound", {gain = 1.0})	
+			updatemenu(self, self.select)
+		end
+	end
+end

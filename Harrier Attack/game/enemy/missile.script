@@ -1,0 +1,77 @@
+local data = require ("main.data")
+
+local SPEED = 150
+local ROTATE_SPEED = 0.5
+local LIFE = 300
+
+go.property("angle", 0)
+go.property("snap", false)
+
+local function updatetarget(self)
+	local pos = go.get_position()
+	local v = pos - data.playerpos
+	self.targetangle = -math.atan2 (v.x, v.y) - (math.pi / 2)
+	
+	if math.abs(self.angle - self.targetangle) > math.pi then
+		if self.targetangle > self.angle then
+			self.targetangle = self.targetangle - (math.pi * 2)
+		else
+			self.targetangle = self.targetangle + (math.pi * 2)
+		end
+	end
+end
+
+function init(self)
+	particlefx.play("#pfx")
+	
+	self.life = LIFE
+    self.pos = go.get_position()
+	self.vel = vmath.vector3(math.cos(self.angle) * SPEED, math.sin(self.angle) * SPEED, 0)
+	msg.post("main:/sound#rocket", "play_sound", {gain = 1.0})	
+	
+	if self.snap then
+		updatetarget(self)
+		self.angle = self.targetangle
+	end
+end
+
+function final(self)
+	particlefx.stop("#pfx")
+end
+
+function update(self, dt)
+	updatetarget(self)
+
+    if (self.angle < self.targetangle) then
+    	self.angle = self.angle + (ROTATE_SPEED * dt)
+    elseif (self.angle > self.targetangle) then
+    	self.angle = self.angle - (ROTATE_SPEED * dt)
+	end
+	
+	if math.abs (self.angle - self.targetangle) < (ROTATE_SPEED * dt)
+	or math.abs (self.targetangle - self.angle) < (ROTATE_SPEED * dt) then
+		self.angle = self.targetangle
+	end
+	
+	local r = vmath.quat_rotation_z(self.angle)
+	go.set_rotation(r, "#sprite")
+
+	self.vel = vmath.vector3(math.cos(self.angle) * SPEED, math.sin(self.angle) * SPEED, 0)
+
+	self.pos = self.pos + (self.vel * dt)
+	
+	if self.pos.x < data.scrollpos.x then go.delete() end
+	
+	self.life = self.life - 1
+	if self.life <= 0 then go.delete() end
+
+	if data.state == data.STATE_COMPLETED then go.delete() end
+	
+	go.set_position(self.pos)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		go.delete()
+	end
+end

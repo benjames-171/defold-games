@@ -1,0 +1,39 @@
+local data = require ("main.data")
+local itm = require ("game/items.items")
+
+function init(self)
+ 	gui.set_enabled(gui.get_node("completed"), false)
+	gui.set_color(gui.get_node("completed"), vmath.vector4(0,0,0,0))
+end
+
+local function processclick(self, x, y)
+	if gui.pick_node(gui.get_node("box"), x, y) then
+		msg.post("view", "look_at", { position = vmath.vector3(56, 100, 0) })    	
+    	msg.post("main:/handler", "show_menu")
+		msg.post("main:/sound#music", "stop_sound", {})	   		
+	end
+end
+
+local function populate(self)
+	data.clearsavegame(self)	
+	data.state = data.STATE_COMPLETED
+ 	gui.set_enabled(gui.get_node("completed"), true)
+	gui.animate(gui.get_node("completed"), gui.PROP_COLOR, vmath.vector4(0, 0, 0, 1), gui.EASING_INOUTQUAD, 0.25)
+
+	if data.itemininv(itm.getnum("AMULET OF YENDOR")) then
+	 	gui.set_enabled(gui.get_node("snake"), false)	
+		gui.set_text(gui.get_node("epilogue"), "You have completed Rogue's Redemption.\n\nAfter what seems like days, you find yourself back on the surface in the crisp dawn of a new day. Holding the AMULET OF YENDOR in your palm, you venture forth back into the world and consider your future.\n\nWill you use the amulet for your own gain or for the greater good?\n\nThat's a story for another day...")
+	else
+	 	gui.set_enabled(gui.get_node("congrats"), false)	
+	 	gui.set_enabled(gui.get_node("amulet"), false)	
+		gui.set_text(gui.get_node("epilogue"), "You failed to complete Rogue's Redemption.\n\nYou left the AMULET OF YENDOR behind.\n\nWhy would you do that?\n\nYOU HAD ONE JOB")
+	end	
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("fade_in") then
+		populate(self)
+	elseif message_id == hash("click") then
+		processclick(self, message.x, message.y)
+	end
+end
