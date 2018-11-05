@@ -1,0 +1,198 @@
+local data = require ("main.data")
+
+local SPEED = 4.1
+local BULLDOZER_TIME = 600
+
+local function reset(self)
+	self.velocity = vmath.vector3(0, -SPEED, 0)
+	go.set_position(vmath.vector3(512, 672, 1))
+end
+
+function init(self)
+	reset(self)
+	self.bulldozer = 0
+	self.levelurl = string.format("level%d:/map#level", data.level)
+end
+
+local function move(self)
+	local pos = go.get_position() + self.velocity
+	go.set_position(pos)
+	data.ballpos = vmath.vector3(pos.x, pos.y, pos.z)	
+end	
+
+local function destroyblock(self, p)
+	tilemap.set_tile(self.levelurl, "top", p.x, p.y, 0)
+	data.blocks = data.blocks - 1
+	data.score = data.score + 10
+	
+	data.resolveshadow(self.levelurl, p.x, p.y)
+	data.resolveshadow(self.levelurl, p.x + 1, p.y)
+	data.resolveshadow(self.levelurl, p.x, p.y - 1)
+	data.resolveshadow(self.levelurl, p.x + 1, p.y - 1)
+end
+
+local function checktile(self, p, sound)
+	local hit = false
+
+	p.x = math.floor((p.x + 32) / 32)
+	p.y = math.floor((p.y + 32) / 32)
+
+	local t = tilemap.get_tile(self.levelurl, "top", p.x, p.y)
+	local t2 = tilemap.get_tile(self.levelurl, "special", p.x, p.y)
+
+	if t >= 16 and t <= 128 or t2 == 97 then
+		hit = true
+		msg.post(string.format("main:/sound#bip%d", sound), "play_sound", {gain = 0.25})
+
+		if t >= 81 and t <= 89 then
+			if self.bulldozer > 1 then hit = false end
+			if t > 86 then
+				t = t - 1
+				tilemap.set_tile(self.levelurl, "top", p.x, p.y, t)
+				data.score = data.score + 5
+			else
+				destroyblock(self, p)
+			end
+		end
+	end
+	
+	return hit
+end
+
+local function collisions(self)
+	local p1 = go.get_position()
+	local p2 = go.get_position()
+
+	p1.y = p1.y + 15
+	p1.x = p1.x - 12
+	p2.y = p2.y + 15
+	p2.x = p2.x + 12
+	if checktile(self, p1, 1) or checktile(self, p2, 1) then
+		self.velocity.y = -math.abs(self.velocity.y)
+		move(self)
+	end
+	
+	p1 = go.get_position()
+	p2 = go.get_position()
+	p1.x = p1.x + 15
+	p1.y = p1.y + 12
+	p2.x = p2.x + 15
+	p2.y = p2.y - 12
+	if checktile(self, p1, 2) or checktile(self, p2, 2) then
+		self.velocity.x = -math.abs(self.velocity.x)
+		move(self)
+	end
+	
+	p1 = go.get_position()
+	p2 = go.get_position()
+	p1.y = p1.y - 15
+	p1.x = p1.x - 12
+	p2.y = p2.y - 15
+	p2.x = p2.x + 12
+	if checktile(self, p1, 1) or checktile(self, p2, 1) then
+		self.velocity.y = math.abs(self.velocity.y)
+		move(self)
+	end
+
+	p1 = go.get_position()
+	p2 = go.get_position()
+	p1.x = p1.x - 15
+	p1.y = p1.y + 12
+	p2.x = p2.x - 15
+	p2.y = p2.y - 12
+	if checktile(self, p1, 2) or checktile(self, p2, 2) then
+		self.velocity.x = math.abs(self.velocity.x)
+		move(self)
+	end
+end
+
+local function sanitycheck(self)
+	x, y, w, h = tilemap.get_bounds(self.levelurl)
+	
+	local p = go.get_position()
+	p.x = math.floor((p.x + 32) / 32)
+	p.y = math.floor((p.y + 32) / 32)
+	
+	if p.x <= x or p.x >= w or p.y <= y or p.y >= h then
+		msg.post(string.format("level%d:/map#script", data.level), "reset", {})
+	end
+end
+
+local function loselife(self)
+	data.lives = data.lives - 1
+
+	if data.lives > 0 then
+		data.state = data.STATE_GETREADY
+		msg.post(string.format("level%d:/map#script", data.level), "reset", {})
+		msg.post("view#gui", "reset", {})
+		msg.post("main:/sound#fail", "play_sound", {gain = 1.0})
+	else
+		data.state = data.STATE_GAMEOVER
+		msg.post("view#gui", "gameover", {})
+		msg.post("main:/sound#gameover", "play_sound", {gain = 1.0})
+	end
+end
+
+local function specials(self)
+	local p = go.get_position()
+	
+	p.x = math.floor((p.x + 32) / 32)
+	p.y = math.floor((p.y + 32) / 32)
+	
+	local t = tilemap.get_tile(self.levelurl, "special", p.x, p.y)
+
+	if t == 113 then
+		loselife(self)
+	end
+
+	if self.bulldozer > 0 then
+		self.bulldozer = self.bulldozer - 1
+	end
+	
+	if self.bulldozer <= 0 then
+		particlefx.stop("#stream")
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		sanitycheck(self)
+		move(self)
+		collisions(self)
+		specials(self)		
+	end
+end
+
+local function hitbat(self)
+	local pos = go.get_position()
+	local v = pos - data.playerpos
+	
+	local len = math.sqrt((v.x * v.x) + (v.y * v.y))
+	
+	v.x = (v.x / len) * SPEED
+	v.y = (v.y / len) * SPEED
+	
+	self.velocity = vmath.vector3(v.x, v.y, 0)
+	
+	msg.post("main:/sound#bip1", "play_sound", {gain = 0.25})
+	msg.post("main:/sound#bip2", "play_sound", {gain = 0.25})
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.group == hash("player") then
+			hitbat(self)
+		end
+	elseif message_id == hash("position") then
+		go.set_position(message.pos)
+	elseif message_id == hash("bulldozer") then
+		if self.bulldozer <= 0 then particlefx.play("#stream") end		
+		self.bulldozer = self.bulldozer + BULLDOZER_TIME
+	elseif message_id == hash("loselife") then
+		loselife(self)
+	end
+end
+
+function on_input(self, action_id, action)
+end
+
