@@ -1,0 +1,19 @@
+local data = require ("main.data")
+
+local SPAWN_TIME = 100
+
+function init(self)
+	self.timer = -1
+end
+
+function update(self, dt)
+	if data.onscreen(go.get_position(), -data.TILE_SIZE) then
+		self.timer = self.timer + 1
+		if self.timer % SPAWN_TIME == 0 then
+			local pos = go.get_position()
+			pos.x = pos.x + 4
+			factory.create("#mine_factory", pos, nil, {})
+			msg.post("main:/sound#shot", "play_sound")
+		end
+	end
+end

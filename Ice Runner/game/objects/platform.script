@@ -1,0 +1,20 @@
+local data = require ("main.data")
+
+go.property("maxheight", 100)
+
+function init(self)
+	self.origin = go.get_position()
+	self.height = 0
+end
+
+function update(self, dt)
+	self.height = self.height + 1
+	if self.height >= self.maxheight then
+		self.height = 0
+		msg.post("#co", "enable")
+	end
+	local pos = vmath.vector3(self.origin.x, self.origin.y + self.height, self.origin.z)
+	go.set_position(pos)
+	if self.maxheight - self.height < 32 then msg.post("#co", "disable")
+	end
+end

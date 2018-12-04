@@ -1,0 +1,31 @@
+local data = require ("main.data")
+
+local AMP = 8
+local WAVELENGTH = 0.05
+
+function init(self)
+	self.origin = go.get_position()
+	self.time = 0
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	if data.onscreen(pos, data.TILE_SIZE) then
+		pos.x = pos.x - 2
+		pos.y = self.origin.y + math.sin(self.time) * AMP 
+		self.time = self.time + WAVELENGTH
+		go.set_position(pos)
+		go.set_rotation(vmath.quat_rotation_z(self.time))
+	else
+		go.delete()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		msg.post("main:/sound#explosion", "play_sound")
+		msg.post("common/player", "dead", {})
+		go.delete()
+	end
+end
+

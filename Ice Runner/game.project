@@ -1,0 +1,26 @@
+[project]
+title = Ice Runner
+version = 1
+
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /render/custom.renderc
+
+[input]
+game_binding = /input/game.input_bindingc
+use_accelerometer = 0
+
+[display]
+width = 1280
+height = 720
+
+[script]
+shared_state = 1
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[html5]
+splash_image = /assets/png/loading.png
+

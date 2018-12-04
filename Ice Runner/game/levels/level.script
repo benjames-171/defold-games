@@ -1,0 +1,40 @@
+local data = require ("main.data")
+
+local function spawn_player(self, x, y)
+	local pos = data.tile2world(vmath.vector3(x, y, 0))
+	msg.post("common/player", "position", {pos = pos})
+	data.spawnpos = pos
+end
+
+local function spawn_lava(self, x, y)
+	local pos = data.tile2world(vmath.vector3(x, y, 0))
+	factory.create("#lava_factory", pos, nil, {})
+end
+
+local function spawn_mine_spawner(self, x, y)
+	local pos = data.tile2world(vmath.vector3(x, y, 0))
+	factory.create("#mine_spawner_factory", pos, nil, {})
+end
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			if t == 1 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				spawn_player(self, x, y)
+			elseif t == 10 then
+				spawn_lava(self, x, y)
+			elseif t == 5 then
+				spawn_mine_spawner(self, x, y)
+			end
+		end
+	end
+end
+
+function init(self)
+	parse(self)
+end
+
