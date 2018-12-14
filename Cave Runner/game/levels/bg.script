@@ -1,0 +1,26 @@
+local data = require ("main.data")
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			if math.random(6) == 1 then
+				tilemap.set_tile("#tilemap", "bg", x, y, math.random(6, 8))
+			end
+		end
+	end
+end
+
+function init(self)
+	parse(self)
+end
+
+function update(self, dt)
+	local pos = data.scrollpos
+	pos.x = pos.x / 4
+	pos.y = pos.y / 4
+	pos.z = -0.9
+	go.set_position(pos)
+end
+

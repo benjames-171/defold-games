@@ -1,0 +1,48 @@
+images {
+  image: "/assets/png/pixel.png"
+}
+images {
+  image: "/assets/png/key.png"
+}
+images {
+  image: "/assets/png/logo.png"
+}
+images {
+  image: "/assets/png/vignette.png"
+}
+images {
+  image: "/assets/png/box.png"
+}
+images {
+  image: "/assets/png/box_green.png"
+}
+images {
+  image: "/assets/png/box_red.png"
+}
+images {
+  image: "/assets/png/arrow.png"
+}
+images {
+  image: "/assets/png/hand.png"
+}
+images {
+  image: "/assets/png/cog.png"
+}
+images {
+  image: "/assets/png/play.png"
+}
+images {
+  image: "/assets/png/powerbar.png"
+}
+images {
+  image: "/assets/png/cave.png"
+}
+images {
+  image: "/assets/png/thumbs_down.png"
+}
+images {
+  image: "/assets/png/thumbs_up.png"
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0

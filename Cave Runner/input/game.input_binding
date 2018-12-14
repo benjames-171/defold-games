@@ -1,0 +1,12 @@
+key_trigger {
+  input: KEY_END
+  action: "debug"
+}
+key_trigger {
+  input: KEY_Z
+  action: "left"
+}
+key_trigger {
+  input: KEY_M
+  action: "right"
+}
