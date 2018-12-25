@@ -1,0 +1,12 @@
+local data = require ("main.data")
+
+function init(self)
+	msg.post("#camera", "acquire_camera_focus")
+	go.set_position(data.offset)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("reset") then
+		go.set_position(vmath.vector3(0,0,0))
+	end
+end

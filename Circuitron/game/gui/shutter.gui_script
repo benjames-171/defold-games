@@ -1,0 +1,11 @@
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+local function hide(self)
+	gui.animate(gui.get_node("shutter"), gui.PROP_COLOR, vmath.vector4(37/255, 26/255, 42/255, 0), gui.EASING_LINEAR, 0.25, 0, disablenode)
+end
+
+function init(self)
+	hide(self)
+end

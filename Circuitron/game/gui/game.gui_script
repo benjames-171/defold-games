@@ -1,0 +1,28 @@
+local data = require ("main.data")
+
+function init(self)
+	self.time = 0
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		self.time = self.time + dt
+		gui.set_text(gui.get_node("time"), string.format ("TIME %02d:%02d", self.time/60, math.floor(self.time%60)))
+	end
+end
+
+function newlevel(self)
+	gui.set_text(gui.get_node("level"), string.format("LEVEL %02d/10", data.level))
+	self.time = 0
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("input") then
+		if gui.pick_node(gui.get_node("options"), message.action.x, message.action.y) then
+			data.state = data.STATE_OPTIONS
+			msg.post("gui#options", "show")
+		end
+	elseif message_id == hash("newlevel") then
+		newlevel(self)
+	end
+end

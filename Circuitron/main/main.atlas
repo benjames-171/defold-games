@@ -1,0 +1,39 @@
+images {
+  image: "/assets/png/box.png"
+}
+images {
+  image: "/assets/png/box_good.png"
+}
+images {
+  image: "/assets/png/logo.png"
+}
+images {
+  image: "/assets/png/pixel.png"
+}
+images {
+  image: "/assets/png/cursor.png"
+}
+images {
+  image: "/assets/png/circuit.png"
+}
+images {
+  image: "/assets/png/button.png"
+}
+images {
+  image: "/assets/png/box_options.png"
+}
+images {
+  image: "/assets/png/options_icon.png"
+}
+images {
+  image: "/assets/png/gradient.png"
+}
+images {
+  image: "/assets/png/box_bad.png"
+}
+images {
+  image: "/assets/png/button_small.png"
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0
