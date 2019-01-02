@@ -1,0 +1,32 @@
+local data = require ("main.data")
+
+function init(self)
+	msg.post("#camera", "acquire_camera_focus")
+	self.target = vmath.vector3()
+	self.pos = go.get_world_position()
+	msg.post("@render:", "clear_color", { color = vmath.vector4(0/255, 0/255, 0/255, 1) } )
+end
+
+local function move(self)
+	local speed = 0.15
+	local v = vmath.vector3((self.target.x - self.pos.x) * speed, (self.target.y - self.pos.y) * speed, 0)
+	self.pos = self.pos + v
+end
+
+function update(self, dt)
+	move(self)
+	go.set_position(self.pos - data.offset)
+	data.scrollpos = self.pos - data.offset
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("look_at") then
+		self.target = message.position
+	elseif message_id == hash("snap_to") then
+		self.pos = message.position
+		self.target = message.position
+	elseif message_id == hash("reset") then
+		go.set_position(vmath.vector3(0,0,0))
+	end
+end
+

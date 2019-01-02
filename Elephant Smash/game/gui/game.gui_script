@@ -1,0 +1,13 @@
+local data = require ("main.data")
+
+function draw(lives, cheese, level)
+	gui.set_text(gui.get_node("cheese"), string.format("CHEESE : %02d/10", cheese))
+	gui.set_text(gui.get_node("level"), string.format("LEVEL : %02d", level))
+	gui.set_text(gui.get_node("lives"), string.format("LIVES : %02d", lives))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("update") then
+		draw(message.lives, message.cheese, message.level)
+	end
+end

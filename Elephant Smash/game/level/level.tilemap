@@ -1,0 +1,99 @@
+tile_set: "/game/level/level.tilesource"
+layers {
+  id: "main"
+  z: 0.0
+  is_visible: 1
+  cell {
+    x: -1
+    y: -1
+    tile: 7
+    h_flip: 0
+    v_flip: 0
+  }
+  cell {
+    x: 2
+    y: 0
+    tile: 1
+    h_flip: 0
+    v_flip: 0
+  }
+  cell {
+    x: 4
+    y: 0
+    tile: 0
+    h_flip: 0
+    v_flip: 0
+  }
+  cell {
+    x: 6
+    y: 0
+    tile: 1
+    h_flip: 0
+    v_flip: 0
+  }
+  cell {
+    x: 8
+    y: 0
+    tile: 0
+    h_flip: 0
+    v_flip: 0
+  }
+  cell {
+    x: 10
+    y: 0
+    tile: 1
+    h_flip: 0
+    v_flip: 0
+  }
+  cell {
+    x: 12
+    y: 0
+    tile: 0
+    h_flip: 0
+    v_flip: 0
+  }
+  cell {
+    x: 14
+    y: 0
+    tile: 1
+    h_flip: 0
+    v_flip: 0
+  }
+  cell {
+    x: 16
+    y: 0
+    tile: 0
+    h_flip: 0
+    v_flip: 0
+  }
+  cell {
+    x: 18
+    y: 0
+    tile: 1
+    h_flip: 0
+    v_flip: 0
+  }
+  cell {
+    x: 21
+    y: 0
+    tile: 7
+    h_flip: 0
+    v_flip: 0
+  }
+  cell {
+    x: -1
+    y: 0
+    tile: 7
+    h_flip: 0
+    v_flip: 0
+  }
+  cell {
+    x: 21
+    y: 6
+    tile: 7
+    h_flip: 0
+    v_flip: 0
+  }
+}
+material: "/builtins/materials/tile_map.material"
+blend_mode: BLEND_MODE_ALPHA
