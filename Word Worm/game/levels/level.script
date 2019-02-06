@@ -1,0 +1,16 @@
+local words = require ("main.words")
+
+local function populate(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	for y = sy + 1, h+sy - 14 do
+		for x = sx + 1, w + sx - 2 do
+			tilemap.set_tile("#tilemap", "main", x, y, string.byte(words.random_letter(), 1) - 96)
+			tilemap.set_tile("#tilemap", "select", x, y, 30)
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("newlevel") then populate(self) end
+end

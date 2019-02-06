@@ -1,0 +1,22 @@
+local data = require ("main.data")
+
+local function disable_node (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	self.node = gui.get_node("container")
+	if data.level > 1 then disable_node(self, self.node) end
+end
+
+local function hide(self)
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(640,300,0), gui.EASING_INOUTQUAD, 0.5, 0.0, disable_node)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.5, 0.0)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("hide") then
+		hide(self)
+	end
+end

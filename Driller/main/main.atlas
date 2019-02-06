@@ -1,0 +1,39 @@
+images {
+  image: "/assets/png/burst.png"
+}
+images {
+  image: "/assets/png/pixel.png"
+}
+images {
+  image: "/assets/png/logo.png"
+}
+images {
+  image: "/assets/png/key.png"
+}
+images {
+  image: "/assets/png/space.png"
+}
+images {
+  image: "/assets/png/dialog.png"
+}
+images {
+  image: "/assets/png/dialogbad.png"
+}
+images {
+  image: "/assets/png/dialoglarge.png"
+}
+images {
+  image: "/assets/png/tutorial.png"
+}
+images {
+  image: "/assets/png/palette_bg.png"
+}
+images {
+  image: "/assets/png/palette_spr.png"
+}
+images {
+  image: "/assets/png/guibg.png"
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0

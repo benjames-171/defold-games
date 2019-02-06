@@ -1,0 +1,22 @@
+local data = require ("main.data")
+
+function init(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	data.pills = 0
+	data.eaten = 0
+
+	for y = sy, h + sy - 1 do
+		for x = sx, w + sx - 1 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			if t == 9 then
+				msg.post("/common/player", "spawn", {x = x, y = y})
+				tilemap.set_tile("#tilemap", "world", x, y, 5)
+			elseif t == 17 then
+				data.pills = data.pills + 1
+			elseif t == 18 or t == 19 then
+				msg.post("spawner", "spawner", {x = x, y = y})
+			end
+		end
+	end
+end

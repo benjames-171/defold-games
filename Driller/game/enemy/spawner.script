@@ -1,0 +1,33 @@
+local data = require ("main.data")
+
+local SPAWN_TIME = 200
+
+function init(self)
+	self.spawner = {}
+	self.total = 0
+	self.timer = 0
+end
+
+local function spawn(self)
+	local pos = self.spawner[math.random(1, self.total)]
+	pos.z = 0.5
+	factory.create("#enemy_factory", data.tile2world(pos))
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		self.timer = self.timer + 1
+		if self.timer >= SPAWN_TIME - (data.level * 15) then
+			self.timer = 0
+			spawn(self)
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("spawner") then
+		self.total = self.total + 1
+		self.spawner[self.total] = vmath.vector3(message.x, message.y, 0)
+	end
+end
+

@@ -1,0 +1,7 @@
+local data = require ("main.data")
+
+function update(self, dt)
+	gui.set_text(gui.get_node("pills"), string.format("%d/%d", data.eaten, data.pills))
+	gui.set_text(gui.get_node("drills"), string.format("%d%%", data.energy))
+end
+

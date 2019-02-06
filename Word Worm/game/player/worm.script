@@ -1,0 +1,68 @@
+local data = require ("main.data")
+
+local GRAVITY = 0.025
+local SPEED = 0.5
+
+function init(self)
+	self.dead = false
+	self.vel = vmath.vector3(SPEED, 0, 0)
+	self.lastpos = go.get_position()
+	self.scrollspeed = 0.06 + (data.level * 0.01)
+	data.scrollpos = vmath.vector3(-96, 244, 0)
+	msg.post("/common/view", "snap_to", {position = data.scrollpos})
+	particlefx.play("#pfx")
+end
+
+local function move(self)
+	local pos = go.get_position()
+	local sign = 1
+
+	if math.abs(pos.x - self.lastpos.x) < 0.5 then
+		if pos.x < self.lastpos.x then sign = -1 end
+		msg.post("#co", "apply_force", {force = vmath.vector3(500 * sign, 0, 0), position = go.get_world_position()})
+	end
+
+	self.lastpos = go.get_position()
+end
+
+local function levelclear(self)
+	msg.post("/common/view#clear", "show", {})
+	msg.post("main:/sound#music", "stop_sound", {})
+	msg.post("main:/sound#clear", "play_sound", {gain = 1.0})
+end
+
+local function checks(self)
+	local pos = go.get_position()
+
+	if pos.y - data.scrollpos.y >= 184 then
+		msg.post("/common/view#gameover", "show", {})
+		msg.post("main:/sound#music", "stop_sound", {})
+		msg.post("main:/sound#gameover", "play_sound", {gain = 1.0})
+		return
+	elseif pos.y - data.scrollpos.y <= 22 then
+		levelclear(self)
+	end
+
+	pos.y = pos.y - 10
+	pos = data.world2tile(pos)
+	local t = tilemap.get_tile("/level#tilemap", "main", pos.x, pos.y)
+	if t == 29 then
+		levelclear(self)
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING and not self.dead then
+		move(self)
+		checks(self)
+		data.scrollpos.y = data.scrollpos.y - self.scrollspeed
+		msg.post("/common/view", "look_at", {position = data.scrollpos})
+	elseif data.state == data.STATE_LEVELCLEAR then
+		self.dead = true
+		particlefx.stop("#pfx")
+	end
+end
+
+function on_message(self, message_id, message, sender)
+end
+

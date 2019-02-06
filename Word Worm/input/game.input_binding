@@ -1,0 +1,32 @@
+key_trigger {
+  input: KEY_SPACE
+  action: "action"
+}
+key_trigger {
+  input: KEY_BACKSPACE
+  action: "delete"
+}
+key_trigger {
+  input: KEY_C
+  action: "clear"
+}
+key_trigger {
+  input: KEY_X
+  action: "delete"
+}
+key_trigger {
+  input: KEY_Z
+  action: "click"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_LEFT
+  action: "click"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_RIGHT
+  action: "delete"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_MIDDLE
+  action: "clear"
+}
