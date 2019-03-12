@@ -1,0 +1,35 @@
+local data = require ("main.data")
+
+local TIME_MAX = 300
+local TIME_MIN = 150
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			if t == 41 then
+				table.insert(self.eyes, vmath.vector3(x,y,math.random(TIME_MIN, TIME_MAX)))
+			end
+		end
+	end
+end
+
+function update(self, dt)
+	for k, v in pairs(self.eyes) do
+		if self.eyes[k].z == 6 then
+			tilemap.set_tile("#tilemap", "world", self.eyes[k].x, self.eyes[k].y, 42)
+		elseif self.eyes[k].z == 0 then
+			tilemap.set_tile("#tilemap", "world", self.eyes[k].x, self.eyes[k].y, 41)
+			self.eyes[k].z = math.random(TIME_MIN, TIME_MAX)
+		end
+		self.eyes[k].z = self.eyes[k].z - 1
+	end
+end
+
+function init(self)
+	self.eyes = {}
+	parse(self)
+end
+

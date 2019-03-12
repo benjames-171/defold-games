@@ -1,0 +1,16 @@
+function init(self)
+	self.rot = 0
+end
+
+function update(self, dt)
+	self.rot = self.rot - 0.05
+	go.set_rotation(vmath.quat_rotation_z(self.rot))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") and message.enter then
+		sound.play("main:/sound#death")
+		msg.post("common/player", "dead", {})
+	end
+end
+

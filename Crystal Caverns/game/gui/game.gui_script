@@ -1,0 +1,22 @@
+local data = require ("main.data")
+
+local function panel(self)
+	gui.set_text(gui.get_node("cubes"), string.format("%2d", data.lives))
+	gui.set_text(gui.get_node("gems"), string.format("%d/%d", data.gems, data.totalgems))
+end
+
+local function vig(self)
+	local a = data.playerpos.y/50
+	if a < 4 then a = 4 
+	elseif a > 8 then a = 8 end
+	gui.set_scale(gui.get_node("vignette"), vmath.vector3(a,a,1))
+end
+
+function update(self, dt)
+	panel(self)
+	vig(self)
+end
+
+function on_message(self, message_id, message, sender)
+end
+

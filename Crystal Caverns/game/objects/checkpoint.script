@@ -1,0 +1,9 @@
+local data = require ("main.data")
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		data.spawnpos = go.get_position()
+		data.spawnpos.y = data.spawnpos.y + 8
+		data.spawnpos.z = 0.1
+	end
+end

@@ -1,0 +1,82 @@
+local data = require ("main.data")
+
+local function spawn_player(self, x, y)
+	local pos = data.tile2world(vmath.vector3(x, y, 0.1))
+	msg.post("common/player", "position", {pos = pos})
+	data.spawnpos = pos
+	data.playerpos = pos
+end
+
+local function spawn_acid(self, x, y)
+	local pos = data.tile2world(vmath.vector3(x, y, 0))
+	factory.create("#acid_factory", pos, nil, {})
+end
+
+local function spawn_mine_spawner(self, x, y)
+	local pos = data.tile2world(vmath.vector3(x, y, 0))
+	pos.y = pos.y - 5
+	factory.create("#mine_spawner_factory", pos, nil, {})
+end
+
+local function spawn_step(self, x ,y)
+	local pos = data.tile2world(vmath.vector3(x, y, 0))
+	pos.y = pos.y - 8
+	factory.create("#step_factory", pos, nil, {})
+end
+
+local function spawn_platform_large(self, x ,y)
+	local pos = data.tile2world(vmath.vector3(x, y, 0.5))
+	pos.x = pos.x + 24
+	pos.y = pos.y + 28
+	factory.create("#platform_large_factory", pos, nil, {})
+end
+
+local function spawn_block(self, x ,y)
+	local pos = data.tile2world(vmath.vector3(x, y, 0.2 ))
+	factory.create("#block_factory", pos, nil, {})
+end
+
+local function spawn_swingball(self, x ,y)
+	local pos = data.tile2world(vmath.vector3(x, y, 0.2 ))
+	factory.create("#swingball_factory", pos, nil, {})
+end
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	data.totalgems = 0
+	data.gems = 0
+	
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			if t == 1 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				spawn_player(self, x, y)
+			elseif t == 3 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				spawn_step(self, x, y)
+			elseif t == 4 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				spawn_block(self, x, y)
+			elseif t == 5 then
+				tilemap.set_tile("#tilemap", "world", x, y, 24)
+				spawn_platform_large(self, x, y)
+			elseif t == 17 then
+				msg.post("#acid", "add", {pos = vmath.vector3(x, y, 0)})
+				spawn_acid(self, x, y)
+			elseif t == 6 then
+				data.totalgems = data.totalgems + 1
+			elseif t == 7 then
+				spawn_mine_spawner(self, x, y)
+			elseif t == 8 then
+				spawn_swingball(self, x, y)
+			end
+		end
+	end
+end
+
+function init(self)
+	parse(self)
+end
+

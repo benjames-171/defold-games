@@ -1,0 +1,51 @@
+images {
+  image: "/assets/png/pixel.png"
+}
+images {
+  image: "/assets/png/key.png"
+}
+images {
+  image: "/assets/png/space.png"
+}
+images {
+  image: "/assets/png/logo.png"
+}
+images {
+  image: "/assets/png/vignette.png"
+}
+images {
+  image: "/assets/png/box.png"
+}
+images {
+  image: "/assets/png/box_green.png"
+}
+images {
+  image: "/assets/png/box_red.png"
+}
+images {
+  image: "/assets/png/block2.png"
+}
+images {
+  image: "/assets/png/step.png"
+}
+images {
+  image: "/assets/png/platform_large.png"
+}
+images {
+  image: "/assets/png/mine.png"
+}
+images {
+  image: "/assets/png/hand.png"
+}
+images {
+  image: "/assets/png/gem.png"
+}
+images {
+  image: "/assets/png/swingball.png"
+}
+images {
+  image: "/assets/png/box_complete.png"
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0

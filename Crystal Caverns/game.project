@@ -1,0 +1,27 @@
+[project]
+title = Crystal Caverns
+version = 1
+
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /render/custom.renderc
+
+[display]
+width = 1280
+height = 720
+fullscreen = 1
+
+[script]
+shared_state = 1
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[html5]
+splash_image = /assets/png/loading.png
+
+[physics]
+gravity_y = -800.0
+scale = 0.1
+
