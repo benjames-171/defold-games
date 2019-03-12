@@ -1,0 +1,38 @@
+local data = require ("main.data")
+
+local SHOW_TIME = 200
+
+local function disable_node (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	self.time = 0
+	self.node = gui.get_node("container")
+	gui.set_enabled(self.node, false)
+	gui.set_position(self.node, vmath.vector3(480, -64, 0))
+end
+
+local function show(self, message)
+	gui.set_enabled(self.node, true)
+	gui.set_text(gui.get_node("text"), message.text)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(480,0,0), gui.EASING_INOUTQUAD, 0.25, 0.0)
+	self.time = SHOW_TIME
+end
+
+local function hide(self)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(480,-64,0), gui.EASING_INOUTQUAD, 0.25, 0, disable_node)
+end
+
+function update(self, dt)
+	if self.time > 0 then
+		self.time = self.time - 1
+		if self.time == 0 then hide(self) end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self, message)
+	end
+end

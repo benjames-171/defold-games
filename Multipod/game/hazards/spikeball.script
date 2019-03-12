@@ -1,0 +1,21 @@
+go.property("vel", vmath.vector3(0,0,0))
+
+function init(self)
+	self.rot = 0
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	pos = pos + self.vel
+	go.set_position(pos)
+
+	self.rot = self.rot + 0.1
+	go.set_rotation(vmath.quat_rotation_z(self.rot))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") and message.other_group == hash("world") then
+		self.vel = self.vel * -1
+	end
+end
+

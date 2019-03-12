@@ -1,0 +1,70 @@
+local data = require ("main.data")
+
+local function spawn_player(self, x, y)
+	tilemap.set_tile("#tilemap", "control", x, y, 0)
+	local pos = data.tile2world(vmath.vector3(x, y, 0))
+	msg.post("common/player", "position", {pos = pos})
+	data.spawnpos = pos
+end
+
+local function spawn_spikeball(self, x, y, vel)
+	tilemap.set_tile("#tilemap", "control", x, y, 0)
+	local pos = data.tile2world(vmath.vector3(x, y, 0))
+	factory.create("#spikeball_factory", pos, nil, {vel = vel})
+end
+
+local function spawn_flail(self, x, y)
+	tilemap.set_tile("#tilemap", "control", x, y, 0)
+	local pos = data.tile2world(vmath.vector3(x, y, 0))
+	factory.create("#flail_factory", pos)
+end
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "control", x, y)
+			if t == 1 then
+				spawn_player(self, x, y)
+			elseif t == 2 then
+				data.maxpills = data.maxpills + 1
+			elseif t == 3 then
+				self.exit = vmath.vector3(x, y, 0)
+			elseif t == 5 then
+				msg.post("#spikes", "add", {pos = vmath.vector3(x, y, 0)})
+			elseif t == 9 then
+				spawn_spikeball(self, x, y, vmath.vector3(0.5,0,0))
+			elseif t == 10 then
+				spawn_spikeball(self, x, y, vmath.vector3(0,0.5,0))
+			elseif t == 11 then
+				spawn_flail(self, x, y)
+			end
+		end
+	end
+end
+
+local function tutorial(self)
+	if data.level == 1 then
+		msg.post("/common/view#notify", "show", {text = "USE WASD OR CURSOR KEYS TO MOVE AROUND."})
+	elseif data.level == 2 then
+		msg.post("/common/view#notify", "show", {text = "AVOID THE FLOOR SPIKES."})
+	elseif data.level == 3 then
+		msg.post("/common/view#notify", "show", {text = "AVOID THE MOVING HAZARDS."})
+	elseif data.level == 6 then
+		msg.post("/common/view#notify", "show", {text = "FIND THE CORRECT SEQUENCE."})
+	end
+end
+
+function init(self)
+	data.maxpills = 0
+	self.exit = vmath.vector3()
+	parse(self)
+	tutorial(self)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("openexit") then
+		tilemap.set_tile("#tilemap", "control", self.exit.x, self.exit.y, 4)
+	end
+end

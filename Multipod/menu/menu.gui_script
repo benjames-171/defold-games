@@ -1,0 +1,22 @@
+local data = require ("main.data")
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	data.state = data.STATE_MENU
+
+	if data.maxlevel == 1 then
+		gui.set_text(gui.get_node("press_space"), "press SPACE to START a NEW GAME")
+	else
+		gui.set_text(gui.get_node("press_space"), string.format("press SPACE to CONTINUE from level %d of 8", data.maxlevel))
+	end
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_MENU then
+		if action_id == hash("action") and action.pressed then
+			data.level = data.maxlevel
+			data.state = data.STATE_PLAYING
+			msg.post("main:/handler", "show_game")
+		end
+	end
+end

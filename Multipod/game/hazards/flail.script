@@ -1,0 +1,8 @@
+function init(self)
+	self.rot = math.random(0, 640) / 100.0
+end
+
+function update(self, dt)
+	self.rot = self.rot - 0.07
+	go.set_rotation(vmath.quat_rotation_z(self.rot))
+end

@@ -1,0 +1,14 @@
+function init(self)
+end
+
+local function draw(self, message)
+	gui.set_text(gui.get_node("pillstext"), string.format("%d / %d", message.pills, message.max))
+	gui.set_text(gui.get_node("energytext"), string.format("%d%%", message.energy))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("update") then
+		draw(self, message)
+	end
+end
+
