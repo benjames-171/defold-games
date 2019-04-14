@@ -1,0 +1,15 @@
+local data = require("main.data")
+
+function update(self, dt)
+	gui.set_text (gui.get_node("score"), string.format("SCORE %05d", data.score))
+	gui.set_text (gui.get_node("level"), string.format("LEVEL %d/4", data.level))
+	gui.set_scale(gui.get_node("fuel"), vmath.vector3(data.fuel/100, 1, 1))
+	if data.lives < 3 then gui.set_enabled(gui.get_node("life3"), false) end
+	if data.lives < 2 then gui.set_enabled(gui.get_node("life2"), false) end
+	if data.lives < 1 then gui.set_enabled(gui.get_node("life1"), false) end
+
+	if data.fuel > 0 then gui.set_enabled(gui.get_node("outoffuel"), false)
+	else gui.set_enabled(gui.get_node("outoffuel"), true)
+	end
+end
+

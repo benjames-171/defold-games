@@ -1,0 +1,43 @@
+local data = require("main.data")
+
+local SHOOT = 8
+
+function init(self)
+	self.origin = go.get_position()
+	self.theta = 0
+	self.timer = 0
+end
+
+local function cycle(self)
+	self.theta = self.theta + 0.04
+	if self.theta > math.pi * 2 then self.theta = 0 end
+
+	local pos = go.get_position()
+	if pos.x - data.scrollpos.x < -6 then go.delete() end
+end
+
+local function shoot(self)
+	self.timer = self.timer + 1
+	if self.timer >= SHOOT and self.theta < math.pi then
+		self.timer = 0
+		local pos = go.get_position()
+		pos.y = pos.y + 8
+		factory.create("#bullet_factory", pos, nil, {angle = self.theta})
+	end
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	if data.onscreen(pos, 0) then
+		cycle(self)
+		shoot(self)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		msg.post("/common/explosion", "explode", {pos = go.get_position()})
+		go.delete()
+	end
+end
+

@@ -1,0 +1,20 @@
+local data = require ("main.data")
+
+function init(self)
+	self.move = true
+end
+
+function update(self, dt)
+	if self.move and data.state == data.STATE_PLAYING then
+		pos = go.get_position()
+		pos.x = pos.x + 0.2
+		if pos.x < data.scrollpos.x-320 then pos.x = pos.x + 320 end
+		go.set_position(pos)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("stop") then
+		self.move = false
+	end
+end

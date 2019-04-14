@@ -1,0 +1,73 @@
+local data = require "main.data"
+
+local MAX_SPEED = 0.1
+local SHOOT = 15
+local BOSS_ENERGY = 200
+
+function init(self)
+	self.time = 0
+	self.rot = 0
+	self.flash = false
+	self.energy = BOSS_ENERGY
+	if data.level == 10 then self.energy = self.energy * 2 end
+	self.strength = self.energy
+end
+
+local function destroy(self)
+	data.score = data.score + 5000
+	data.total = 0
+	msg.post("/common/explosion", "explode_large", {pos = go.get_position()})
+	go.delete()
+end
+
+local function flash(self)
+	if self.flash then
+		sprite.set_constant("#sprite", "tint", vmath.vector4(4,4,4,1))
+		self.energy = self.energy - 1
+		if self.energy <= 0 then
+			destroy(self)
+		end
+		self.flash = false
+	else
+		sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+	end
+end
+
+local function move(self)
+	local stage = 1.1 - (self.energy / self.strength)
+	self.rot = self.rot + (MAX_SPEED * stage)
+	if self.rot > math.pi then self.rot = self.rot - math.pi*2 end
+	go.set_rotation(vmath.quat_rotation_z(self.rot))
+
+	self.time = self.time + 1
+	stage = stage * SHOOT * 0.8
+	if self.time >= SHOOT - stage then
+		self.time = 0
+		local pos = go.get_position()
+		pos.z = pos.z - 0.2
+		factory.create("#bullet_factory", pos, nil, {angle = self.rot})
+		if self.energy < self.strength * 0.66 then
+			factory.create("#bullet_factory", pos, nil, {angle = self.rot + (math.pi * 0.66) })
+		end
+		if self.energy < self.strength * 0.33 then
+			factory.create("#bullet_factory", pos, nil, {angle = self.rot + (math.pi * 1.33) })
+		end
+	end
+end
+	
+function update(self, dt)
+	flash(self)
+	
+	if data.state == data.STATE_PLAYING then
+		move(self)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.other_group == hash("shot") then self.flash = true
+		end
+	end
+end
+
+

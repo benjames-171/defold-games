@@ -1,0 +1,17 @@
+local data = require("main.data")
+
+local SPEED = 6
+
+function init(self)
+	local pos = go.get_position()
+	pos.z = pos.z - 0.1
+	go.set_position(pos)
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	pos.x = pos.x + SPEED
+	go.set_position(pos)
+	if not data.onscreen(pos, data.TILE_SIZE) then go.delete() end
+end
+

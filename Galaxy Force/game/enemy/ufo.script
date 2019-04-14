@@ -1,0 +1,46 @@
+local data = require("main.data")
+
+local HEIGHT = 32
+local WIDTH = 8
+local SHOOT = 7
+
+function init(self)
+	self.origin = go.get_position()
+	self.theta = math.random()*7
+	self.shoot = 0
+	self.timer = 0
+end
+
+local function move(self)
+	local pos = vmath.vector3(self.origin.x, self.origin.y, self.origin.z)
+	pos.x = pos.x + (math.sin(self.theta * 2) * WIDTH)
+	pos.y = pos.y + (math.sin(self.theta) * HEIGHT)
+	self.theta = self.theta + 0.04
+	go.set_position(pos)
+
+	if pos.x - data.scrollpos.x < -6 then go.delete() end
+end
+
+local function shoot(self)
+	self.timer = self.timer + 1
+	if self.timer >= SHOOT - data.level then
+		self.timer = 0
+		local t = self.shoot % math.pi
+		factory.create("#bullet_factory", nil, nil, {angle = t + math.pi*0.5})
+	end
+	self.shoot = self.shoot + 0.08
+end
+
+function update(self, dt)
+	move(self)
+	shoot(self)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		msg.post("/common/explosion", "explode", {pos = go.get_position()})
+		go.delete()
+		data.score = data.score + 25
+	end
+end
+

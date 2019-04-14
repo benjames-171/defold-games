@@ -1,0 +1,31 @@
+local data = require("main.data")
+
+local function collision(self, message)
+	go.delete()
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	pos = data.world2tile(pos)
+
+	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+	if t == 4 then
+		tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 0)
+		pos = data.tile2world(pos)
+		msg.post("/common/explosion", "explode", {pos = pos})
+		data.score = data.score + 20
+	elseif t == 5 then
+		tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 0)
+		pos = data.tile2world(pos)
+		msg.post("/common/explosion", "explode", {pos = pos})
+		data.fuel = data.fuel + 20
+		data.score = data.score + 10
+		if data.fuel > 100 then data.fuel = 100 end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		collision(self, message)
+	end
+end

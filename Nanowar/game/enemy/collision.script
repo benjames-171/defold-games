@@ -1,0 +1,44 @@
+local data = require "main.data"
+
+go.property("energy", 2)
+
+function init(self)
+	self.value = self.energy
+	self.flash = false
+	data.total = data.total + 1
+end
+
+local function pickup(self)
+	if math.random(1,25) == 1 then
+		factory.create("#pickup_factory", nil, vmath.quat_rotation_z(0))
+	end
+end
+
+local function destroy(self)
+	data.total = data.total - 1
+	msg.post("/common/explosion", "explode", {pos = go.get_position()})
+	go.delete()
+end
+
+function update(self, dt)
+	if self.flash then
+		sprite.set_constant("#sprite", "tint", vmath.vector4(4,4,4,1))
+		self.energy = self.energy - 1
+		if self.energy <= 0 then
+			data.score = data.score + (self.value * 10)
+			destroy(self)
+			if self.energy < 50 then pickup(self) end
+		end
+		self.flash = false
+	else
+		sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.other_group == hash("shot") then self.flash = true
+		elseif message.other_group == hash("player") then destroy(self)
+		end
+	end
+end

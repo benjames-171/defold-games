@@ -1,0 +1,194 @@
+local data = require "main.data"
+
+go.property("side", 1)
+
+local GROUND = 24
+local JUMP = 5
+local GRAVITY = -0.55
+local BOOST = 0.21
+local INVUL = 100
+local MAX_DELAY = 100
+
+local function newprojectile(self)
+	self.next = math.random(1,7)
+end
+
+function init(self)
+	self.ai = false
+	self.incoming = false
+	self.jumphash = ""
+	self.throwhash = ""
+	self.jump = 0
+	self.boost = 1
+	self.dir = 1
+	self.recharge = 100
+	self.hearts = 10
+	self.invul = 0
+	self.jumpdelay = MAX_DELAY
+	self.jumphold = 0
+	self.throwdelay = MAX_DELAY
+
+	data.lockinput = 10
+	newprojectile(self)
+		
+	if self.side == 1 then
+		if data.players >= 3 then self.ai = true end
+		self.jumphash = hash("s")
+		self.throwhash = hash("c")
+		go.set_position(vmath.vector3(24,GROUND,0))
+	elseif self.side == 2 then
+		if data.players == 1 or data.players == 4 then self.ai = true end
+		self.jumphash = hash("up")
+		self.throwhash = hash("left")
+		self.dir = -1
+		go.set_position(vmath.vector3(296,GROUND,0))
+		msg.post("#sprite", "play_animation", {id = hash("p2")})
+	end
+
+	msg.post(".", "acquire_input_focus")
+end
+
+local function move(self)
+	local pos = go.get_position()
+	if (pos.y > GROUND or self.jump > 0) and self.hearts > 0 then
+		pos.y = pos.y + self.jump
+		self.jump = self.jump + (GRAVITY * self.boost)
+		self.boost = 1
+		if pos.y < GROUND then pos.y = GROUND end
+		go.set_position(pos)
+	end
+end
+
+local function recharge(self)
+	if self.recharge < 100 then self.recharge = self.recharge + 2 end
+end
+
+local function osd(self)
+	msg.post("view#gui", "update", {side = self.side, recharge = self.recharge, hearts = self.hearts, next = self.next})
+end
+
+local function invul(self)
+	if self.invul > 0 then
+		self.invul = self.invul - 1
+		if self.invul == 0 then
+			msg.post("#co", "enable")
+		elseif self.invul % 6 < 3 then
+			sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+		else
+			sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0))
+		end
+	end
+end
+
+local function jump(self)
+	local pos = go.get_position()
+	if pos.y == GROUND then
+		self.jump = JUMP
+		sound.play("main:/sound#jump", {gain = 0.5})
+	else self.boost = BOOST
+	end
+end
+
+local function throw(self)
+	self.recharge = 0
+	factory.create("#projectile_factory", nil, nil, {vel = vmath.vector3(5.5 * self.dir, 5, 0), type = self.next})
+	newprojectile(self)
+	sound.play("main:/sound#throw")
+end
+
+local function quit(self)
+	data.state = data.STATE_MENU
+	msg.post("main:/handler", "show_menu")
+end
+
+local function input_playing(self, action_id, action)
+	if action_id == self.jumphash then jump(self)
+	elseif action_id == self.throwhash and action.pressed and self.recharge == 100 then throw(self)
+	elseif action_id == hash("esc") then quit(self)
+	end
+end
+
+local function input_gameover(self, action_id, action)
+	if action_id == hash("s") or action_id == hash("up") and action.pressed then
+		quit(self)
+	end
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_PLAYING and not self.ai and data.lockinput == 0 then
+		input_playing(self, action_id, action)
+	elseif data.state == data.STATE_GAMEOVER and data.lockinput == 0 then
+		input_gameover(self, action_id, action)
+	end
+end
+
+local function gameover(self)
+	data.state = data.STATE_GAMEOVER
+	msg.post("view#gameover", "show", {loser = self.side})
+	sound.play("main:/sound#gameover")
+	self.jump = JUMP
+	data.lockinput = 60
+end
+
+local function hit(self)
+	if self.hearts > 0 then self.hearts = self.hearts - 1 end
+	if self.hearts == 0 then gameover(self)	end
+
+	msg.post("#co", "disable")
+	self.invul = INVUL
+	sound.play(string.format("main:/sound#hit%d", self.side))
+end
+
+local function ai(self)
+	if self.jumpdelay > 0 then self.jumpdelay = self.jumpdelay - 1 end
+	if self.throwdelay > 0 then self.throwdelay = self.throwdelay - 1 end
+	if self.jumphold > 0 then self.jumphold = self.jumphold - 1 end
+			
+	local pos = go.get_position()
+	if self.incoming then
+		jump(self)
+		self.jumphold = math.random(1, MAX_DELAY / 2)
+	end
+	self.incoming = false
+
+	if self.jumpdelay == 0 or self.jumphold > 0 then
+		jump(self)
+		self.jumpdelay = math.random(1, MAX_DELAY * 4)
+		self.jumphold = math.random(1, MAX_DELAY / 2)
+	end
+	
+	if self.recharge == 100 and self.throwdelay == 0 then
+		throw(self)
+		self.throwdelay = math.random(1, MAX_DELAY * 2)
+	end
+end
+
+local function falloff(self)
+	local pos = go.get_position()
+	if pos.y < -16 then self.jump = 0 end
+	pos.x = pos.x + self.dir
+	pos.y = pos.y + self.jump
+	self.jump = self.jump + (GRAVITY / 4)
+	go.set_position(pos)
+end
+
+function update(self, dt)
+	move(self)
+	osd(self)
+	if data.state == data.STATE_PLAYING then
+		if self.ai then ai(self) end
+		recharge(self)
+		invul(self)
+	elseif data.state == data.STATE_GAMEOVER and self.hearts == 0 then
+		falloff(self)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.own_group == hash("player") then hit(self)
+		elseif message.own_group == hash("prox") then self.incoming = true
+		end
+	end
+end
+
