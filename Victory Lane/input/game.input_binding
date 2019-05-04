@@ -19,10 +19,38 @@ key_trigger {
   action: "select"
 }
 key_trigger {
-  input: KEY_Q
-  action: "quit"
+  input: KEY_ESC
+  action: "exit"
+}
+key_trigger {
+  input: KEY_W
+  action: "accel"
+}
+key_trigger {
+  input: KEY_S
+  action: "brake"
+}
+key_trigger {
+  input: KEY_A
+  action: "turn_left"
+}
+key_trigger {
+  input: KEY_D
+  action: "turn_right"
+}
+key_trigger {
+  input: KEY_1
+  action: "1"
+}
+key_trigger {
+  input: KEY_2
+  action: "2"
 }
 key_trigger {
   input: KEY_ESC
-  action: "exit"
+  action: "quit"
+}
+key_trigger {
+  input: KEY_3
+  action: "3"
 }

@@ -1,0 +1,35 @@
+local data = require ("main.data")
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+local function show(self)
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(0, 0, 0), gui.EASING_INOUTQUAD, 0.5)
+end
+
+local function hide(self)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(1280, 0, 0), gui.EASING_INOUTQUAD, 0.5, 0, disablenode)
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.node = gui.get_node("container")
+	gui.set_position(self.node, vmath.vector3(1280, 0, 0))
+	gui.set_enabled(self.node, false)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	end
+end
+
+function on_input(self, action_id, action)
+	if (action_id == hash("shoot") or action_id == hash("exit")) and action.pressed then
+		hide(self)
+		msg.post("#mainmenu", "show", {})
+	end
+end
+

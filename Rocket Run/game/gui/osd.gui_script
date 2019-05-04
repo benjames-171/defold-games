@@ -1,0 +1,89 @@
+local data = require ("main.data")
+
+function init(self)
+	self.timer = 100
+	self.mm_size = vmath.vector3()
+	self.mm_offset = vmath.vector3()
+	self.mm_scale = 4
+end
+
+local function minimap(self)
+	local pos = data.playerpos
+	pos.x = pos.x / data.TILE_SIZE
+	pos.y = pos.y / data.TILE_SIZE
+	pos.x = pos.x - self.mm_size.x - self.mm_offset.x
+	gui.set_position(gui.get_node("mm_pos"), pos)
+end
+
+function update(self, dt)
+	if data.fuel <= 20 then gui.set_color(gui.get_node("fuel"), vmath.vector4(157/255, 31/255, 47/255, 1))
+	else gui.set_color(gui.get_node("fuel"), vmath.vector4(1, 1, 1, 0))
+	end
+
+	if data.shield <= 20 then gui.set_color(gui.get_node("shield"), vmath.vector4(157/255, 31/255, 47/255, 1))
+	else gui.set_color(gui.get_node("shield"), vmath.vector4(1, 1, 1, 0))
+	end
+
+	if data.artifacts >= 4 then gui.set_color(gui.get_node("artifacts"), vmath.vector4(82/255, 180/255, 102/255, 1))
+	else gui.set_color(gui.get_node("artifacts"), vmath.vector4(216/255, 225/255, 169/255, 1))
+	end
+
+	local str = string.format("%d%%", data.fuel)
+	gui.set_text(gui.get_node("fuel"), str)
+	gui.set_scale(gui.get_node("fuel_bar"), vmath.vector3(4 * (data.fuel/100), 4, 1))
+
+	str = string.format("%d%%", data.shield)
+	gui.set_text(gui.get_node("shield"), str)
+	gui.set_scale(gui.get_node("shield_bar"), vmath.vector3(4 * (data.shield/100), 4, 1))
+
+	str = string.format("%d/4", data.artifacts)
+	gui.set_text(gui.get_node("artifacts"), str)
+
+	if self.timer > 0 then self.timer = self.timer - 1
+	end
+
+	if self.timer == 1 then
+		node = gui.get_node("statusbox")
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.25)
+	end
+
+	minimap(self)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("level_clear") then
+		node = gui.get_node("largetext")
+		if data.level < 6 then
+			gui.set_text(node, "LEVEL CLEAR")
+		else
+			gui.set_text(node, "GAME COMPLETE")
+			local n = gui.get_node("thanks")
+			gui.animate(n, gui.PROP_COLOR, vmath.vector4(216/255, 225/255, 169/255, 1), gui.EASING_INOUTQUAD, 0.5)
+			data.maxlevel = 1
+		end
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(216/255, 225/255, 169/255, 1), gui.EASING_INOUTQUAD, 0.5)
+	elseif message_id == hash("game_over") then
+		node = gui.get_node("largetext")
+		gui.set_text(node, "GAME OVER")
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(216/255, 225/255, 169/255, 1), gui.EASING_INOUTQUAD, 0.5)
+	elseif message_id == hash("out_of_fuel") then
+		node = gui.get_node("largetext")
+		gui.set_text(node, "OUT OF FUEL")
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(216/255, 225/255, 169/255, 1), gui.EASING_INOUTQUAD, 0.5)
+	elseif message_id == hash("update_status") then
+		gui.set_text(gui.get_node("status"), message.status)
+		local m = gui.get_text_metrics_from_node(gui.get_node("status"))
+		gui.set_size(gui.get_node("statusbox"), vmath.vector3(m.width + 32, 40, 1))
+		gui.set_color(gui.get_node("statusbox"), vmath.vector4(1,1,1,1))
+		self.timer = 120
+	elseif message_id == hash("minimap_size") then
+		gui.set_size(gui.get_node("minimap"), message.size)
+		self.mm_size = message.size
+		self.mm_offset = message.offset
+	elseif message_id == hash("mm_scale") then
+		self.mm_scale = self.mm_scale + 4
+		if self.mm_scale > 4 then self.mm_scale = 0 end
+		gui.set_scale(gui.get_node("minimap"), vmath.vector3(self.mm_scale, self.mm_scale, 0))
+	end
+end
+

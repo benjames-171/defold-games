@@ -1,0 +1,36 @@
+local function generate(self)
+	sx, sy, width, height = tilemap.get_bounds("/level#tilemap")
+
+	local buff = buffer.create(width * height, {{name=hash("rgba"), type = buffer.VALUE_TYPE_UINT8, count = 4}})
+	local stream = buffer.get_stream(buff, hash("rgba"))
+
+	for y = sy, sy + height - 1 do
+		for x = sx, sx + width - 1 do
+			local index = ((y - sy) * width * 4) + ((x - sx) * 4) 
+			local t = tilemap.get_tile("/level#tilemap", "world", x, y)
+
+			if t == 0 then
+				stream[index + 1] = 0xff
+				stream[index + 2] = 0xff
+				stream[index + 3] = 0xff
+				stream[index + 4] = 0xff
+			else
+				stream[index + 1] = 0x00
+				stream[index + 2] = 0x00
+				stream[index + 3] = 0x00
+				stream[index + 4] = 0x00
+			end
+		end
+	end
+
+	local resource_path = go.get("#sprite", "texture0")
+	local header = {width = width, height = height, type = resource.TEXTURE_TYPE_2D, format = resource.TEXTURE_FORMAT_RGBA, num_mip_maps = 1}
+	resource.set_texture(resource_path, header, buff)
+
+	msg.post("osd#gui", "minimap_size", {size = vmath.vector3(width - 1, height - 1, 0), offset = vmath.vector3(sx, sy, 0)})
+	msg.post("#sprite", "disable")
+end
+
+function init(self)
+	generate(self)
+end

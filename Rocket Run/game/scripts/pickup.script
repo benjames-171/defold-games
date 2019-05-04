@@ -1,8 +1,0 @@
-go.property("type", 0)
-
-function on_message(self, message_id, message, sender)
-    if message_id == hash("contact_point_response") and
-	message.group == hash("player") then
-		msg.post("common/player", "pickup", {pickup = self.type})
-	end
-end

@@ -1,0 +1,62 @@
+local data = require ("main.data")
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.node = gui.get_node("container")
+	gui.set_enabled(self.node, false)
+	gui.set_position(self.node, vmath.vector3(640, 260, 0))
+	gui.set_color(self.node, vmath.vector4(1,1,1,0))
+end
+
+local function show(self)
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(640, 360, 0), gui.EASING_INOUTQUAD, 0.5)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_INOUTQUAD, 0.5)
+end
+
+local function hide(self)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(640, 260, 0), gui.EASING_INOUTQUAD, 0.5, 0, disablenode)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.5)
+end
+
+local function box(self)
+	local pos = vmath.vector3()
+	pos = gui.get_position(gui.get_node(string.format("track%d", data.level)))
+	gui.set_position(gui.get_node("box"), pos)
+end
+
+function update(self, dt)
+	box(self)
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_SELECT then
+		if action_id == hash("accel") and action.pressed and data.level > 2 then
+			data.level = data.level - 2
+			msg.post("main:/sound#beep", "play_sound")
+		elseif action_id == hash("brake") and action.pressed and data.level < 3 then
+			data.level = data.level + 2
+			msg.post("main:/sound#beep", "play_sound")
+		elseif action_id == hash("turn_left") and action.pressed and data.level > 1 then
+			data.level = data.level - 1
+			msg.post("main:/sound#beep", "play_sound")
+		elseif action_id == hash("turn_right") and action.pressed and data.level < 4 then
+			data.level = data.level + 1
+			msg.post("main:/sound#beep", "play_sound")
+		elseif action_id == hash("exit") and action.pressed then
+			hide(self)
+			msg.post("#menu", "show", {})
+		elseif action_id == hash("select") and action.pressed then
+			msg.post("main:/handler", "show_game")
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then show(self)
+	end
+end

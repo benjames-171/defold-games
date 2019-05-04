@@ -1,0 +1,46 @@
+local data = require ("main.data")
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	self.wrongway = false
+	gui.animate(gui.get_node("getready"), gui.PROP_POSITION, vmath.vector3(640, -100, 0), gui.EASING_INOUTQUAD, 0.5, 2, disablenode)	
+	gui.set_enabled(gui.get_node("raceover"), false)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("lap") then
+		local str = string.format("LAP %d/%d", message.lap, data.MAX_LAPS)
+		gui.set_text(gui.get_node("lap"), str)
+	elseif message_id == hash("laptime") then
+		local str = string.format ("TIME %.2f", message.time)
+		gui.set_text(gui.get_node("laptime"), str)
+	elseif message_id == hash("lapbest") then
+		local str = string.format ("BEST %.2f", message.time)
+		gui.set_text(gui.get_node("lapbest"), str)
+	elseif message_id == hash("wrongway") then
+		if self.wrongway == false then
+			gui.animate(gui.get_node("wrongway"), gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_INOUTQUAD, 1, 1)
+			self.wrongway = true
+		end
+	elseif message_id == hash("rightway") then
+		if self.wrongway == true then
+			gui.animate(gui.get_node("wrongway"), gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.2, 0)
+			self.wrongway = false
+		end
+	elseif message_id == hash("finished") then
+		local str
+		if message.p == 1 then str = "YOU WON! 1st PLACE!"
+		elseif message.p == 2 then str = "2nd PLACE"
+		elseif message.p == 3 then str = "3rd PLACE"
+		elseif message.p == 4 then str = "4th PLACE"
+		elseif message.p == 5 then str = "5th PLACE"
+		else str = "6th PLACE"
+		end
+		gui.set_text(gui.get_node("placing"), str)
+		gui.set_enabled(gui.get_node("raceover"), true)
+		gui.animate(gui.get_node("raceover"), gui.PROP_POSITION, vmath.vector3(640,0,0), gui.EASING_INOUTQUAD, 0.5)
+	end
+end

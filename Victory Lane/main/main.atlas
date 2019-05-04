@@ -1,51 +1,54 @@
 images {
-  image: "/assets/car.png"
+  image: "/assets/png/car.png"
 }
 images {
-  image: "/assets/car2.png"
+  image: "/assets/png/car2.png"
 }
 images {
-  image: "/assets/tree.png"
+  image: "/assets/png/tree.png"
 }
 images {
-  image: "/assets/bridge.png"
+  image: "/assets/png/bridge.png"
 }
 images {
-  image: "/assets/tree2.png"
+  image: "/assets/png/tree2.png"
 }
 images {
-  image: "/assets/greenlights.png"
+  image: "/assets/png/greenlights.png"
 }
 images {
-  image: "/assets/redlights.png"
+  image: "/assets/png/redlights.png"
 }
 images {
-  image: "/assets/bridge2.png"
+  image: "/assets/png/bridge2.png"
 }
 images {
-  image: "/assets/greenlights2.png"
+  image: "/assets/png/track1.png"
 }
 images {
-  image: "/assets/redlights2.png"
+  image: "/assets/png/track2.png"
 }
 images {
-  image: "/assets/bg.png"
+  image: "/assets/png/track3.png"
 }
 images {
-  image: "/assets/track1.png"
+  image: "/assets/png/track4.png"
 }
 images {
-  image: "/assets/track2.png"
+  image: "/assets/png/arrow.png"
 }
 images {
-  image: "/assets/track3.png"
+  image: "/assets/png/logo.png"
 }
 images {
-  image: "/assets/track4.png"
+  image: "/assets/png/key.png"
 }
 images {
-  image: "/assets/arrow.png"
+  image: "/assets/png/flagbg.png"
+}
+images {
+  image: "/assets/png/skid.png"
 }
 margin: 0
-extrude_borders: 0
+extrude_borders: 2
 inner_padding: 0

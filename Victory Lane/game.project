@@ -1,6 +1,6 @@
 [project]
 title = Victory Lane
-version = 0.1
+version = 2
 
 [bootstrap]
 main_collection = /main/main.collectionc
@@ -13,7 +13,7 @@ game_binding = /input/game.input_bindingc
 width = 1280
 height = 720
 update_frequency = 60
-fullscreen = 1
+fullscreen = 0
 
 [physics]
 scale = 0.02
@@ -26,4 +26,7 @@ shared_state = 1
 [graphics]
 default_texture_min_filter = nearest
 default_texture_mag_filter = nearest
+
+[html5]
+splash_image = /assets/png/splash.png
 

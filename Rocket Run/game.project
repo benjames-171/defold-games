@@ -1,6 +1,6 @@
 [project]
 title = Rocket Run
-version = 1.0
+version = 2.0
 
 [bootstrap]
 main_collection = /main/main.collectionc
@@ -12,7 +12,7 @@ game_binding = /input/game.input_bindingc
 [display]
 width = 1280
 height = 720
-fullscreen = 1
+fullscreen = 0
 
 [physics]
 scale = 0.02
@@ -27,4 +27,7 @@ shared_state = 1
 default_texture_min_filter = nearest
 default_texture_mag_filter = nearest
 max_debug_vertices = 20000
+
+[html5]
+splash_image = /assets/png/splash.png
 

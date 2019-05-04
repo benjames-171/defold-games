@@ -1,0 +1,338 @@
+go.property("ai", false)
+go.property("rot", 0)
+
+local data = require ("main.data")
+
+local ACCEL_SPEED = 0.05
+local MAX_REVERSE = -1
+local STEER_THRESHOLD = 1
+local OFFSET = 30
+local SKID_DELAY = 20
+local SPEED_MAX = 3.5
+local TURN_MAX = 0.05
+local DRIFT = 0.005
+
+function init(self)
+	if self.ai then
+		sprite.set_constant("#sprite", "tint", vmath.vector4(0,0,0,0))
+	else
+		msg.post(".", "acquire_input_focus")
+		sprite.set_constant("#sprite1", "tint", vmath.vector4(0,0,0,0))
+	end	
+
+	self.dir = self.rot
+	self.targetdir = self.rot
+	self.drift = self.rot
+	self.speed = 0
+	self.lastpos = vmath.vector3()
+	self.steerpos = 0
+	self.sector = 0
+	self.laptime = 0
+	self.lapbest = 9999
+	self.lap = 1
+	self.skid = 0
+	self.skidvol = 0
+	self.enginevol = 0
+			
+	self.left = false
+	self.right = false
+	self.accel = false
+	self.brake = false
+
+	if self.ai then	self.boost = (math.random() / 2) - 0.25
+	else
+		self.boost = 0
+		msg.post("/common/view#osd", "lap", {lap = 1})
+		msg.post("main:/sound#skidding", "play_sound", {gain = 0})
+		msg.post("main:/sound#engine", "play_sound", {gain = 0})
+	end
+end
+
+local function checkwrongway(self)
+	local pos = data.world2tile(go.get_position())
+	local tc = tilemap.get_tile("/track#tilemap", "control", pos.x, pos.y)
+		
+	if tc >= 113 and tc <= 120 then
+		local d = tc - 113
+		d = d * (math.pi / 4)
+	
+		if math.abs(self.dir - d) > math.pi then
+			if d > self.dir then
+				d = d - (math.pi * 2)
+			else
+				d = d + (math.pi * 2)
+			end
+		end
+
+		if math.abs(self.dir - d) > math.pi * 0.6 then
+			msg.post("/common/view#osd", "wrongway", {})
+		else
+			msg.post("/common/view#osd", "rightway", {})
+		end
+	end
+end
+
+local function handlesectors(self)
+	local pos = data.world2tile(go.get_position())
+	local tc = tilemap.get_tile("/track#tilemap", "control", pos.x, pos.y)
+
+	if tc == 121 then
+		if self.sector == 0 then
+			self.sector = 1
+			self.laptime = 0
+		elseif self.sector == 3 then
+			self.sector = 1
+			if self.laptime < self.lapbest then
+				self.lapbest = self.laptime
+				if not self.ai then
+					msg.post("/common/view#osd", "lapbest", {time = self.lapbest})
+					msg.post("main:/sound#levelup", "play_sound", {gain = 1.0})
+				end
+			end
+			self.laptime = 0
+			if self.lap < data.MAX_LAPS then
+				self.lap = self.lap + 1
+			else
+				msg.post("/bridge#script", "finished", {ai = self.ai})
+				if not self.ai then
+					self.ai = true
+					data.state = data.STATE_RACEOVER
+				end
+				self.boost = 0
+			end
+
+			if not self.ai then
+				msg.post("/common/view#osd", "lap", {lap = self.lap})
+			end
+		end
+	elseif tc == 122 and self.sector == 1 then
+		self.sector = 2
+	elseif tc == 123 and self.sector == 2 then
+		self.sector = 3
+	end
+end
+
+local function turn_left(self)
+	if self.speed < STEER_THRESHOLD and self.speed > -STEER_THRESHOLD then
+		self.dir = self.dir + (math.abs(self.speed) / 25)
+	else
+		self.dir = self.dir + TURN_MAX
+		self.drift = self.drift + TURN_MAX + DRIFT
+	end
+	self.skid = self.skid + 1
+end
+
+local function turn_right(self)
+	if self.speed < STEER_THRESHOLD and self.speed > -STEER_THRESHOLD then
+		self.dir = self.dir - (math.abs(self.speed) / 25)
+	else
+		self.dir = self.dir - TURN_MAX
+		self.drift = self.drift - TURN_MAX - DRIFT
+	end
+	self.skid = self.skid + 1
+end
+
+local function accel(self)
+	self.speed = self.speed + ACCEL_SPEED
+end
+
+local function brake(self)
+	self.speed = self.speed - 0.1
+end
+
+local function ai(self)
+	local pos = data.world2tile(go.get_position())
+	local t = tilemap.get_tile("/track#tilemap", "control", pos.x, pos.y)
+	
+	if t >= 113 and t <= 120 then
+		t = t - 113
+		self.targetdir = t * (math.pi / 4)
+	end
+
+	if math.abs(self.dir - self.targetdir) > math.pi then
+		if self.targetdir > self.dir then
+			self.targetdir = self.targetdir - (math.pi * 2)
+		else
+			self.targetdir = self.targetdir + (math.pi * 2)
+		end
+	end
+	
+	if self.dir < self.targetdir then
+		turn_left(self)
+	elseif self.dir > self.targetdir then
+		turn_right(self)
+	end	
+	
+	local d = math.abs(self.dir - self.targetdir)
+
+	if (t == 124 or d > 0.6) and self.speed > (SPEED_MAX * 0.75) then
+		brake(self)
+	else
+		accel(self)
+	end
+	
+	if d < TURN_MAX then
+		self.dir = self.targetdir
+	end
+end
+
+local function move(self)
+	if self.left then turn_left(self)
+	elseif self.right then turn_right(self)
+	else
+		self.steerpos = 0
+		self.skid = 0
+		particlefx.stop("#smoke_left")
+		particlefx.stop("#smoke_right")
+		
+	end
+
+	if self.accel then
+		accel(self)
+	elseif self.brake then
+		brake(self)
+	elseif not self.ai then
+		self.speed = self.speed * 0.98
+		if self.speed < 0.5 and self.speed > -0.5 then
+			self.speed = 0
+		end
+	end
+
+	local r = vmath.quat_rotation_z(self.dir)
+	go.set_rotation(r, "#sprite")
+
+	if self.speed > SPEED_MAX + self.boost then
+		self.speed = self.speed - 0.1
+	elseif self.speed < MAX_REVERSE then
+		self.speed = MAX_REVERSE
+	end
+end
+
+local function skids(self)
+	if self.speed > 3 then
+		if self.skid == SKID_DELAY then
+			particlefx.play("#smoke_left")
+			particlefx.play("#smoke_right")
+		elseif self.skid > SKID_DELAY and ((self.skid % 2) == 0) then
+			if self.skidvol < 1.0 then self.skidvol = self.skidvol+0.1 end
+			factory.create("#skid_factory", nil, nil, {})
+		end
+	end
+
+	if self.skid < SKID_DELAY then
+		if self.skidvol > 0 then self.skidvol = self.skidvol - 0.1 end
+	end
+	
+	msg.post("main:/sound#skidding", "set_gain", {gain = self.skidvol})
+end
+
+local function enginesound(self)
+	local gain = 0.1
+	if self.accel then gain = 0.2 end
+	--msg.post("main:/sound#engine", "set_gain", {gain = gain})
+end
+
+local function drift(self)
+	if not self.left and not self.right then
+		if self.drift > self.dir then self.drift = self.drift - TURN_MAX
+		elseif self.drift < self.dir then self.drift = self.drift + TURN_MAX
+		end
+	end
+end
+
+function update(self, dt)
+	if self.dir > math.pi then
+		self.dir = self.dir - (math.pi * 2)
+	elseif self.dir < -math.pi then
+		self.dir = self.dir + (math.pi * 2)
+	end
+
+	if self.ai and data.state > data.STATE_GETREADY then
+		ai(self)
+	elseif data.state == data.STATE_PLAYING then
+		self.laptime = self.laptime + dt
+		if self.sector > 0 then
+			msg.post("/common/view#osd", "laptime", {time = self.laptime})
+		end
+	end
+
+	move(self)
+
+	local p = data.world2tile(go.get_position())
+	local tw = tilemap.get_tile("/track#tilemap", "world", p.x, p.y)
+
+	if tw == 177 then
+		self.speed = self.speed * 0.95
+	end
+
+	if data.state == data.STATE_PLAYING then handlesectors(self)
+	end
+
+	local pos = go.get_position()
+	local vel = vmath.vector3(math.cos(self.dir) * self.speed, math.sin(self.dir) * self.speed, 0)
+	go.set_position(pos + vel)
+	self.correction = vmath.vector3()
+
+	if not self.ai then
+		skids(self)
+		--drift(self)
+		enginesound(self)
+		checkwrongway(self)
+		local o = vmath.vector3(math.cos(self.dir) * OFFSET, math.sin(self.dir) * OFFSET, 0)
+		msg.post("/common/view", "look_at", { position = go.get_position() + o})
+	end
+
+	self.left = false
+	self.right = false
+	self.accel = false
+	self.brake = false
+end
+
+local function collision(self, message)
+	if message.distance > 0 then
+		local proj = vmath.project(self.correction, message.normal * message.distance)
+		if proj < 1 then
+			local pos = go.get_position()
+			local comp = (message.distance - message.distance * proj) * message.normal
+			go.set_position(go.get_position() + comp)
+			self.correction = self.correction + comp
+
+			if message.group == hash("world") then
+				local i = pos - go.get_position()
+				local d = vmath.length(i)
+				self.speed = self.speed - (d / 4)
+				if self.speed < 0 then
+					self.speed = 0
+				end
+			end
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.own_group == hash("front") then
+			self.brake = true
+		else collision(self, message) end
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("exit") and action.pressed then
+		msg.post("main:/handler", "show_menu", {})
+	end
+
+	if action_id == hash("select") and action.pressed and data.state == data.STATE_RACEOVER then
+		msg.post("main:/handler", "show_menu", {})
+	end
+
+	if data.state ~= data.STATE_PLAYING then return end
+
+	if action_id == hash("brake") then self.brake = true
+	elseif action_id == hash("accel") then self.accel = true
+	end
+	
+	if action_id == hash("turn_left") then self.left = true
+	elseif action_id == hash("turn_right") then	self.right = true
+	end
+end

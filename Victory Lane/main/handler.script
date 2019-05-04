@@ -1,6 +1,6 @@
 function init(self)
 	msg.post(".", "acquire_input_focus")
-    msg.post("handler#menu", "load")
+	msg.post("handler#menu", "load")
 end
 
 function on_message(self, message_id, message,sender)

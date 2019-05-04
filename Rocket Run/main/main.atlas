@@ -1,54 +1,63 @@
 images {
-  image: "/assets/flame.png"
+  image: "/assets/png/laser.png"
 }
 images {
-  image: "/assets/laser.png"
+  image: "/assets/png/bg.png"
 }
 images {
-  image: "/assets/bg.png"
+  image: "/assets/png/fan.png"
 }
 images {
-  image: "/assets/fan.png"
+  image: "/assets/png/fuel.png"
 }
 images {
-  image: "/assets/fuel.png"
+  image: "/assets/png/ship.png"
 }
 images {
-  image: "/assets/ship.png"
+  image: "/assets/png/sentry.png"
 }
 images {
-  image: "/assets/sentry.png"
+  image: "/assets/png/item1.png"
 }
 images {
-  image: "/assets/item1.png"
+  image: "/assets/png/energy.png"
 }
 images {
-  image: "/assets/energy.png"
+  image: "/assets/png/bullet.png"
 }
 images {
-  image: "/assets/bullet.png"
+  image: "/assets/png/energy_s.png"
 }
 images {
-  image: "/assets/energy_s.png"
+  image: "/assets/png/mine.png"
 }
 images {
-  image: "/assets/osd_back.png"
+  image: "/assets/png/bar.png"
 }
 images {
-  image: "/assets/front_bg.png"
+  image: "/assets/png/fuel_bar.png"
 }
 images {
-  image: "/assets/mine.png"
+  image: "/assets/png/shield_bar.png"
 }
 images {
-  image: "/assets/bar.png"
+  image: "/assets/png/pixel.png"
 }
 images {
-  image: "/assets/fuel_bar.png"
+  image: "/assets/png/logo.png"
 }
 images {
-  image: "/assets/shield_bar.png"
+  image: "/assets/png/key.png"
+}
+images {
+  image: "/assets/png/space.png"
+}
+images {
+  image: "/assets/png/bg_col.png"
+}
+images {
+  image: "/assets/png/bg2.png"
 }
 margin: 0
-extrude_borders: 0
+extrude_borders: 2
 inner_padding: 0

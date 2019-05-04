@@ -1,0 +1,28 @@
+local data = require ("main.data")
+
+function init(self)
+	self.pos = vmath.vector3(0,0,0)
+end
+
+function update(self, dt)
+
+	local p = vmath.vector3(0, 0, 0)
+
+	p.x = self.pos.x / 2
+	p.y = self.pos.y / 2
+	
+	while self.pos.x - p.x < 160 do	p.x = p.x - 320	end
+	while self.pos.x - p.x > 480 do	p.x = p.x + 320	end
+	while self.pos.y - p.y <  90 do	p.y = p.y - 180	end
+	while self.pos.y - p.y > 270 do	p.y = p.y + 180	end
+
+	go.set_position(p)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("position") then
+		self.pos = message.pos
+		self.pos.z = 0
+	end
+end
+

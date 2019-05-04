@@ -19,12 +19,20 @@ key_trigger {
   action: "test"
 }
 key_trigger {
-  input: KEY_Q
-  action: "quit"
-}
-key_trigger {
   input: KEY_ESC
   action: "exit"
+}
+key_trigger {
+  input: KEY_1
+  action: "1"
+}
+key_trigger {
+  input: KEY_2
+  action: "2"
+}
+key_trigger {
+  input: KEY_M
+  action: "minimap"
 }
 gamepad_trigger {
   input: GAMEPAD_RPAD_DOWN

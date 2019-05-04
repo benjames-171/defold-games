@@ -1,0 +1,41 @@
+local data = require ("main.data")
+
+go.property("angle", 0)
+
+local SPEED = 6
+local TILE_SIZE = 16
+
+function init(self)
+	self.life = 50
+	self.velocity = vmath.vector3(math.cos(self.angle) * SPEED, -math.sin(self.angle) * SPEED, 0)
+	particlefx.play("#trail")
+	
+end
+
+function final(self)
+	particlefx.stop("#trail")
+end
+
+function update(self, dt)
+	self.life = self.life - 1
+	if self.life < 1 then
+		msg.post("common/player", "delete_laser", {laser = go.get_id()})
+	end
+
+	p = go.get_position() + self.velocity
+	go.set_position(p)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.group == hash("world") then
+			particlefx.play("#spark")
+			msg.post("common/player", "delete_laser", {laser = go.get_id()})		
+		elseif message.group == hash("enemy") or message.group == hash("mine") then
+			particlefx.play("#spark")
+			msg.post(message.other_id, "bullet_hit", {})    		
+			msg.post("common/player", "delete_laser", {laser = go.get_id()})		
+		end
+	end
+end
+
