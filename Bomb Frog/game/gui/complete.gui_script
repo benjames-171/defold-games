@@ -1,0 +1,46 @@
+local data = require ("main.data")
+
+local function disable_node (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	self.node = gui.get_node("container")
+	gui.set_enabled(self.node, false)
+	gui.set_color(self.node, vmath.vector4(1,1,1,0))
+	gui.set_position(self.node, vmath.vector3(640,300, 0))
+end
+
+local function show(self)
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(640,360,0), gui.EASING_INOUTQUAD, 0.5, 0.0)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_INOUTQUAD, 0.5, 0.0)
+	data.state = data.STATE_COMPLETE
+
+	local str = ""
+	if data.mushrooms == 0 then
+		str = "You collected no mushrooms :(\n\nTry again and look for them!\n\nStill, well done and thanks for playing!"
+	elseif data.mushrooms == 1 then
+		str = "You collected 1 mushroom!\n\nHere is mushroom fact #1!\n\nLong before trees overtook the land, Earth was covered by giant mushrooms.\n\nWell done and thanks for playing!"
+	elseif data.mushrooms == 2 then
+		str = "You collected 2 mushrooms!\n\nHere is mushroom fact #2!\n\nThe Death Cap Mushroom not only looks safe and edible, it also tastes perfectly nice, and gives no symptoms of poisoning until after it has already ruined your liver and kidneys.\n\nWell done and thanks for playing!"
+	else
+		str = "You collected ALL 3 MUSHROOMS!\n\nHere is mushroom fact #3!\n\nThere are over 30 species of mushroom that glow in the dark. This bioluminescence produces a glowing light known as foxfire.\n\nWell done and thanks for playing!"
+	end
+
+	gui.set_text(gui.get_node("maintext"), str)
+end
+
+local function hide(self)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(640,300,0), gui.EASING_INOUTQUAD, 0.5, 0, disable_node)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.5, 0)
+end
+
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	elseif message_id == hash("hide") then
+		hide(self)
+	end
+end

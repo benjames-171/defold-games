@@ -1,0 +1,90 @@
+local data = require "main.data"
+
+local function spawnghost(self, x, y, n)
+	local pos = data.tile2world(vmath.vector3(x,y,0.2))
+	factory.create("#ghost_factory", pos, nil, {ghost = n - 13})
+	data.ghosts = data.ghosts + 1
+end
+
+local function spawn_player(self, x, y)
+	local pos = data.tile2world(vmath.vector3(x, y, 0.25))
+	msg.post("common/player", "position", {pos = pos})
+end
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			t = tilemap.get_tile("#tilemap", "top", x, y)
+			if t == 1 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				spawn_player(self, x, y)
+			elseif t >= 14 and t <= 18 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				spawnghost(self, x, y, t)
+			end
+
+			--tilemap.set_tile("#tilemap", "world", x, y, 0)
+		end
+	end
+end
+
+local function findempty(self)
+	local t = 1
+	local world = 41
+	local pos = vmath.vector3()
+
+	while t ~= 0 or world > 40 do
+		pos = vmath.vector3(math.random(1,12), math.random(1,12), 0)
+		t = tilemap.get_tile("#tilemap", "treasure", pos.x, pos.y)
+		world = tilemap.get_tile("#tilemap", "world", pos.x, pos.y)
+	end
+
+	return pos
+end
+
+local function treasure(self)
+	data.treasure = 0
+	data.treasuretotal = 3 + math.floor(data.level/3)
+
+	for n = 1, 6 do
+		local pos = findempty(self)
+		tilemap.set_tile("#tilemap", "treasure", pos.x, pos.y, math.random(5,10))
+	end
+end
+
+local function mushroom(self)
+	if data.level == 4 or data.level == 6 or data.level == 8 then
+		local pos = findempty(self)
+		tilemap.set_tile("#tilemap", "treasure", pos.x, pos.y, 2)
+	end
+end
+
+function init(self)
+	data.ghosts = 0
+	parse(self)
+	treasure(self)
+	mushroom(self)
+end
+
+local function bombs(self)
+	if data.bombsgrey + data.bombs < 4 and math.random(1,50) == 10 then
+		local pos = vmath.vector3(math.random(1,12), math.random(1,12), 0)
+		local t = tilemap.get_tile("#tilemap", "world", pos.x, pos.y)
+		local b = tilemap.get_tile("#tilemap", "treasure", pos.x, pos.y)
+	
+		if t <= 40 and b == 0 then
+			t = tilemap.get_tile("#tilemap", "top", pos.x, pos.y)
+			if t == 0 then
+				tilemap.set_tile("#tilemap", "top", pos.x, pos.y, 3)
+				data.bombsgrey = data.bombsgrey + 1
+			end
+		end
+	end
+end
+
+function update(self, dt)
+	bombs(self)
+end
+

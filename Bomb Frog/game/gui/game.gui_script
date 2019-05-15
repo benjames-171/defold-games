@@ -1,0 +1,43 @@
+local data = require ("main.data")
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	gui.set_enabled(gui.get_node("secret"), false)
+end
+
+function update(self, dt)
+	gui.set_text(gui.get_node("bombs"), tostring(data.bombs))
+
+	if data.mushrooms == 0 then
+		gui.set_enabled(gui.get_node("mushrooms"), false)
+	else
+		gui.set_enabled(gui.get_node("mushrooms"), true)
+		gui.set_text(gui.get_node("mushrooms"), tostring(data.mushrooms))
+	end
+	
+	local str = string.format("%d/%d", data.treasure, data.treasuretotal)
+	gui.set_text(gui.get_node("treasure"), str)
+		
+	for h = 1, data.hearts do
+		local node = gui.get_node(string.format("heart%d", h))
+		gui.set_texture(node, "main")
+		gui.play_flipbook(node, "heart")
+	end
+
+	for h = data.hearts+1, 5 do
+		local node = gui.get_node(string.format("heart%d", h))
+		gui.set_texture(node, "main")
+		gui.play_flipbook(node, "heart_empty")
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("secret") then
+		gui.set_enabled(gui.get_node("secret"), true)
+		gui.animate(gui.get_node("secret"), gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.5, 1.0, disablenode)
+	end
+end
+

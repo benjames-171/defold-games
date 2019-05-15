@@ -1,0 +1,99 @@
+local data = require "main.data"
+
+local SPEED = 1
+local SLEEP = 600
+
+go.property("ghost", 1)
+
+function init(self)
+	self.time = 0
+	self.step = go.get_position()
+	self.target = go.get_position()
+	local anim = "ghost" .. tostring(self.ghost)
+	msg.post("#sprite", "play_animation", {id = hash(anim)})
+end
+
+local function move(self)
+	local pos = go.get_position()
+	if pos.x < self.step.x then pos.x = pos.x + SPEED
+	elseif pos.x > self.step.x then pos.x = pos.x - SPEED
+	elseif pos.y < self.step.y then pos.y = pos.y + SPEED
+	elseif pos.y > self.step.y then pos.y = pos.y - SPEED
+	end
+
+	go.set_position(pos)
+end
+
+local function target(self)
+	local pos = go.get_position()
+	
+	if pos == self.target then
+		self.target = vmath.vector3(math.random(1,12), math.random(1,12), 0) * data.TILE_SIZE
+		self.target = self.target - vmath.vector3(8,8,0)
+		self.target.z = pos.z
+	end
+
+	if pos == self.step then
+		if self.step.x < self.target.x then
+			self.step.x = self.step.x + data.TILE_SIZE
+			sprite.set_hflip("#sprite", true)
+		elseif self.step.x > self.target.x then
+			self.step.x = self.step.x - data.TILE_SIZE
+			sprite.set_hflip("#sprite", false)
+		elseif self.step.y < self.target.y then self.step.y = self.step.y + data.TILE_SIZE
+		elseif self.step.y > self.target.y then self.step.y = self.step.y - data.TILE_SIZE
+		end
+
+		pos = data.world2tile(self.step)
+		local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+		if t > 40 then
+			self.target = go.get_position()
+			self.step = go.get_position()
+		end
+	end
+end
+
+local function wake(self)
+	if self.time > 0 then
+		self.time = self.time - 1
+		if self.time == 100 then msg.post("#sprite", "enable") end
+
+		if self.time <= 100 then
+			local a = (100-self.time) / 100
+			sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,a))
+		end
+
+		if self.time == 0 then
+			msg.post("#co", "enable")
+		end
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		target(self)
+		move(self)
+		wake(self)
+	end
+end
+
+local function dead(self)
+	data.ghosts = data.ghosts - 1
+	if math.random(1,4) == 1 then
+		local pos = data.world2tile(go.get_position())
+		local t = tilemap.get_tile("/level#tilemap", "top", pos.x, pos.y)
+		local b = tilemap.get_tile("/level#tilemap", "treasure", pos.x, pos.y)
+		if t == 0 and b == 0 then tilemap.set_tile("/level#tilemap", "top", pos.x, pos.y, 20) end
+	end
+
+	self.time = SLEEP
+	msg.post("#sprite", "disable")
+	msg.post("#co", "disable")
+end
+	
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.other_group == hash("explosion") and self.ghost ~= 5 then dead(self) end
+	end
+end
+

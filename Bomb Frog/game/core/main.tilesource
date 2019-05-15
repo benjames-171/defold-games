@@ -1,0 +1,626 @@
+image: "/assets/png/tiles.png"
+tile_width: 16
+tile_height: 16
+tile_margin: 0
+tile_spacing: 0
+collision: "/assets/png/tiles.png"
+material_tag: "tile"
+convex_hulls {
+  index: 0
+  count: 16
+  collision_group: ""
+}
+convex_hulls {
+  index: 16
+  count: 10
+  collision_group: ""
+}
+convex_hulls {
+  index: 26
+  count: 14
+  collision_group: ""
+}
+convex_hulls {
+  index: 40
+  count: 6
+  collision_group: ""
+}
+convex_hulls {
+  index: 46
+  count: 12
+  collision_group: ""
+}
+convex_hulls {
+  index: 58
+  count: 9
+  collision_group: ""
+}
+convex_hulls {
+  index: 67
+  count: 10
+  collision_group: ""
+}
+convex_hulls {
+  index: 77
+  count: 9
+  collision_group: ""
+}
+convex_hulls {
+  index: 86
+  count: 9
+  collision_group: ""
+}
+convex_hulls {
+  index: 95
+  count: 9
+  collision_group: ""
+}
+convex_hulls {
+  index: 104
+  count: 8
+  collision_group: ""
+}
+convex_hulls {
+  index: 112
+  count: 8
+  collision_group: ""
+}
+convex_hulls {
+  index: 120
+  count: 14
+  collision_group: ""
+}
+convex_hulls {
+  index: 134
+  count: 13
+  collision_group: ""
+}
+convex_hulls {
+  index: 147
+  count: 13
+  collision_group: ""
+}
+convex_hulls {
+  index: 160
+  count: 13
+  collision_group: ""
+}
+convex_hulls {
+  index: 173
+  count: 13
+  collision_group: ""
+}
+convex_hulls {
+  index: 186
+  count: 13
+  collision_group: ""
+}
+convex_hulls {
+  index: 199
+  count: 7
+  collision_group: ""
+}
+convex_hulls {
+  index: 206
+  count: 7
+  collision_group: ""
+}
+convex_hulls {
+  index: 213
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 217
+  count: 8
+  collision_group: ""
+}
+convex_hulls {
+  index: 225
+  count: 8
+  collision_group: ""
+}
+convex_hulls {
+  index: 233
+  count: 8
+  collision_group: ""
+}
+convex_hulls {
+  index: 241
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 245
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 249
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 253
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 257
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 261
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 265
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 269
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 273
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 273
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 273
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 273
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 277
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 281
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 285
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 289
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 293
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 297
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 301
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 305
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 305
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 305
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 305
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 305
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 305
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 305
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 305
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 309
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 313
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 317
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 317
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 317
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 317
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 317
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 317
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 321
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 325
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 329
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 333
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 337
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 337
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 337
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 337
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 337
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 337
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 341
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 345
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 345
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 349
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 353
+  count: 5
+  collision_group: ""
+}
+convex_hulls {
+  index: 358
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 358
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 358
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 358
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 358
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 358
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 358
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 362
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 366
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 370
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 370
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 370
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 370
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 370
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 370
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 370
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 370
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 374
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 378
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 382
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 386
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 390
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 394
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 398
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 402
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 402
+  count: 0
+  collision_group: ""
+}
+animations {
+  id: "artefact"
+  start_tile: 4
+  end_tile: 4
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "bomb"
+  start_tile: 13
+  end_tile: 13
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "bomb_insert"
+  start_tile: 3
+  end_tile: 3
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "ghost1"
+  start_tile: 14
+  end_tile: 14
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "ghost2"
+  start_tile: 15
+  end_tile: 15
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "ghost3"
+  start_tile: 16
+  end_tile: 16
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "ghost4"
+  start_tile: 17
+  end_tile: 17
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "ghost5"
+  start_tile: 18
+  end_tile: 18
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "heart"
+  start_tile: 20
+  end_tile: 20
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "heart_empty"
+  start_tile: 19
+  end_tile: 19
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "jump"
+  start_tile: 11
+  end_tile: 12
+  playback: PLAYBACK_ONCE_BACKWARD
+  fps: 15
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "mushroom"
+  start_tile: 2
+  end_tile: 2
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "player"
+  start_tile: 11
+  end_tile: 11
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+extrude_borders: 2
+inner_padding: 0

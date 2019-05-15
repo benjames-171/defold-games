@@ -1,0 +1,43 @@
+local data = require "main.data"
+
+local TIME = 120
+
+function init(self)
+	local pos = go.get_position()
+	pos.z = pos.z - 0.1
+	go.set_position(pos)
+	self.time = TIME
+	particlefx.play("#pfx")
+	sound.play("main:/sound#fuse")
+end
+
+local function destroytile(x, y)
+	local t = tilemap.get_tile("/level#tilemap", "world", x, y)
+	if t <= 40 then
+		tilemap.set_tile("/level#tilemap", "world", x, y, 0)
+	end
+end
+
+function update(self, dt)
+	self.time = self.time - 1
+	if self.time <= 0 then
+		local pos = data.world2tile(go.get_position())
+		destroytile(pos.x, pos.y)
+		destroytile(pos.x+1, pos.y)
+		destroytile(pos.x-1, pos.y)
+		destroytile(pos.x, pos.y+1)
+		destroytile(pos.x, pos.y-1)
+		
+		msg.post("/common/explosion", "explode", {pos = go.get_position()})
+		go.delete()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.other_group == hash("enemy") then
+			self.time = 0
+		end
+	end
+end
+

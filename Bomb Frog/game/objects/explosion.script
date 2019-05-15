@@ -1,0 +1,13 @@
+function update(self, dt)
+	msg.post("#co", "disable")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("explode") then
+		go.set_position(message.pos)
+		particlefx.play("#pfx")
+		sound.play("main:/sound#exp")
+		msg.post("#co", "enable")
+	end
+end
+

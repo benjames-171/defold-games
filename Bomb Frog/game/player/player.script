@@ -1,0 +1,262 @@
+local data = require "main.data"
+
+local SPEED = 2
+local STEP = 16
+local INVUL = 150
+local LOCK_TIME = 50
+
+local function invulnerable(self)
+	self.invul = INVUL
+	msg.post("#co", "disable")
+end	
+
+function init(self)
+	self.invul = 0
+	self.dropbomb = false
+	self.target = go.get_position()
+	self.inputlock = 0
+	data.bombsgrey = 0
+	data.bombs = 4
+	msg.post(".", "acquire_input_focus")
+	msg.post("@render:", "clear_color", {color = vmath.vector4(26/255, 28/255, 44/255, 1)})
+	invulnerable(self)
+
+	if data.level == 1 then msg.post("view#getready", "show")
+	else data.state = data.STATE_PLAYING
+	end
+end
+
+local function move(self)
+	local pos = go.get_position()
+	if pos.x < self.target.x then pos.x = pos.x + SPEED
+	elseif pos.x > self.target.x then pos.x = pos.x - SPEED
+	elseif pos.y < self.target.y then pos.y = pos.y + SPEED
+	elseif pos.y > self.target.y then pos.y = pos.y - SPEED
+	end
+
+	go.set_position(pos)
+end
+
+local function pickup(self)
+	local pos = data.world2tile(go.get_position())
+	local t = tilemap.get_tile("/level#tilemap", "top", pos.x, pos.y)
+
+	if t == 3 then
+		tilemap.set_tile("/level#tilemap", "top", pos.x, pos.y, 0)
+		sound.play("main:/sound#pickup")
+		data.bombs = data.bombs + 1
+		data.bombsgrey = data.bombsgrey - 1
+	elseif t == 20 and data.hearts < 5 then
+		tilemap.set_tile("/level#tilemap", "top", pos.x, pos.y, 0)
+		sound.play("main:/sound#heart")
+		data.hearts = data.hearts + 1
+	end
+
+	t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+	if t == 0 then
+		t = tilemap.get_tile("/level#tilemap", "treasure", pos.x, pos.y)
+		if t == 2 then
+			tilemap.set_tile("/level#tilemap", "treasure", pos.x, pos.y, 0)
+			sound.play("main:/sound#mushroom")
+			msg.post("view#game", "secret")
+			data.mushrooms = data.mushrooms + 1
+		elseif t > 2 then
+			tilemap.set_tile("/level#tilemap", "treasure", pos.x, pos.y, 0)
+			sound.play("main:/sound#treasure")
+			data.treasure = data.treasure + 1
+		end
+	end
+end
+
+local function bombs(self)
+	if self.target == go.get_position() and data.bombs > 0 and self.dropbomb then
+		data.bombs = data.bombs - 1
+		self.dropbomb = false
+		factory.create("#bomb_factory", self.target, vmath.quat_rotation_z(0))
+	end
+end
+
+local function blink(self)
+	if self.invul > 0 then
+		self.invul = self.invul - 1
+		if self.invul == 0 then
+			msg.post("#co", "enable")
+		elseif self.invul % 6 < 3 then
+			sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+		else
+			sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0))
+		end
+	end
+end
+
+local function exittomenu(self)
+	msg.post("/common/view", "reset")
+	msg.post("main:/sound", "stop_sound")
+	msg.post("main:/handler", "show_menu")
+end
+
+local function endcond(self)
+	if data.treasure >= data.treasuretotal then
+		msg.post("#co", "disable")
+		if data.level < 8 then
+			self.inputlock = LOCK_TIME
+			msg.post("view#clear", "show")
+			if data.hearts < 5 then data.hearts = data.hearts + 1 end
+		else
+			self.inputlock = LOCK_TIME
+			msg.post("view#complete", "show")
+		end
+	end
+
+	if data.hearts == 0 then
+		self.inputlock = LOCK_TIME
+		msg.post("main:/sound#music_game", "stop_sound")
+		sound.play("main:/sound#death")
+		msg.post("view#gameover", "show")
+		msg.post("#co", "disable")
+	end
+end
+
+function update(self, dt)
+	move(self)
+
+	if data.state == data.STATE_PLAYING then
+		blink(self)
+		pickup(self)
+		bombs(self)
+		endcond(self)
+	end
+
+	if self.inputlock > 0 then self.inputlock = self.inputlock - 1 end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("position") then
+		go.set_position(message.pos)
+		self.target = go.get_position()
+	elseif message_id == hash("contact_point_response") then
+		if data.hearts > 0 then data.hearts = data.hearts - 1 end
+		sound.play("main:/sound#hit")
+		invulnerable(self)
+	end
+end
+
+local function validtile(self, pos)
+	local r = true
+	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+
+	if t > 40 then r = false end
+	return r
+end
+
+local function move(self, pos, rot)
+	if validtile(self, data.world2tile(pos)) then
+		self.target = pos
+		go.set_rotation(vmath.quat_rotation_z(math.rad(rot)))
+		msg.post("#sprite", "play_animation", {id = hash("jump")})
+		sound.play("main:/sound#jump")
+	end
+end
+
+local function up(self)
+	if self.target.y < 184 then
+		local pos = go.get_position()
+		pos.y = pos.y + STEP
+		move(self, pos, 0)
+	end
+end
+
+local function down(self)
+	if self.target.y > 8 then
+		local pos = go.get_position()
+		pos.y = pos.y - STEP
+		move(self, pos, 180)
+	end
+end
+
+local function left(self)
+	if self.target.x > 8 then
+		local pos = go.get_position()
+		pos.x = pos.x - STEP
+		move(self, pos, 90)
+	end
+end
+
+local function right(self)
+	if self.target.x < 184 then
+		local pos = go.get_position()
+		pos.x = pos.x + STEP
+		move(self, pos, 270)
+	end
+end
+
+local function dropbomb(self)
+	if data.bombs > 0 then
+		self.dropbomb = true
+	else
+		sound.play("main:/sound#no")
+	end
+end
+
+local function input_playing(self, action_id, action)
+	if go.get_position() == self.target then
+		if action_id == hash("down") then down(self)
+		elseif action_id == hash("up") then up(self)
+		end
+		if action_id == hash("left") then left(self)
+		elseif action_id == hash("right") then right(self)
+		end
+	end
+
+	if action_id == hash("action") and action.pressed then
+		dropbomb(self)
+	elseif action_id == hash("exit") and action.pressed then
+		exittomenu(self)
+	elseif action_id == hash("debug") and action.pressed then
+		--data.treasure = data.treasuretotal
+	end
+end
+
+local function input_levelclear(self, action_id, action)
+	if action_id == hash("action") and action.pressed then
+		data.level = data.level + 1
+		data.maxlevel = data.level
+		msg.post("game:/loader", "new_level", {})
+	end	
+end
+
+local function input_complete(self, action_id, action)
+	if action_id == hash("action") and action.pressed then
+		data.maxlevel = 1
+		exittomenu(self)
+	end	
+end
+
+local function input_gameover(self, action_id, action)
+	if action_id == hash("action") and action.pressed then
+		exittomenu(self)
+	end
+end
+
+local function input_getready(self, action_id, action)
+	if action_id == hash("action") and action.pressed then
+		msg.post("view#getready", "hide")
+		data.state = data.STATE_PLAYING
+	end
+end
+
+function on_input(self, action_id, action)
+	if self.inputlock > 0 then return end
+	
+	if data.state == data.STATE_PLAYING then
+		input_playing(self, action_id, action)
+	elseif data.state == data.STATE_LEVELCLEAR then
+		input_levelclear(self, action_id, action)
+	elseif data.state == data.STATE_GAMEOVER then
+		input_gameover(self, action_id, action)
+	elseif data.state == data.STATE_GETREADY then
+		input_getready(self, action_id, action)
+	elseif data.state == data.STATE_COMPLETE then
+		input_complete(self, action_id, action)
+	end
+end
