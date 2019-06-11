@@ -1,0 +1,154 @@
+local data = require "main.data"
+local enemy = require "game.enemy.enemy"
+
+local function pathto(self, pos, dest)
+	tilemap.set_tile("#tilemap", "col", pos.x, pos.y, 0)
+		
+	while pos.x ~= dest.x do
+		tilemap.set_tile("#tilemap", "col", pos.x, pos.y, 0)
+		if pos.x > dest.x then pos.x = pos.x - 1
+		else pos.x = pos.x + 1
+		end
+	end
+
+	tilemap.set_tile("#tilemap", "col", pos.x, pos.y, 0)
+	
+	while pos.y ~= dest.y do
+		tilemap.set_tile("#tilemap", "col", pos.x, pos.y, 0)
+		if pos.y > dest.y then pos.y = pos.y - 1
+		else pos.y = pos.y + 1
+		end
+	end
+
+	tilemap.set_tile("#tilemap", "col", pos.x, pos.y, 0)
+	
+	return pos
+end
+
+local function generate(self)
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local pos = vmath.vector3(1, math.random(1, 9), 0.2)
+	
+	msg.post("/common/player", "position", {pos = data.tile2world(pos)})
+
+	for n = 0, 10 do
+		tilemap.set_tile("#tilemap", "col", n, 0, 1)
+		tilemap.set_tile("#tilemap", "col", n, 10, 1)
+		tilemap.set_tile("#tilemap", "col", 0, n, 1)
+		tilemap.set_tile("#tilemap", "col", 10, n, 1)
+	end
+
+	tilemap.set_tile("#tilemap", "col", 0, pos.y, 0)
+		
+	for y = sy+1, h+sy-2 do
+		for x = sx+1, w+sx-2 do
+			tilemap.set_tile("#tilemap", "col", x, y, 1)
+			tilemap.set_tile("#tilemap", "item", x, y, 0)
+		end
+	end
+
+	local total = math.random(10,14)
+	
+	while total > 0 do
+		pos = pathto(self, pos, vmath.vector3(math.random(1,9), math.random(1,9), 0))
+		total = total - 1
+	end
+
+	pos = pathto(self, pos, vmath.vector3(9, math.random(1,9), 0))
+	tilemap.set_tile("#tilemap", "col", 10, pos.y, 0)
+	msg.post("/common/exit", "position", {pos = data.tile2world(pos)})
+end
+
+local function tile(self, x, y, set)
+	local p = {
+		0,0,0,0,0,
+		0,0,0,1,6,
+		0,0,1,0,5,
+		0,0,1,1,18,
+		0,1,0,0,22,
+		0,1,0,1,20,
+		0,1,1,0,19,
+		0,1,1,1,23,
+		1,0,0,0,21,
+		1,0,0,1,2,
+		1,0,1,0,4,
+		1,0,1,1,8,
+		1,1,0,0,3,
+		1,1,0,1,7,
+		1,1,1,0,24,
+		1,1,1,1,1}
+
+	local t = tilemap.get_tile("#tilemap", "col", x, y)
+		
+	if t == 0 then
+		local n = tilemap.get_tile("#tilemap", "col", x, y+1)
+		local e = tilemap.get_tile("#tilemap", "col", x+1, y)
+		local s = tilemap.get_tile("#tilemap", "col", x, y-1)
+		local w = tilemap.get_tile("#tilemap", "col", x-1, y)
+
+		if n > 0 then n = 1 end
+		if e > 0 then e = 1 end
+		if s > 0 then s = 1 end
+		if w > 0 then w = 1 end
+		
+		local c = 1
+		while p[c] ~= n or p[c+1] ~= e or p[c+2] ~= s or p[c+3] ~= w do
+			c = c + 5
+		end
+
+		local tile = p[c+4]
+		if tile ~= 0 then tilemap.set_tile("#tilemap", "edge", x, y, set + tile) end
+	else
+		tilemap.set_tile("#tilemap", "col", x, y, set + 1)
+	end
+end
+
+local function parse(self)
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local sets = {32, 40, 64, 72, 96, 104, 128, 136, 160, 168}
+	local tileset = math.random(1,10)
+	local set = sets[tileset]
+
+	for y = sy+1, h+sy-2 do
+		for x = sx+1, w+sx-2 do
+			tilemap.set_tile("#tilemap", "bg", x, y, set + 17)
+			tilemap.set_tile("#tilemap", "edge", x, y, 0)
+			tile(self, x, y, set)
+		end
+	end
+end
+
+local function spawn(self)
+	local total = 5
+
+	while total > 0 do
+		local pos = data.getfreetile(self)
+		msg.post("/common/enemy", "spawn", {pos = data.tile2world(pos)})
+		total = total - 1
+	end
+end
+
+local function items(self)
+	local thresh = {30,40,50}
+		if math.random(1,100) >= thresh[data.difficulty] then
+		local pos = data.getfreetile(self)
+		tilemap.set_tile("#tilemap", "item", pos.x, pos.y, math.random(226,230))
+	end
+end
+
+local function newlevel(self)
+	enemy.deleteall()
+	generate(self)
+	parse(self)
+	spawn(self)
+	items(self)
+end
+
+function init(self)
+	newlevel(self)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("newlevel") then newlevel(self)
+	end
+end

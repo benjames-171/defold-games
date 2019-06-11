@@ -1,0 +1,109 @@
+local data = require "main.data"
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+function update(self, dt)
+	local str = tostring(data.level)
+	gui.set_text(gui.get_node("level"), str)
+
+	local node = gui.get_node("hp")
+	str = string.format("%d/9", data.energy)
+	gui.set_text(node, str)
+
+	if data.energy == 3 then gui.set_color(node, data.hex2rgba("#c9ad23"))
+	elseif data.energy == 2 then gui.set_color(node, data.hex2rgba("#b05621"))
+	elseif data.energy <= 1 then gui.set_color(node, data.hex2rgba("#9d1f2f"))
+	else gui.set_color(node, data.hex2rgba("#d8e1a9"))
+	end
+end
+
+local function invsort(self)
+	local temp = {0,0,0,0,0,0,0,0,0,0}
+
+	local slot = 1
+	for n = 1, 10 do
+		if data.item[n] > 0 then
+			temp[slot] = data.item[n]
+			slot = slot + 1
+		end
+	end
+	for n = 1, 10 do
+		data.item[n] = temp[n]
+	end
+end
+
+local function invpanel(self)
+	for n = 1, 10 do
+		if data.item[n] > 0 then
+			local node = gui.get_node(tostring(n))
+			gui.set_color(node, data.hex2rgba("#d8e1a9"))
+						
+			node = gui.get_node("name"..tostring(n))
+			gui.set_enabled(node, true)
+			gui.set_text(node, data.itemname[data.item[n]])
+
+			node = gui.get_node("icon"..tostring(n))
+			gui.set_enabled(node, true)
+			gui.set_texture(node, "tiles")
+			gui.play_flipbook(node, "item"..tostring(data.item[n]))
+		else
+			local node = gui.get_node(tostring(n))
+			gui.set_color(node, data.hex2rgba("#126f7e"))
+			
+			node = gui.get_node("name"..tostring(n))
+			gui.set_enabled(node, false)
+
+			node = gui.get_node("icon"..tostring(n))
+			gui.set_enabled(node, false)
+		end
+	end
+end
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	invsort(self)
+	invpanel(self)
+	gui.set_enabled(gui.get_node("fade"), false)
+	gui.set_enabled(gui.get_node("disc"), false)
+end
+
+local function fadeout(self, node)
+	gui.animate(node, gui.PROP_COLOR, self.base, gui.EASING_INOUTQUAD, 1.0, 0, disablenode)
+end
+
+local function fade(self, col)
+	local node = gui.get_node("fade")
+	self.base = vmath.vector4(col)
+	self.base.w = 0
+	col.w = 0.35
+	gui.set_enabled(node, true)
+	gui.set_color(node, self.base)
+	gui.animate(node, gui.PROP_COLOR, col, gui.EASING_INOUTQUAD, 0.5, 0, fadeout)
+end
+
+local function disc(self, item)
+	local node = gui.get_node("disc")
+	gui.set_enabled(node, true)
+	local text = "*"..data.itemtype[item].."*"
+	gui.set_text(gui.get_node("power"), text)
+	local to = data.hex2rgba("#52b466")
+	gui.set_color(node, to)
+	to.w = 0
+	gui.animate(node, gui.PROP_COLOR, to, gui.EASING_INOUTQUAD, 0.5, 3.0)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("inv") then
+		invsort(self)
+		invpanel(self)
+	elseif message_id == hash("fade") then
+		fade(self, message.col)
+	elseif message_id == hash("disc") then
+		disc(self, message.item)
+	end
+end

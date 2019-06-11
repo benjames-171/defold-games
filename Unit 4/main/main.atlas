@@ -1,0 +1,24 @@
+images {
+  image: "/assets/png/panel.png"
+}
+images {
+  image: "/assets/png/pixel.png"
+}
+images {
+  image: "/assets/png/logo.png"
+}
+images {
+  image: "/assets/png/dialog.png"
+}
+images {
+  image: "/assets/png/pixel_red.png"
+}
+images {
+  image: "/assets/png/dialog_large.png"
+}
+images {
+  image: "/assets/png/menu.png"
+}
+margin: 0
+extrude_borders: 0
+inner_padding: 0

@@ -1,0 +1,97 @@
+local data = require "main.data"
+local enemy = require "game.enemy.enemy"
+
+function init(self)
+	self.frozen = false
+	self.energy = 2
+	self.dest = go.get_position()
+	self.type = math.random(1,4)
+	anim = "enemy"..tostring(self.type)
+	msg.post("#sprite", "play_animation", {id = hash(anim)})
+end
+
+local function move(self)
+	local pos = go.get_position()
+	if pos.x < self.dest.x then pos.x = pos.x + 2
+	elseif pos.x > self.dest.x then pos.x = pos.x - 2
+	elseif pos.y < self.dest.y then pos.y = pos.y + 2
+	elseif pos.y > self.dest.y then pos.y = pos.y - 2
+	end
+	go.set_position(pos)
+end
+
+local function attack(self)
+	msg.post("/common/player", "hit")
+end
+
+local function trymove(self, move)
+	local pos = data.world2tile(go.get_position() + move)
+	local t = tilemap.get_tile("/level#tilemap", "col", pos.x, pos.y)
+	
+	if t == 0 and pos.x > 0 and pos.x < 10 then
+		pos = go.get_position() + move
+		if pos.x == data.playerpos.x and pos.y == data.playerpos.y then
+			attack(self)
+		else
+			local url = enemy.ontile(pos)
+
+			if url == nil then
+				self.dest = pos
+				enemy.setpos(go.get_id(), pos)
+			end
+		end
+	end
+end
+
+local function ai(self)
+	local pos = go.get_position()
+	local THRESH = 32
+	if math.abs(pos.x - data.playerpos.x) <= THRESH and math.abs(pos.y - data.playerpos.y) <= THRESH then
+		local move = vmath.vector3()
+		if math.random(1,2) == 1 and pos.x ~= data.playerpos.x then
+			if pos.x > data.playerpos.x then move = vmath.vector3(-data.TILE_SIZE, 0, 0)
+			elseif pos.x < data.playerpos.x then move = vmath.vector3(data.TILE_SIZE, 0, 0)
+			end
+		else
+			if pos.y > data.playerpos.y then move = vmath.vector3(0, -data.TILE_SIZE, 0)
+			elseif pos.y < data.playerpos.y then move = vmath.vector3(0, data.TILE_SIZE, 0)
+			end
+		end
+		trymove(self, move)
+	else
+		local moves = {vmath.vector3(1,0,0), vmath.vector3(-1,0,0), vmath.vector3(0,1,0), vmath.vector3(0,-1,0)}
+		trymove(self, moves[math.random(1,4)] * data.TILE_SIZE)
+	end
+end
+
+function update(self, dt)
+	if data.turn == 5 and not self.frozen then ai(self) end
+	move(self)
+end
+
+local function hit(self, power)
+	self.energy = self.energy - power
+	msg.post("/common/fx", "fx", {pos = go.get_position(), fx = data.FX_HIT})
+	if self.energy <= 0 then
+		enemy.delete(go.get_id())
+		sound.play("main:/sound#hit2")
+		go.delete()
+	else
+		sound.play("main:/sound#hit1")
+	end
+end
+
+local function freeze(self)
+	anim = "frozen"..tostring(self.type)
+	msg.post("#sprite", "play_animation", {id = hash(anim)})
+	self.frozen = true
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("hit") then
+		hit(self, message.power)
+	elseif message_id == hash("freeze") then
+		freeze(self)
+	end
+end
+
