@@ -1,3 +1,0 @@
-function init(self)
-    print("debug URL", msg.url())
-end

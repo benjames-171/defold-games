@@ -1,8 +1,0 @@
-function on_message(self, message_id, message, sender)
-	if message_id == hash("explode") then
-		go.set_position(message.pos)
-		particlefx.play("#pfx")
-		msg.post("main:/sound#exp_small", "play_sound", {gain = 1.0})		
-	end
-end
-

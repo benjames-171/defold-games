@@ -1,5 +1,0 @@
-function init(self)
-	msg.post("#camera", "acquire_camera_focus")
-	self.pos = vmath.vector3 (0, 0, 0)
-	go.set_position(self.pos)
-end
