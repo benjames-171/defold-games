@@ -1,0 +1,37 @@
+local data = require ("main.data")
+
+local function disable_node (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	self.node = gui.get_node("container")
+	gui.set_enabled(self.node, false)
+end
+
+local function show(self)
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_COLOR, data.hex2rgba("#14121e"), gui.EASING_INOUTQUAD, 3.0)
+	gui.animate(gui.get_node("exit"), gui.PROP_COLOR, data.hex2rgba("#c92464"), gui.EASING_INOUTQUAD, 1.0, 5.0)
+	data.state = data.STATE_GAMEOVER
+	sound.stop("main:/sound")
+	sound.play("main:/sound#dead")
+	msg.post(".", "acquire_input_focus")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("click") and action.pressed and data.state == data.STATE_GAMEOVER then
+		if gui.pick_node(gui.get_node("exit"), action.x, action.y) then
+			msg.post("player", "gameover")
+		end
+	end
+end
+
+
+

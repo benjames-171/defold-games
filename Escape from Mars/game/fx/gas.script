@@ -1,0 +1,13 @@
+local data = require "main.data"
+
+local TIME = 30
+
+function init(self)
+	particlefx.play("#pfx")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") and message.other_group == hash("player") and data.turn == 8 then
+		msg.post("/common/player", "gas")
+	end
+end

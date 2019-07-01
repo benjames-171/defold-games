@@ -1,0 +1,7 @@
+local data = require "main.data"
+
+function on_message(self, message_id, message, sender)
+	sprite.play_flipbook("#sprite", hash(message.anim))
+	if message_id == hash("position") then go.set_position(message.pos) end
+end
+

@@ -1,0 +1,25 @@
+local BASE = 0.1
+local SLIDE = 0.01
+
+function init(self)
+	self.machine = BASE
+	self.machadd = 0
+	sound.play("main:/sound#machine", {gain = self.machine})
+end
+
+function update(self, dt)
+	self.machine = self.machine + self.machadd
+	self.machadd = -SLIDE
+	
+	if self.machine > 1 then self.machine = 1 end
+	if self.machine < BASE then self.machine = BASE end
+
+	sound.set_gain("main:/sound#machine", self.machine)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("vol_machine") then
+		if message.vol > self.machine then self.machadd = SLIDE end
+	end
+end
+

@@ -1,0 +1,13 @@
+local enemy = require "game.enemy.enemy"
+
+local function spawn(self, pos)
+	pos.z = 0.2
+	local url = factory.create("#enemy_factory", pos, nil, {})
+	enemy.add(url, pos)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("spawn") then spawn(self, message.pos)
+	end
+end
+

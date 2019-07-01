@@ -1,0 +1,15 @@
+go.property("vec", vmath.vector3())
+go.property("power", 0)
+
+function update(self, dt)
+	local pos = go.get_position()
+	go.set_position(pos + self.vec)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		msg.post(message.other_id, "hit", {power = self.power})
+		go.delete()
+	end
+end
+

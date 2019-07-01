@@ -1,0 +1,33 @@
+local data = require "main.data"
+
+local function opened (self, node)
+	gui.set_enabled(node, false)
+end
+
+local function closed (self, node)
+	gui.animate(gui.get_node("underline_bottom"), gui.PROP_COLOR, vmath.vector4(0, 0, 0, 0), gui.EASING_INOUTQUAD, 1)
+	gui.animate(gui.get_node("underline_top"), gui.PROP_COLOR, vmath.vector4(0, 0, 0, 0), gui.EASING_INOUTQUAD, 1)
+	msg.post("/common/player", "closed")
+end
+
+local function hide(self)
+	gui.animate(gui.get_node("shutter_top"), gui.PROP_POSITION, vmath.vector4(0, 720, 0, 0), gui.EASING_INOUTQUAD, 1, 0.25, opened)
+	gui.animate(gui.get_node("shutter_bottom"), gui.PROP_POSITION, vmath.vector4(0, 0, 0, 0), gui.EASING_INOUTQUAD, 1, 0.25, opendd)
+	sound.play("main:/sound#out")
+end
+
+local function show(self)
+	gui.set_enabled(gui.get_node("shutter_top"), true)
+	gui.set_enabled(gui.get_node("shutter_bottom"), true)
+	gui.animate(gui.get_node("shutter_top"), gui.PROP_POSITION, vmath.vector4(0, 360, 0, 0), gui.EASING_INOUTQUAD, 1, 0, closed)
+	gui.animate(gui.get_node("shutter_bottom"), gui.PROP_POSITION, vmath.vector4(0, 360, 0, 0), gui.EASING_INOUTQUAD, 1)
+	sound.play("main:/sound#in")
+end
+
+function init(self)
+	hide(self)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then show(self) end
+end

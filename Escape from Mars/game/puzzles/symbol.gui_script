@@ -1,0 +1,117 @@
+local data = require ("main.data")
+
+local function disablenode(self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.node = gui.get_node("container")
+	self.code = {0,0,0,0}
+	self.col = 1
+
+	if data.level == 1 then	self.valid = {2,8,6,5}
+	else self.valid = {7,3,9,4}
+	end
+	gui.set_enabled(self.node, false)
+	gui.set_color(self.node, vmath.vector4(1,1,1,0))
+	gui.set_position(self.node, vmath.vector3(640,300, 0))
+end
+
+local function show(self)
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(640,360,0), gui.EASING_INOUTQUAD, 0.25, 0.0)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_INOUTQUAD, 0.25, 0.0)
+	msg.post("/common/view#game", "tick", {text = "ENTER CODE TO RESTORE MAIN POWER"})
+	data.state = data.STATE_PUZZLE
+	sound.play("main:/sound#open")
+end
+
+local function hide(self)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(640,300,0), gui.EASING_INOUTQUAD, 0.25, 0.0, disablenode)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.25, 0.0)
+	data.state = data.STATE_PLAYING
+	sound.play("main:/sound#close")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	end
+end
+
+local function panel(self)
+	for n = 1, 4 do
+		local node = gui.get_node("d"..tostring(n))
+		local anim = tostring(self.code[n])
+		gui.play_flipbook(node, anim)
+	end
+end
+
+local function engage(self)
+	local f = true
+	for n = 1, 4 do
+		if self.code[n] ~= self.valid[n] then f = false end
+	end
+
+	if f then
+		msg.post("/common/view#game", "tick", {text = "MAIN POWER RESTORED"})
+		sound.play("main:/sound#positive")
+		sound.play("main:/sound#startup", {gain = 0.2})
+		data.elec = true
+		hide(self)
+	else
+		self.code = {0,0,0,0}
+		self.col = 1
+		panel(self)
+		msg.post("/common/view#game", "tick", {text = "INCORRECT CODE"})
+		sound.play("main:/sound#no")
+	end
+
+	sound.play("main:/sound#square")
+end
+
+local function digit(self, n)
+	if self.col < 5 then
+		self.code[self.col] = n
+		self.col = self.col + 1
+		sound.play("main:/sound#square")
+		panel(self)
+	end
+end
+
+local function backspace(self)
+	if self.col > 1 then
+		self.col = self.col - 1
+		sound.play("main:/sound#delete", {gain = 0.5})
+	end
+	self.code [self.col] = 0
+	panel(self)
+end
+
+local function cancel(self)
+	self.code = {0,0,0,0}
+	self.col = 1
+	panel(self)
+	msg.post("/common/view#game", "tick", {text = "CODE ENTRY CANCELLED"})
+	sound.play("main:/sound#square")
+	hide(self)
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("click") and action.pressed and data.state == data.STATE_PUZZLE then
+		if gui.pick_node(gui.get_node("cancel"), action.x, action.y) then
+			cancel(self)
+		elseif gui.pick_node(gui.get_node("ok"), action.x, action.y) then
+			engage(self)
+		elseif gui.pick_node(gui.get_node("back"), action.x, action.y) then
+			backspace(self)
+		else
+			for n = 1, 9 do
+				local node = gui.get_node(tostring(n))
+				if gui.pick_node(node, action.x, action.y) then digit(self, n) end
+			end
+		end
+	end
+end
+

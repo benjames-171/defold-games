@@ -1,0 +1,99 @@
+local data = require "main.data"
+local enemy = require "game.enemy.enemy"
+
+local SPEED = 1
+
+function init(self)
+	self.dest = go.get_position()
+	self.type = math.random(1, data.level)
+	self.power = self.type * 5
+	self.energy = 10 + (self.type * 15)
+	anim = "enemy"..tostring(self.type)
+	msg.post("#sprite", "play_animation", {id = hash(anim)})
+end
+
+local function move(self)
+	local pos = go.get_position()
+	if pos.x < self.dest.x then pos.x = pos.x + SPEED
+	elseif pos.x > self.dest.x then pos.x = pos.x - SPEED
+	end
+	if pos.y < self.dest.y then pos.y = pos.y + SPEED
+	elseif pos.y > self.dest.y then pos.y = pos.y - SPEED
+	end
+	go.set_position(pos)
+end
+
+local function attack(self)
+	msg.post("/common/player", "hit", {power = self.power})
+end
+
+local function trymove(self, move)
+	local pos = data.world2tile(go.get_position() + move)
+	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+	
+	if t <= 80 then
+		pos = go.get_position() + move
+		if pos.x == data.playerpos.x and pos.y == data.playerpos.y then
+			attack(self)
+		else
+			local url = enemy.ontile(pos)
+
+			if url == nil then
+				self.dest = pos
+				enemy.setpos(go.get_id(), pos)
+			end
+		end
+	end
+end
+
+local function ai(self)
+	local pos = go.get_position()
+	local THRESH = 64
+	
+	local v = physics.raycast(go.get_position(), data.playerpos, {hash("world")})
+
+	if math.abs(pos.x - data.playerpos.x) <= THRESH and math.abs(pos.y - data.playerpos.y) <= THRESH and v == nil then
+		local move = vmath.vector3()
+		if pos.x > data.playerpos.x then move.x = -data.TILE_SIZE
+		elseif pos.x < data.playerpos.x then move.x = data.TILE_SIZE
+		end
+		if pos.y > data.playerpos.y then move.y = -data.TILE_SIZE
+		elseif pos.y < data.playerpos.y then move.y = data.TILE_SIZE
+		end
+		trymove(self, move)
+		msg.post("/common/player", "spotted")
+		msg.post("#alert", "enable")
+	else
+		local moves = {vmath.vector3(1,0,0), vmath.vector3(-1,0,0), vmath.vector3(0,1,0), vmath.vector3(0,-1,0)}
+		trymove(self, moves[math.random(1,4)] * data.TILE_SIZE)
+		msg.post("#alert", "disable")
+	end
+end
+
+function update(self, dt)
+	if data.turn == 8 then
+		ai(self)
+	end
+	move(self)
+end
+
+local function hit(self, power)
+	self.energy = self.energy - power
+	msg.post("/common/fx", "fx", {pos = go.get_position(), fx = data.FX_HIT})
+	if self.energy <= 0 then
+		enemy.delete(go.get_id())
+		sound.play("main:/sound#wreck")
+		go.delete()
+		msg.post("/common/fx", "fx", {pos = go.get_position(), fx = data.FX_EXPLODE})
+		msg.post("/common/view#game", "tick", {text = "DESTROYED A HOSTILE ROBOT"})
+	else
+		sound.play("main:/sound#hit2")
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("hit") then
+		hit(self, message.power)
+	end
+end
+

@@ -1,0 +1,15 @@
+local data = require "main.data"
+
+function init(self)
+	self.rot = 0
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	local d = vmath.length(pos - data.playernow)
+	d = 1-(d/150)
+	if d < 0.1 then d = 0.1 end
+	msg.post("/common/sound", "vol_machine", {vol = d})
+	self.rot = self.rot - 0.2
+	go.set_rotation(vmath.quat_rotation_z(self.rot))
+end

@@ -1,0 +1,28 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /render/custom.renderc
+
+[display]
+width = 1280
+height = 720
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[script]
+shared_state = 1
+
+[project]
+title = Escape from Mars
+
+[html5]
+splash_image = /assets/png/splash.png
+htmlfile = /custom.html
+
+[sprite]
+subpixels = 1
+
+[android]
+immersive_mode = 1
+

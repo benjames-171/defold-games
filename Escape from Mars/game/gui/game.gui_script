@@ -1,0 +1,115 @@
+local data = require "main.data"
+
+function flashpos(self, node)
+	gui.set_color(node, data.hex2rgba("#6df7c1"))
+	gui.animate(node, gui.PROP_COLOR, data.hex2rgba("#1e8875"), gui.EASING_LINEAR, 0.5, 0, flashpos)
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.tick = 0
+	self.current = ""
+	sx, sy, self.mapw, self.maph = tilemap.get_bounds("/level#tilemap")
+	flashpos(self, gui.get_node("position"))
+end
+
+local function ticker(self)
+	local len = string.len(self.current)
+	if self.tick < len then
+		self.tick = self.tick + 1
+		if self.tick % 3 == 0 then
+			sound.play("main:/sound#tick")
+		end
+		gui.set_text(gui.get_node("ticker"), string.sub(self.current, 1, self.tick))
+	end
+end
+
+local function status(self)
+	gui.set_scale(gui.get_node("health"), vmath.vector3(1, data.energy/100, 1))
+	gui.set_scale(gui.get_node("power"), vmath.vector3(1, data.power/100, 1))
+	gui.set_scale(gui.get_node("ammo"), vmath.vector3(1, data.ammo/20, 1))
+end
+
+local function map(self)
+	if data.state == data.STATE_PLAYING then
+		local pos = data.playernow 
+		pos.x = pos.x / 4
+		pos.y = pos.y / 4
+		pos.z = 0
+		local offset = vmath.vector3((self.mapw-2) * 2, (self.maph-2) * 2, 0) --FUDGE
+		gui.set_position(gui.get_node("position"), pos - offset)
+	end
+end
+
+function update(self, dt)
+	ticker(self)
+	status(self)
+	map(self)
+end
+
+local function invsort(self)
+	local temp = {}
+	local slot = 1
+
+	for n = 1, data.INV_SIZE do
+		temp[n] = 0
+	end
+		
+	for n = 1, data.INV_SIZE do
+		if data.inv[n] > 0 then
+			temp[slot] = data.inv[n]
+			slot = slot + 1
+		end
+	end
+
+	for n = 1, data.INV_SIZE do
+		data.inv[n] = temp[n]
+	end
+end
+
+local function inv(self)
+	for n = 1, data.ITM_SIZE do
+		local slot = "inv"..tostring(n)
+		local node = gui.get_node(slot)
+		gui.play_flipbook(node, "item"..tostring(data.inv[n]))
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("inv") then
+		invsort(self)
+		inv(self)
+	elseif message_id == hash("minimap_size") then
+		gui.set_size(gui.get_node("minimap"), message.size)
+	elseif message_id == hash("tick") then
+		self.current = message.text
+		self.tick = 0
+	end
+end
+
+local function examine(self, slot)
+	msg.post("#examine", "show", {slot = slot})
+end
+
+local function processclick(self, action)
+	if gui.pick_node(gui.get_node("screen"), action.x, action.y) then
+		msg.post("player", "click")
+	elseif gui.pick_node(gui.get_node("skip"), action.x, action.y) and data.turn == 0 then
+		data.turn = 1
+		self.current = "SKIPPED A TURN"
+		self.tick = 0
+	end
+
+	for n = 1, data.ITM_SIZE do
+		local node = gui.get_node("inv"..tostring(n))
+		if gui.pick_node(node, action.x, action.y) and data.inv[n] > 0 then
+			examine(self, n)
+		end
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("click") and action.pressed and data.state == data.STATE_PLAYING then
+		processclick(self, action)
+	end
+end

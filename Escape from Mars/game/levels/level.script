@@ -1,0 +1,110 @@
+local data = require "main.data"
+
+local function spawn_enemy(self, pos)
+	tilemap.set_tile("#tilemap", "control", pos.x, pos.y, 0)
+	msg.post("/common/enemy", "spawn", {pos = data.tile2world(pos)})
+end
+
+local function spawn_player(self, pos)
+	tilemap.set_tile("#tilemap", "control", pos.x, pos.y, 0)
+	msg.post("/common/player", "spawn", {pos = data.tile2world(pos)})
+end
+
+local function spawn_fan(self, pos)
+	tilemap.set_tile("#tilemap", "control", pos.x, pos.y, 0)
+	pos = data.tile2world(pos) + vmath.vector3(8,-8,0)
+	factory.create("#fan_factory", pos)
+end
+
+local function tile(self, x, y, set)
+	local p = {
+		0,0,0,0,38,0,
+		0,0,0,1,37,0,
+		0,0,1,0,4,0,
+		0,0,1,1,3,0,
+		0,1,0,0,20,0,
+		0,1,0,1,21,4,
+		0,1,1,0,1,0,
+		0,1,1,1,2,0,
+		1,0,0,0,36,0,
+		1,0,0,1,35,0,
+		1,0,1,0,5,4,
+		1,0,1,1,19,0,
+		1,1,0,0,33,0,
+		1,1,0,1,34,0,
+		1,1,1,0,17,0,
+		1,1,1,1,18,0}
+
+	local n = tilemap.get_tile("#tilemap", "world", x, y+1)
+	local e = tilemap.get_tile("#tilemap", "world", x+1, y)
+	local s = tilemap.get_tile("#tilemap", "world", x, y-1)
+	local w = tilemap.get_tile("#tilemap", "world", x-1, y)
+
+	if n > 0 and n <= 128 then n = 1 else n = 0 end
+	if e > 0 and e <= 128 then e = 1 else e = 0 end
+	if s > 0 and s <= 128 then s = 1 else s = 0 end
+	if w > 0 and w <= 128 then w = 1 else w = 0 end
+
+	local c = 1
+	while p[c] ~= n or p[c+1] ~= e or p[c+2] ~= s or p[c+3] ~= w do
+		c = c + 6
+	end
+
+	local tile = p[c+4]
+	if p[c+5] ~= 0 then tile = tile + math.random(0, p[c+5]) end
+	tilemap.set_tile("#tilemap", "world", x, y, set + tile)
+end
+
+local function shadow(self, x, y)
+	local p = {
+		0,0,0,0,
+		0,0,1,28,
+		0,1,0,30,
+		0,1,1,29,
+		1,0,0,26,
+		1,0,1,24,
+		1,1,0,27,
+		1,1,1,25}
+
+	local w = tilemap.get_tile("#tilemap", "world", x-1, y)
+	local nw = tilemap.get_tile("#tilemap", "world", x-1, y+1)
+	local n = tilemap.get_tile("#tilemap", "world", x, y+1)
+
+	if w > 0 then w = 1 end
+	if nw > 0 then nw = 1 end
+	if n > 0 then n = 1 end
+
+	local c = 1
+	while p[c] ~= w or p[c+1] ~= nw or p[c+2] ~= n do
+		c = c + 4
+	end
+
+	local tile = p[c+3]
+	tilemap.set_tile("#tilemap", "shadow", x, y, tile)
+end
+
+local function parse(self)
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	local set = 80
+	
+	for y = sy+1, h+sy-2 do
+		for x = sx+1, w+sx-2 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			if t > 0 and t <= 128 then tile(self, x, y, set) 
+			elseif t == 177 then tilemap.set_tile("#tilemap", "world", x, y, math.random(161,172))
+			elseif t == 0 then shadow(self, x, y)
+			end
+			
+			t = tilemap.get_tile("#tilemap", "control", x, y)
+			if t == 1 then spawn_player(self, vmath.vector3(x,y,0.2))
+			elseif t == 2 then spawn_enemy(self, vmath.vector3(x,y,0.2))
+			elseif t == 3 then spawn_fan(self, vmath.vector3(x,y,-0.1))
+			end
+		end
+	end
+end
+
+function init(self)
+	parse(self)
+end

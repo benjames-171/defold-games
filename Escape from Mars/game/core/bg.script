@@ -1,0 +1,16 @@
+local data = require "main.data"
+
+function update(self, dt)
+	local pos = vmath.vector3()
+
+	while pos.x - data.scrollpos.x < 320 do pos.x = pos.x + 320 end
+	while pos.x - data.scrollpos.x > 320 do pos.x = pos.x - 320 end
+
+	while pos.y - data.scrollpos.y < 180 do pos.y = pos.y + 180 end
+	while pos.y - data.scrollpos.y > 180 do pos.y = pos.y - 180 end
+		
+	pos.z = -0.5
+
+	go.set_position(pos)
+end
+

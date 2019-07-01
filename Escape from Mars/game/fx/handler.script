@@ -1,0 +1,6 @@
+function on_message(self, message_id, message, sender)
+	if message_id == hash("fx") then
+		factory.create("#fx_factory", message.pos, nil, {fx = message.fx})
+	end
+end
+

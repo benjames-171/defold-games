@@ -1,0 +1,16 @@
+key_trigger {
+  input: KEY_ESC
+  action: "exit"
+}
+key_trigger {
+  input: KEY_END
+  action: "debug"
+}
+key_trigger {
+  input: KEY_DEL
+  action: "equip"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_LEFT
+  action: "click"
+}

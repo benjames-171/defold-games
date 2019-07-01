@@ -1,0 +1,447 @@
+local data = require "main.data"
+local enemy = require "game.enemy.enemy"
+local item = require "game.core.item"
+
+local Z_DEPTH = 0.5
+local SPEED = 1
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	msg.post("view#game", "inv")
+	data.state = data.STATE_PLAYING
+	data.elec = false
+	self.dest = go.get_position()
+	self.cursor = vmath.vector3()
+	self.block = vmath.vector3()
+	self.snap = true
+	self.path = {}
+
+	if data.level == 1 then
+		msg.post("view#game", "tick", {text = "WELCOME TO MARS"})
+		sound.play("main:/sound#machine", {gain = 0.1})
+		sound.play("main:/sound#music", {gain = 1.0})
+		item.data[0] = {name = "NOTHING", slot = item.SLOT_NONE, prop = item.PROP_NONE, value = 0}
+	end
+end
+
+local function move(self)
+	local pos = go.get_position()
+	if pos.x < self.dest.x then
+		pos.x = pos.x + SPEED
+		sprite.set_hflip("#sprite", false)
+	elseif pos.x > self.dest.x then
+		pos.x = pos.x - SPEED
+		sprite.set_hflip("#sprite", true)
+	end
+	if pos.y < self.dest.y then pos.y = pos.y + SPEED
+	elseif pos.y > self.dest.y then pos.y = pos.y - SPEED
+	end
+	go.set_position(pos)
+	data.playernow = pos
+end
+
+local function nextlevel(self)
+	enemy.deleteall()
+	data.level = data.level + 1
+
+	if data.level < 5 then msg.post("game:/loader", "new_level", {})
+	else msg.post("view#complete", "show")
+	end
+end
+
+local function levelclear(self)
+	msg.post("view#shutter", "show")
+	data.state = data.STATE_CLEAR
+end
+
+local function puzzle(self)
+	if not data.elec then
+		msg.post("/level#puzzle", "show")
+	end
+end
+
+local function cond(self)
+	if data.turn == 0 then
+		local pos = data.world2tile(go.get_position())
+		local t = tilemap.get_tile("/level#tilemap", "back", pos.x, pos.y)
+
+		if t == 59 then
+			levelclear(self)
+		elseif t == 43 and data.world2tile(go.get_position()) ~= self.block then
+			self.block = data.world2tile(go.get_position())
+			puzzle(self)
+		end
+	end
+end
+
+local function turn(self)
+	if data.turn > 0 then data.turn = data.turn + 1 end
+	if data.turn > 16 then data.turn = 0 end
+end
+
+local function pickup(self)
+	if go.get_position() ~= self.dest then return end
+	
+	local pos = data.world2tile(go.get_position())
+	local t = tilemap.get_tile("/level#tilemap", "control", pos.x, pos.y) - 209
+
+	if pos == self.block then return
+	else self.block = vmath.vector3()
+	end
+
+	if t >= 0 and t <= 16 then
+		local slot = 1
+		while data.inv[slot] > 0 and slot < data.INV_SIZE do
+			slot = slot + 1
+		end
+		if data.inv[slot] == 0 then
+			data.inv[slot] = t
+			tilemap.set_tile("/level#tilemap", "control", pos.x, pos.y, 0)
+			msg.post("view#game", "inv")
+			sound.play("main:/sound#pickup")
+			msg.post("view#game", "tick", {text = "PICKED UP THE "..item.getname(t)})
+		else
+			msg.post("view#game", "tick", {text = "INVENTORY FULL"})
+			self.block = pos
+		end
+	end
+end
+
+local function drop(self, slot)
+	local pos = data.world2tile(go.get_position())
+	local itm = data.inv[slot]
+	tilemap.set_tile("/level#tilemap", "control", pos.x, pos.y, itm + 209)
+	msg.post("view#game", "tick", {text = "DROPPED THE "..item.getname(itm)})
+	data.inv[slot] = 0
+	self.block = pos
+	msg.post("view#game", "inv")
+end
+
+local function equip(self, slot)
+	local itm = data.inv[slot]
+	local dest = item.getslot(itm)
+	local tmp = data.inv[dest]
+
+	data.inv[dest] = itm
+	data.inv[slot] = tmp
+	msg.post("view#game", "inv")
+	msg.post("view#game", "tick", {text = "EQUIPPED THE "..item.getname(itm)})
+end
+
+local function unequip(self, slot)
+	local itm = data.inv[slot]
+
+	local dest = 1
+	while data.inv[dest] > 0 and dest < data.INV_SIZE do
+		dest = dest + 1
+	end
+	if data.inv[dest] == 0 then
+		data.inv[dest] = itm
+		data.inv[slot] = 0
+	else
+		drop(self, slot)
+	end
+	msg.post("view#game", "inv")
+	msg.post("view#game", "tick", {text = "UNEQUIPPED THE "..item.getname(itm)})
+end
+
+local function use(self, slot)
+	local itm = data.inv[slot]
+	local val = item.getvalue(itm)
+	local prop = item.getprop(itm)
+
+	if prop == item.PROP_HEALTH then
+		data.energy = data.energy + val
+		if data.energy > 100 then data.energy = 100 end
+	elseif prop == item.PROP_POWER then
+		data.power = data.power + val
+		if data.power > 100 then data.power = 100 end
+	end
+
+	data.inv[slot] = 0
+	msg.post("view#game", "inv")
+	msg.post("view#game", "tick", {text = "USED THE "..item.getname(itm)})
+end
+
+local function load(self, slot)
+	if data.inv[item.SLOT_RIGHT] > 0 then
+		local itm = data.inv[slot]
+		local val = item.getvalue(itm)
+		data.ammo = data.ammo + val
+		if data.ammo > 20 then data.ammo = 20 end
+		data.inv[slot] = 0
+		msg.post("view#game", "inv")
+		msg.post("view#game", "tick", {text = "WEAPON LOADED"})
+	else
+		msg.post("view#game", "tick", {text = "NO RANGED WEAPON EQUIPPED"})
+	end
+end
+
+local function cam(self)
+	if self.snap then
+		msg.post("view#script", "snap_to", {position = go.get_position()})
+		self.snap = false
+	else
+		msg.post("view#script", "look_at", {position = go.get_position()})
+	end
+end
+
+local function hit(self, power)
+	local arm = item.getvalue(data.inv[item.SLOT_CHEST])
+	arm = 1 - (arm / 100)
+
+	if data.inv[item.SLOT_CHEST] == 2 and data.power > 0 then
+		arm = arm / 4
+	end
+	
+	data.energy = data.energy - (power * arm)
+	msg.post("/common/fx", "fx", {pos = go.get_position(), fx = data.FX_HIT})
+	
+	if data.energy <= 0 then
+		data.energy = 0
+		msg.post("#sprite", "disable")
+		msg.post("view#gameover", "show")
+	else
+		sound.play("main:/sound#hit1")
+	end
+end
+
+local function gas(self)
+	if data.inv[item.SLOT_HEAD] == 0 and data.state == data.STATE_PLAYING then
+		hit(self, 20)
+	end
+end
+
+local function attack(self, url)
+	local power = 5
+
+	local itm = data.inv[item.SLOT_LEFT]
+	if itm > 0 then power = item.getvalue(itm)
+	else msg.post("view#game", "tick", {text = "NO MELEE WEAPON EQUIPPED"})
+	end
+
+	msg.post(url, "hit", {power = power})
+end
+
+local function usekey(self)
+	local KEY_ID = 5
+	
+	for slot = 1, data.ITM_SIZE do
+		if data.inv[slot] == KEY_ID then
+			data.inv[slot] = 0
+			msg.post("view#game", "inv")
+			return true
+		end
+	end
+
+	return false
+end
+
+local function trymove(self, dest)
+	local pos = data.world2tile(dest)
+	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+	if t <= 80 then
+		pos = dest
+		local url = enemy.ontile(pos)
+		if url == nil then
+			self.dest = pos
+			sound.play("main:/sound#step")
+			data.playerpos = pos
+		else
+			attack(self, url)
+			self.path = {}
+		end
+		data.turn = 1
+	elseif t == 192 then
+		if not data.elec then
+			msg.post("view#game", "tick", {text = "MAIN POWER OFFLINE"})
+			self.path = {}
+		elseif usekey(self) then
+			tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 0)
+			sound.play("main:/sound#door")
+			msg.post("view#game", "tick", {text = "INNER HATCH OPEN"})
+		else
+			msg.post("view#game", "tick", {text = "INNER HATCH LOCKED"})
+			self.path = {}
+		end
+	else
+		self.path = {}
+	end
+end
+
+local function gameover(self)
+	enemy.deleteall()
+	msg.post("view#script", "snap_to", {position = data.offset})
+	msg.post("main:/handler", "show_menu")
+	sound.stop("main:/sound")
+	data.state = data.STATE_MENU
+end
+
+local function cursor(self, action)
+	self.cursor = vmath.vector3(action.x / data.PIXEL_SIZE, action.y / data.PIXEL_SIZE, 0) + data.scrollpos
+	self.cursor = data.world2tile(self.cursor)
+	self.cursor = data.tile2world(self.cursor)
+
+	local anim = "default"
+	if enemy.ontile(self.cursor) ~= nil then anim = "target" end
+	msg.post("cursor", "position", {pos = self.cursor, anim = anim})
+end
+
+local function path(self)
+	if go.get_position() == self.dest and self.path[1] ~= nil then
+		local dest = data.tile2world(self.path[1])
+		table.remove(self.path, 1)
+		trymove(self, dest)
+	end
+end
+
+local function power(self)
+	if data.inv[item.SLOT_CHEST] == 2 and data.power > 0 and data.turn == 2 then
+		data.power = data.power - 0.5
+		if data.power <= 0 then
+			data.power = 0
+			msg.post("view#game", "tick", {text = "ELECTRICAL POWER EXHAUSTED"})
+		end
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		path(self)
+		move(self)
+		cond(self)
+		pickup(self)
+		power(self)
+		cam(self)
+	end
+	turn(self)
+end
+
+local function bresenham(self, x1, y1, x2, y2)
+	delta_x = x2 - x1
+	ix = delta_x > 0 and 1 or -1
+	delta_x = 2 * math.abs(delta_x)
+
+	delta_y = y2 - y1
+	iy = delta_y > 0 and 1 or -1
+	delta_y = 2 * math.abs(delta_y)
+
+	if delta_x >= delta_y then
+		error = delta_y - delta_x / 2
+
+		while x1 ~= x2 do
+			if (error > 0) or ((error == 0) and (ix > 0)) then
+				error = error - delta_x
+				y1 = y1 + iy
+			end
+
+			error = error + delta_y
+			x1 = x1 + ix
+
+			table.insert (self.path, vmath.vector3(x1, y1, Z_DEPTH))
+		end
+	else
+		error = delta_x - delta_y / 2
+
+		while y1 ~= y2 do
+			if (error > 0) or ((error == 0) and (iy > 0)) then
+				error = error - delta_y
+				x1 = x1 + ix
+			end
+
+			error = error + delta_x
+			y1 = y1 + iy
+
+			table.insert (self.path, vmath.vector3(x1, y1, Z_DEPTH))
+		end
+	end
+end
+
+local function makepath(self)
+	local pos = data.world2tile(go.get_position())
+	local dest = data.world2tile(self.cursor)
+
+	self.path = {}
+	bresenham(self, pos.x, pos.y, dest.x, dest.y)
+end
+
+local function shoot(self)
+	if data.ammo > 0 then
+		local v = self.cursor - go.get_position()
+		v = vmath.normalize(v) * 12
+		local r = math.atan2(v.y, v.x)
+		local p = item.getvalue(data.inv[item.SLOT_RIGHT])
+		factory.create("#fire_factory", nil, vmath.quat_rotation_z(r), {vec = v, power = p})
+		sound.play("main:/sound#shot1")
+		data.ammo = data.ammo - 1
+		data.turn = 1
+	else
+		sound.play("main:/sound#click")
+		msg.post("view#game", "tick", {text = "WEAPON EMPTY"})
+	end
+end
+
+local function click(self)
+	local pos = go.get_position()
+	local dx = math.abs(pos.x - self.cursor.x)
+	local dy = math.abs(pos.y - self.cursor.y)
+	
+	if data.turn == 0 then
+		if enemy.ontile(self.cursor) and data.inv[item.SLOT_RIGHT] > 0 and (dx > data.TILE_SIZE or dy > data.TILE_SIZE) then shoot(self)
+		else makepath(self)
+		end
+	end
+end
+
+local function input_playing(self, action_id, action)
+	if action_id == hash("exit") and action.pressed then
+		gameover(self)
+	--[[elseif action_id == hash("debug") and action.pressed then
+		levelclear(self)
+	elseif action_id == hash("equip") and action.pressed then
+		for n = 1, data.INV_SIZE do
+			data.inv[n] = math.random(1,15)
+		end
+		msg.post("view#game", "inv")--]]
+	end
+	cursor(self, action)
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_PLAYING then
+		input_playing(self, action_id, action)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("spawn") then
+		local pos = message.pos
+		pos.z = Z_DEPTH
+		go.set_position(pos)
+		self.dest = pos
+	elseif message_id == hash("hit") then
+		hit(self, message.power)
+	elseif message_id == hash("click") then
+		click(self)
+	elseif message_id == hash("spotted") then
+		self.path = {}
+	elseif message_id == hash("drop") then
+		drop(self, message.slot)
+	elseif message_id == hash("EQUIP") then 
+		equip(self, message.slot)
+	elseif message_id == hash("UNEQUIP") then 
+		unequip(self, message.slot)
+	elseif message_id == hash("USE") then 
+		use(self, message.slot)
+	elseif message_id == hash("LOAD") then 
+		load(self, message.slot)
+	elseif message_id == hash("gameover") then 
+		gameover(self)
+	elseif message_id == hash("closed") then 
+		nextlevel(self)
+	elseif message_id == hash("gas") then 
+		gas(self)
+	end
+end
+
+
