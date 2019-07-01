@@ -1,0 +1,85 @@
+local data = require "main.data"
+
+function update(self, dt)
+	local a = data.items[2] * 0.1
+
+	a = a + data.items[3] * 0.5
+	a = a + data.items[4] * 2.5
+	a = a + data.items[5] * 10
+	a = a + data.items[6] * 25
+	a = a + data.items[7] * 50
+	
+	data.energy = data.energy + a
+end
+
+local function findtile(self, layer, num)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", layer, x, y)
+			if t == num then return vmath.vector3(x,y,0) end
+		end
+	end
+	print("tile ", num, " not found on layer ", layer)
+end
+
+local function addpanel(self)
+	if data.items[2] >= data.modules * 2 or data.items[2] >= 100 then return end
+	
+	data.items[2] = data.items[2] + 1
+	data.energy = data.energy - data.prices[2]
+	data.prices[2] =  math.ceil(data.prices[2] * 1.1)
+
+	local pos = findtile(self, "panels", data.items[2])
+	local t = 104
+	if pos.y == 11 then t = 106
+	elseif pos.y == 13 then t = 107
+	elseif pos.x == 12 or pos.x == 20 or pos.x == 28 then t = 105
+	end
+	tilemap.set_tile("#tilemap", "main", pos.x, pos.y, t)
+	msg.post("effects", "trigger", {pos = data.tile2world(pos)})
+end
+
+local function addmodule(self, type)
+	if data.items[8] == 0 and data.modules >= 20 or
+		data.items[8] == 1 and data.modules >= 35 or
+		data.items[8] == 2 and data.modules >= 50 then return
+	end
+	
+	data.modules = data.modules + 1
+	data.items[type] = data.items[type] + 1
+	data.energy = data.energy - data.prices[type]
+	data.prices[type] =  math.ceil(data.prices[type] * 1.1)
+	
+	local pos = findtile(self, "modules", data.modules)
+	local t = 119 + (type*2)
+	if pos.y ~= 12 then t = t + 1 end
+	tilemap.set_tile("#tilemap", "main", pos.x, pos.y, t)
+	msg.post("effects", "trigger", {pos = data.tile2world(pos)})
+end
+
+local function addhub(self)
+	if data.modules < 20 or data.items[8] >= 2 then return end
+	
+	data.items[8] = data.items[8] + 1
+	data.energy = data.energy - data.prices[8]
+	data.prices[8] =  math.ceil(data.prices[8] * 1.1)
+
+	local pos = findtile(self, "hubs", data.items[8])
+	tilemap.set_tile("#tilemap", "main", pos.x, pos.y, 101)
+	tilemap.set_tile("#tilemap", "main", pos.x+1, pos.y, 103)
+	tilemap.set_tile("#tilemap", "main", pos.x-1, pos.y, 103)
+	tilemap.set_tile("#tilemap", "main", pos.x, pos.y+1, 102)
+	tilemap.set_tile("#tilemap", "main", pos.x, pos.y-1, 102)
+
+	msg.post("effects", "trigger", {pos = data.tile2world(pos)})
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("add_panel") then addpanel(self)
+	elseif message_id == hash("add_module") then addmodule(self, message.type)
+	elseif message_id == hash("add_hub") then addhub(self)
+	end
+end
+

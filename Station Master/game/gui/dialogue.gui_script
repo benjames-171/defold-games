@@ -1,0 +1,228 @@
+local data = require "main.data"
+local dialogue = require "game.gui.dialogue"
+
+local function show(self)
+	if not self.open then
+		gui.animate(gui.get_node("container"), gui.PROP_POSITION, vmath.vector3(640,620,0), gui.EASING_INOUTQUAD, 0.25)
+		self.open = true
+	end
+end
+
+local function hide(self)
+	if self.open and self.tick == string.len(self.current) and self.queue[1] == nil then
+		gui.animate(gui.get_node("container"), gui.PROP_POSITION, vmath.vector3(640,700,0), gui.EASING_INOUTQUAD, 0.25)
+		self.open = false
+	end
+end
+
+local function display(self, num)
+	self.current = dialogue.text(num)
+	self.tick = 0
+	if not self.open then show(self) end
+end
+
+local function ticker(self)
+	local len = string.len(self.current)
+	if self.tick < len then
+		self.tick = self.tick + 1
+
+		if self.time % 3 == 0 then
+			local str = "main:/sound#tick"..tostring(math.random(1,9))
+			sound.play(str)
+		end
+		
+		gui.set_text(gui.get_node("dialogue_text"), string.sub(self.current, 1, self.tick))
+		else
+	end
+end
+
+local function next(self)
+	local len = string.len(self.current)
+	if self.tick < len then
+		self.tick = len
+		gui.set_text(gui.get_node("dialogue_text"), self.current)
+	elseif self.queue[1] ~= nil then
+		display(self, self.queue[1])
+		table.remove(self.queue, 1)
+	else
+		hide(self)
+	end
+end
+
+local function add(self, num)
+	if not dialogue.used(num) then
+		table.insert(self.queue, num)
+		return true
+	end
+	return false
+end
+
+local function clear(self)
+	self.queue = {}
+	self.tick = 0
+	self.current = ""
+end
+
+local function force(self, num)
+	if not dialogue.used(num) then
+		clear(self)
+		table.insert(self.queue, num)
+		return true
+	end
+	return false
+end
+	
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.queue = {}
+	self.open = false
+	self.tick = 0
+	self.current = ""
+	self.time = 0
+	add(self, 1)
+	add(self, 2)
+	add(self, 3)
+	add(self, 4)
+	add(self, 5)
+
+	for n = 6, 47 do
+		--add(self, n)
+	end
+
+	next(self)
+end
+
+local function eye(self)
+	local r = math.random(1,100)
+	if r == 1 then gui.play_flipbook(gui.get_node("eye"), "left")
+	elseif r == 2 then gui.play_flipbook(gui.get_node("eye"), "right")
+	end
+end
+
+local function triggers(self)
+	if data.energy == 10 then
+		if force(self, 6) then add(self, 7); next(self); end
+	end
+
+	if data.modules == 1 then
+		if force(self, 8) then add(self, 9); next(self) end
+	end
+	
+	if data.energy == 50 then
+		if force(self, 10) then next(self) end
+	end
+
+	if data.items[2] >= 1 then
+		if force(self, 11) then next(self) end
+	end
+
+	if data.items[2] >= 8 and data.modules >= 4 then
+		if force(self, 12) then add(self, 13); next(self); data.power = 10 end
+	end
+
+	if data.items[2] >= 16 and data.modules >= 8 then
+		if force(self, 14) then add(self, 15); add(self, 16); next(self); data.power = 100 end
+	end
+
+	if data.items[2] >= 24 and data.modules >= 12 then
+		if force(self, 17) then add(self, 18); add(self, 19); next(self) end
+	end
+
+	if data.items[2] >= 32 and data.modules >= 16 then
+		if force(self, 20) then add(self, 21); add(self, 22); next(self) end
+	end
+
+	if data.items[2] >= 40 and data.modules >= 20 then
+		if force(self, 23) then add(self, 24); add(self, 25); next(self); msg.post("#gui", "unlock"); data.power = 1000 end
+	end
+
+	if data.modules >= 4 and data.items[2] < data.modules then
+		if force(self, 26) then	next(self) end
+	end	
+
+	if data.items[2] >= 46 and data.modules >= 23 then
+		if force(self, 27) then add(self, 28); add(self, 29); add(self, 30); next(self) end
+	end
+
+	if data.items[2] >= 52 and data.modules >= 26 then
+		if force(self, 31) then add(self, 32); add(self, 33); next(self) end
+	end
+
+	if data.items[2] >= 58 and data.modules >= 29 then
+		if force(self, 34) then next(self); data.power = 10000 end
+	end
+
+	if data.items[2] >= 70 and data.modules >= 35 then
+		if force(self, 35) then add(self, 36); add(self, 37); next(self) end
+	end
+
+	if data.items[8] == 2 and data.items[2] >= 70 and data.modules >= 35 then
+		if force(self, 38) then add(self, 39); next(self) end
+	end
+
+	if data.items[2] >= 76 and data.modules >= 38 then
+		if force(self, 40) then next(self) end
+	end
+
+	if data.items[2] >= 82 and data.modules >= 41 then
+		if force(self, 41) then add(self, 42); next(self) end
+	end
+
+	if data.items[2] >= 88 and data.modules >= 44 then
+		if force(self, 43) then add(self, 44); next(self) end
+	end
+
+	if data.items[2] >= 94 and data.modules >= 47 then
+		if force(self, 45) then add(self, 46); next(self) end
+	end
+
+	if data.items[2] >= 98 and data.modules >= 50 then
+		if force(self, 47) then next(self) end
+	end
+
+	if data.items[2] >= 100 and data.modules >= 50 then
+		if force(self, 48) then
+			next(self)
+			sound.stop("main:/sound#music")
+			sound.play("main:/sound#hit")
+			sound.play("main:/sound#horror", {gain = 0.1})
+			msg.post(".", "release_input_focus")
+			msg.post("#end", "show")
+		end
+	end
+end
+
+local function arrow(self)
+	if self.queue[1] == nil then gui.set_enabled(gui.get_node("arrow"), false)
+	else gui.set_enabled(gui.get_node("arrow"), true)
+	end
+end
+
+function update(self, dt)
+	eye(self)
+	ticker(self)
+	triggers(self)
+	arrow(self)
+
+	self.time = self.time + 1
+end
+
+local function processclick(self, action)
+	if gui.pick_node(gui.get_node("container"), action.x, action.y) then
+		if not self.open then show(self)
+		else
+			next(self)
+		end
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("click") and action.pressed then
+		processclick(self, action)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("hide") then hide(self) end
+end
+

@@ -1,0 +1,8 @@
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger") then
+		go.set_position(message.pos)
+		particlefx.play("#pfx")
+		sound.play("main:/sound#place", {gain = 0.5})
+	end
+end
+

@@ -1,0 +1,21 @@
+images {
+  image: "/assets/png/bg.png"
+}
+images {
+  image: "/assets/png/pixel.png"
+}
+images {
+  image: "/assets/png/bar.png"
+}
+images {
+  image: "/assets/png/dash.png"
+}
+images {
+  image: "/assets/png/exit.png"
+}
+images {
+  image: "/assets/png/info.png"
+}
+margin: 0
+extrude_borders: 0
+inner_padding: 0
