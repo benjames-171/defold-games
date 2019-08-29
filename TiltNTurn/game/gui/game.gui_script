@@ -1,0 +1,24 @@
+local data = require "main.data"
+
+function init(self)
+	local col = data.hex2rgba("#f4f3de")
+	col.w = 0
+	gui.set_color(gui.get_node("status"), col)
+end
+
+function update(self, dt)
+	gui.set_text(gui.get_node("gems"), tostring(data.gems).."/"..tostring(data.gemstot))
+	gui.set_text(gui.get_node("balls"), tostring(data.balls).."/"..tostring(data.ballstot))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("status") then
+		local node = gui.get_node("status")
+		local col = data.hex2rgba("#f4f3de")
+		gui.set_color(node, col)
+		gui.set_text(node, message.text)
+		col.w = 0
+		gui.animate(node, gui.PROP_COLOR, col, gui.EASING_LINEAR, 0.25, 5)
+	end
+end
+

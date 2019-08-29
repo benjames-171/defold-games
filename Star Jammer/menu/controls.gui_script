@@ -1,0 +1,38 @@
+local data = require ("main.data")
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+local function show(self)
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_INOUTQUAD, 0.25)
+	data.state = data.STATE_CONTROLS
+end
+
+local function hide(self)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.25, 0, disablenode)
+end
+
+function init(self)
+	self.node = gui.get_node("container")
+	gui.set_enabled(self.node, false)
+	gui.set_color(self.node, vmath.vector4(1,1,1,0))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	end
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_CONTROLS then
+		if ((action_id == hash("action") or action_id == hash("shoot")) or action_id == hash("exit")) and action.pressed then
+			hide(self)
+			msg.post("#menu", "show", {})
+			sound.play("main:/sound#shot1")
+		end
+	end
+end
+

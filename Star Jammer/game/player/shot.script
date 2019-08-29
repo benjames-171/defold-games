@@ -1,0 +1,40 @@
+local data = require "main.data"
+
+go.property("move", vmath.vector3(0,0,0))
+
+function init(self)
+	if self.move.x < 1 then sprite.set_hflip("#sprite", true) end
+end
+
+local function move(self)
+	local pos = go.get_position()
+	pos = pos + self.move
+	go.set_position(pos)
+
+	if not data.onscreen(pos, 0) then go.delete() end
+end
+
+local function coll(self)
+	local pos = data.world2tile(go.get_position())
+	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+	if t >= 225 and t <= 240 then
+		tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 0)
+		pos = data.centreontile(go.get_position())
+		msg.post("/common/fx", "hit", {pos = pos})
+		msg.post("/common/spawner", "item", {pos = pos})
+		go.delete()
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		move(self)
+		coll(self)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		go.delete()
+	end
+end

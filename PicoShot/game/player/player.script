@@ -1,0 +1,196 @@
+local data = require "main.data"
+
+local INVUL = 200
+
+local function invulnerable(self)
+	self.invul = INVUL
+	msg.post("#co", "disable")
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.waitlist = {12,8,20,12,25}
+	self.speed = 1
+	self.invul = 0
+	self.firewait = 0
+	self.move = vmath.vector3()
+	self.item = 1000
+	invulnerable(self)
+	data.state = data.STATE_PLAYING
+end
+
+local function move(self)
+	local pos = go.get_position() + self.move
+
+	if pos.x < 5 then pos.x = 5
+	elseif pos.x > 59 then pos.x = 59
+	end
+
+	if pos.y < 5 then pos.y = 5
+	elseif pos.y > 59 then pos.y = 59
+	end
+
+	go.set_position(pos)
+	data.playerpos = pos
+	self.move = vmath.vector3()
+end
+
+local function cond(self)
+	if self.invul > 0 then
+		self.invul = self.invul - 1
+		if self.invul == 0 then
+			msg.post("#co", "enable")
+		elseif self.invul % 6 < 3 then
+			sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+		else
+			sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0))
+		end
+	end
+
+	if self.firewait > 0 then self.firewait = self.firewait - 1 end
+
+	if data.score >= self.item then
+		self.item = self.item + 1000
+		msg.post("item", "set", {cur = data.weap})
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		move(self)
+		cond(self)
+	end
+end
+
+local function dead(self)
+	msg.post("effects", "explode_large", {pos = go.get_position()})
+	invulnerable(self)
+
+	if data.lives > 0 then
+		data.lives = data.lives - 1
+		data.weap = 1
+		go.set_position(vmath.vector3(32, 8, 0.5))
+	else
+		msg.post("view#gameover", "show")
+		msg.post("#sprite", "disable")
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("position") then
+		go.set_position(message.pos)
+	elseif message_id == hash("contact_point_response") then
+		if message.other_group == hash("enemy") or message.other_group == hash("fire") then
+			dead(self)
+		end
+	elseif message_id == hash("item") then
+		if message.item < 10 then data.weap = message.item
+		elseif message.item == 10 then
+			if data.lives < 5 then
+				data.lives = data.lives + 1
+				msg.post("view#game", "message", {str = "EXTRA LIFE!"})
+			end
+		elseif message.item == 11 then
+			if data.special == 0 then
+				data.special = 1
+				msg.post("view#game", "message", {str = "SPECIAL!"})
+			end
+		elseif message.item == 12 then 
+			data.score = data.score + 500
+			msg.post("view#game", "message", {str = "+500 PTS!"})
+		end
+	end
+end
+
+local function fire(self)
+	self.firewait = self.waitlist[data.weap]
+	if data.weap == 1 then
+		factory.create("#fac_weap", nil, nil, {weap = data.weap})
+	elseif data.weap == 2 then
+		factory.create("#fac_weap", nil, nil, {weap = data.weap})
+	elseif data.weap == 3 then
+		factory.create("#fac_weap", nil, nil, {weap = data.weap, energy = 2})
+	elseif data.weap == 4 then
+		factory.create("#fac_weap", nil, nil, {weap = data.weap})
+		factory.create("#fac_weap", nil, nil, {weap = data.weap, move = vmath.vector3(-3,0,0)})
+		factory.create("#fac_weap", nil, nil, {weap = data.weap, move = vmath.vector3(3,0,0)})
+	elseif data.weap == 5 then
+		factory.create("#fac_weap", nil, nil, {weap = data.weap})
+		factory.create("#fac_weap", nil, nil, {weap = data.weap, move = vmath.vector3(-1,2.5,0)})
+		factory.create("#fac_weap", nil, nil, {weap = data.weap, move = vmath.vector3(1,2.5,0)})
+	end
+
+	sound.play("main:/sound#shot"..tostring(data.weap))
+end
+
+local function special(self)
+	factory.create("#fac_special")
+	sound.play("main:/sound#special")
+	data.special = 0
+end
+
+local function quit(self)
+	sound.stop("main:/sound")
+	msg.post("main:/handler", "show_menu")
+end
+
+local function input_playing(self, action_id, action)
+	if action_id == hash("up") then
+		self.move.y = self.move.y + self.speed
+	elseif action_id == hash("down") then
+		self.move.y = self.move.y - self.speed
+	elseif action_id == hash("left") then
+		self.move.x = self.move.x - self.speed
+	elseif action_id == hash("right") then
+		self.move.x = self.move.x + self.speed
+	elseif action_id == hash("action") and self.firewait == 0 then
+		fire(self)
+	elseif action_id == hash("special") and action.pressed and data.special > 0 then
+		special(self)
+	elseif action_id == hash("exit") then
+		quit(self)
+--[[	elseif action_id == hash("debug") and action.pressed then
+		msg.post("/level", "advance")
+		self.invul = 99999
+		data.special = 1
+		data.weap = 2--]]
+	end
+end
+
+local function input_levelclear(self, action_id, action)
+	if action_id == hash("action") and action.pressed then
+		data.level = data.level + 1
+		if data.level <= 2 then
+			data.maxlevel = data.level
+			msg.post("game:/loader", "new_level", {})
+		else
+			quit(self)
+		end
+	end
+end
+
+local function input_gameover(self, action_id, action)
+	if action_id == hash("action") and action.pressed then
+		quit(self)
+	end
+end
+
+local function input_complete(self, action_id, action)
+	if action_id == hash("action") and action.pressed then
+		data.maxlevel = 1
+		quit(self)
+	end
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_PLAYING then
+		input_playing(self, action_id, action)
+	elseif data.state == data.STATE_LEVELCLEAR then
+		input_levelclear(self, action_id, action)
+	elseif data.state == data.STATE_GAMEOVER then
+		input_gameover(self, action_id, action)
+	elseif data.state == data.STATE_COMPLETE then
+		input_complete(self, action_id, action)
+	end
+end
+

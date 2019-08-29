@@ -1,0 +1,104 @@
+local data = require "main.data"
+
+local LEVEL_SIZE = 24
+
+local function tile(self, x, y, set)
+	local p = {
+		0,0,0,0,12,
+		0,0,0,1,25,
+		0,0,1,0,4,
+		0,0,1,1,3,
+		0,1,0,0,24,
+		0,1,0,1,15,
+		0,1,1,0,1,
+		0,1,1,1,2,
+		1,0,0,0,14,
+		1,0,0,1,23,
+		1,0,1,0,5,
+		1,0,1,1,13,
+		1,1,0,0,21,
+		1,1,0,1,22,
+		1,1,1,0,11,
+		1,1,1,1,12}
+
+	local n = tilemap.get_tile("#tilemap", "world", x, y+1)
+	local e = tilemap.get_tile("#tilemap", "world", x+1, y)
+	local s = tilemap.get_tile("#tilemap", "world", x, y-1)
+	local w = tilemap.get_tile("#tilemap", "world", x-1, y)
+
+	if n >= 10 then n = 1 else n = 0 end
+	if e >= 10 then e = 1 else e = 0 end
+	if s >= 10 then s = 1 else s = 0 end
+	if w >= 10 then w = 1 else w = 0 end
+
+	local c = 1
+	while p[c] ~= n or p[c+1] ~= e or p[c+2] ~= s or p[c+3] ~= w do
+		c = c + 5
+	end
+
+	local tile = p[c+4]
+	tilemap.set_tile("#tilemap", "world", x, y, set + tile)
+end
+
+local function parse(self)
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local sets = {20,25,50,55}
+	local s = data.level%4
+	if s == 0 then s = 4 end
+	local set = sets[s]
+	data.gems = 0
+	data.gemstot = 0
+
+	for y = sy+1, h+sy-2 do
+		for x = sx+1, w+sx-2 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			if t == 10 then tile(self, x, y, set) 
+			elseif t == 4 then data.gemstot = data.gemstot + 1
+			end
+		end
+	end
+
+	sprite.play_flipbook("bg#sprite", tostring(data.level%4))
+
+	local t = 0
+	if data.level == 5 then t = 82
+	elseif data.level == 10 then t = 83
+	elseif data.level == 15 then t = 84
+	end
+	tilemap.set_tile("#tilemap", "world", 0, -14, t)
+end
+
+local function newlevel(self)
+	data.balls = 0
+	data.ballstot = 0
+
+	for y = 2, LEVEL_SIZE-1 do
+		for x = 2, LEVEL_SIZE-1 do
+			local sx = x + (data.level-1) * LEVEL_SIZE
+			local sy = y
+			local dx = x - LEVEL_SIZE / 2
+			local dy = y - LEVEL_SIZE / 2
+			local t = tilemap.get_tile("#masters", "world", sx, sy)
+			if t == 1 then
+				tilemap.set_tile("#tilemap", "world", dx, dy, 0)
+				msg.post("/common/manager", "ball", {x = dx, y = dy})
+				data.ballstot = data.ballstot + 1
+			else tilemap.set_tile("#tilemap", "world", dx, dy, t)
+			end
+		end
+	end
+end
+
+function init(self)
+	msg.post("#masters", "disable")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("angle") then
+		go.set_rotation(vmath.quat_rotation_z(message.angle))
+		data.angle = message.angle
+	elseif message_id == hash("newlevel") then 
+		newlevel(self)
+		parse(self)
+	end
+end

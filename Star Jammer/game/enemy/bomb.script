@@ -1,0 +1,6 @@
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		go.delete()
+		msg.post("/common/fx", "explode", {pos = go.get_position()})
+	end
+end

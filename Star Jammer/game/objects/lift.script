@@ -1,0 +1,46 @@
+local data = require ("main.data")
+
+local WAIT = 30
+
+function init(self)
+	self.origin = go.get_position()
+	self.accend = 0
+	self.decend = 0
+	self.soundon = false
+end
+
+local function volume(self)
+	if self.accend > 0 and not self.soundon then
+		sound.play("main:/sound#lift", {gain = 0.2})
+		self.soundon = true
+	elseif self.accend == 0 and self.soundon then
+		sound.stop("main:/sound#lift")
+		self.soundon = false
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		local pos = data.world2tile(go.get_position())
+		local t = tilemap.get_tile("/level#tilemap", "back", pos.x, pos.y)
+		pos = go.get_position()
+		if self.accend > 0 then
+			if t == 67 then pos.y = pos.y + 1
+			else self.accend = 0
+			end
+		elseif pos.y > self.origin.y and self.decend == 0 then pos.y = pos.y - 1
+		end
+		go.set_position(pos)
+	end
+	volume(self)
+	self.accend = self.accend - 1
+	if self.decend > 0 then self.decend = self.decend - 1 end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") and message.other_group == hash("player") and message.normal.y == -1 then
+		self.accend = 2
+		self.decend = WAIT
+	end
+end
+

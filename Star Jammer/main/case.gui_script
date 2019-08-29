@@ -1,0 +1,29 @@
+local data = require "main.data"
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.led = true
+	gui.set_render_order(15)
+end
+
+function on_message(self, message_id, message, sender)
+end
+
+local function led(self)
+	self.led = not self.led
+
+	local node = gui.get_node("gameboy")
+	if self.led then
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_INOUTQUAD, 1)
+	else
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(0.3,0.3,0.3,1), gui.EASING_INOUTQUAD, 1)
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash ("click") and action.pressed then
+		if gui.pick_node(gui.get_node("led"), action.x, action.y) then
+			led(self)
+		end
+	end
+end

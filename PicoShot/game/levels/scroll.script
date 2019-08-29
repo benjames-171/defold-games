@@ -1,0 +1,21 @@
+local data = require "main.data"
+
+go.property("speed", 0.25)
+go.property("tilemap", true)
+
+function init(self)
+	self.pos = go.get_position()
+
+	if self.tilemap then
+		sx, sy, w, h = tilemap.get_bounds("#tilemap")
+		self.height = h * 8
+	else
+		self.height = 64
+	end
+end
+
+function update(self, dt)
+	self.pos.y = self.pos.y - self.speed
+	if self.pos.y <- self.height then self.pos.y = 0 end
+	go.set_position(data.snap(self.pos))
+end

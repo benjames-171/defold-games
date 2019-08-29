@@ -1,0 +1,17 @@
+font: "/assets/font/CG pixel 3x5.ttf"
+material: "/builtins/fonts/font.material"
+size: 5
+antialias: 0
+alpha: 1.0
+outline_alpha: 1.0
+outline_width: 1.0
+shadow_alpha: 0.0
+shadow_blur: 0
+shadow_x: 0.0
+shadow_y: 0.0
+extra_characters: ""
+output_format: TYPE_BITMAP
+all_chars: true
+cache_width: 0
+cache_height: 0
+render_mode: MODE_SINGLE_LAYER

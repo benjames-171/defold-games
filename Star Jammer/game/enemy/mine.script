@@ -1,0 +1,34 @@
+local data = require "main.data"
+
+local RANGE = 32
+
+function init(self)
+	self.origin = go.get_position()
+
+	local dir = {vmath.vector3(2,1,0), vmath.vector3(-2,1,0), vmath.vector3(2,-1,0), vmath.vector3(-2,-1,0)}
+	self.move = dir [math.random(1,4)] * 0.25
+end
+
+local function move(self)
+	local pos = go.get_position()
+	pos = pos + self.move
+
+	if pos.x < self.origin.x - RANGE or pos.x > self.origin.x + RANGE then self.move.x = -self.move.x end
+	if pos.y < self.origin.y - RANGE or pos.y > self.origin.y + RANGE then self.move.y = -self.move.y end
+
+	go.set_position(pos)
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		move(self)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		go.delete()
+		msg.post("/common/fx", "explode", {pos = go.get_position()})
+	end
+end
+

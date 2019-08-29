@@ -1,0 +1,15 @@
+local data = require "main.data"
+
+go.property("move", vmath.vector3(0,4,0))
+
+function init(self)
+	self.pos = vmath.vector3(32,-10, 0.4)
+end
+
+function update(self, dt)
+	self.pos = self.pos + self.move
+
+	if not data.onscreen(self.pos, 16) then go.delete()
+	else go.set_position(data.snap(self.pos))
+	end
+end

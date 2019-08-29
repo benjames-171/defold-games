@@ -1,0 +1,26 @@
+local data = require "main.data"
+
+local function disable_node (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	self.show = 0
+	self.node = gui.get_node("caution")
+	gui.set_enabled(self.node, false)
+end
+
+local function finished(self)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(32,-10,0), gui.EASING_INOUTQUAD, 0.5, 1.3, disablenode)
+end
+
+local function show(self)
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(32,32,0), gui.EASING_INOUTQUAD, 0.5, 0, finished)
+	sound.play("main:/sound#siren")
+	self.show = 30
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then show(self) end
+end

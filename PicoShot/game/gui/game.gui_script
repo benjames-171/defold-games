@@ -1,0 +1,38 @@
+local data = require "main.data"
+
+function init(self)
+	gui.set_enabled(gui.get_node("message"), false)
+end
+
+function update(self, dt)
+	local str = string.format("%05d", data.score)
+	gui.set_text(gui.get_node("score"), str)
+
+	local sp = false
+	if data.special > 0 then sp = true end
+	gui.set_enabled(gui.get_node("special"), sp)
+	
+	for n = 1, 5 do
+		local node = gui.get_node("heart"..tostring(n))
+		local flag = false
+		if data.lives >= n then flag = true end
+		gui.set_enabled(node, flag)
+	end
+end
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("message") then
+		local node = gui.get_node("message")
+		local col = data.hex2rgba("#ffcd75")
+		gui.set_color(node, col)
+		col.w = 0
+		gui.set_text(node, message.str)
+		gui.set_enabled(node, true)
+		gui.animate(node, gui.PROP_COLOR, col, gui.EASING_INOUTQUAD, 0.15, 0.75, disablenode)
+	end
+end
+		

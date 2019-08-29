@@ -1,0 +1,32 @@
+local data = require "main.data"
+
+local function set(self)
+	self.move = vmath.vector3(0,-0.25,0)
+	self.pos = vmath.vector3(math.random(8,56), 72, 0.15)
+	sprite.play_flipbook("#sprite", "item"..tostring(self.num))
+end
+
+function init(self)
+	self.pos = go.get_position()
+	self.move = vmath.vector3()
+end
+
+function update(self, dt)
+	self.pos = self.pos + self.move
+	go.set_position(data.snap(self.pos))
+end
+
+function on_message(self, message_id, message, sender)
+	local items = {1,2,3,4,5,10,11,12}
+	if message_id == hash("set") then
+		repeat
+			self.num = items[math.random(8)]
+		until self.num ~= message.cur
+		set(self)
+	elseif message_id == hash("contact_point_response") then
+		self.pos = vmath.vector3(-100,0,0)
+		msg.post("/common/player", "item", {item = self.num})
+		sound.play("main:/sound#pickup")
+	end
+end
+

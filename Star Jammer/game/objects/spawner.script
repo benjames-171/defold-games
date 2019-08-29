@@ -1,0 +1,17 @@
+local data = require "main.data"
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("item") then
+		local type = message.type
+		if type == nil then
+			local r = math.random(1,10)
+
+			if r == 1 and data.energy < 3 then type = 5
+			elseif r == 2 and data.ammo < 20 then type = 9
+			else type = 6
+			end
+		end
+		factory.create("#item_factory", message.pos, nil, {type = type})
+	end
+end
+

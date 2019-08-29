@@ -1,0 +1,38 @@
+local data = require "main.data"
+
+local function disablenode(self, node)
+	gui.set_enabled(node, false)
+end
+
+local function energy(self)
+	for n = 1, 8 do
+		local node = gui.get_node("heart"..tostring(n))
+		local flag = false
+		if data.energy >= n then flag = true end
+		gui.set_enabled(node, flag)
+	end
+end
+
+function update(self, dt)
+	energy(self)
+	gui.set_text(gui.get_node("credits"), tostring(data.credits))
+	gui.set_text(gui.get_node("keys"), tostring(data.keys))
+	gui.set_text(gui.get_node("ammo"), tostring(data.ammo))
+end
+
+local function popuphide(self, node)
+	gui.animate(gui.get_node("popup"), gui.PROP_POSITION, vmath.vector3(640,48,0), gui.EASING_INOUTQUAD, 0.25, 2.5, disablenode)
+end
+
+local function popupshow(self, text)
+	gui.set_enabled(gui.get_node("popup"), true)
+	gui.set_text(gui.get_node("message"), text)
+	gui.animate(gui.get_node("popup"), gui.PROP_POSITION, vmath.vector3(640,240-64,0), gui.EASING_INOUTQUAD, 0.25, 0, popuphide)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("popup") then
+		popupshow(self, message.text)
+	end
+end
+

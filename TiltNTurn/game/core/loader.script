@@ -1,0 +1,20 @@
+local data = require ("main.data")
+
+local function loadlevel (self)
+	msg.post ("loader#easy", "load")
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	loadlevel(self)
+end
+
+function on_message(self, message_id, message,sender)
+	if(message_id == hash("new_level"))then
+		loadlevel(self, message.level)
+	elseif message_id == hash("proxy_loaded")then	
+		msg.post(sender, "enable")	
+	elseif message_id == hash("debug") then
+		print(sender)
+	end
+end	

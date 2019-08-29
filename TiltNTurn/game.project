@@ -1,0 +1,28 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /rendercam/rendercam.renderc
+
+[display]
+width = 720
+height = 720
+fullscreen = 0
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[script]
+shared_state = 1
+
+[project]
+title = TiltNTurn
+dependencies = https://github.com/rgrams/rendercam/archive/v1.0.1.zip
+
+[html5]
+splash_image = /assets/png/splash.png
+htmlfile = /custom.html
+
+[physics]
+scale = 0.1
+gravity_y = -400.0
+

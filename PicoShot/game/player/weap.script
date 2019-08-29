@@ -1,0 +1,27 @@
+local data = require "main.data"
+
+go.property("move", vmath.vector3(0,3,0))
+go.property("weap", 1)
+go.property("energy", 1)
+
+function init(self)
+	self.pos = go.get_position()
+	self.pos.z = self.pos.z - 0.1
+	if self.weap < 10 then sprite.play_flipbook("#sprite", "weap"..tostring(self.weap)) end
+end
+
+function update(self, dt)
+	self.pos = self.pos + self.move
+
+	if not data.onscreen(self.pos, 8) then go.delete()
+	else go.set_position(data.snap(self.pos))
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		self.energy = self.energy - 1
+		if self.energy <= 0 then go.delete() end
+	end
+end
+

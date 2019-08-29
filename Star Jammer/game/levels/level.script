@@ -1,0 +1,40 @@
+local data = require "main.data"
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local w = tilemap.get_tile("#tilemap", "world", x, y)
+
+			if w == 15 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				msg.post("/common/player", "position", {pos = data.tile2world(vmath.vector3(x, y, 0.5))})
+			elseif w == 14 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#door_factory", data.tile2world(vmath.vector3(x,y,0.2)))
+			elseif w == 16 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#lift_factory", data.tile2world(vmath.vector3(x,y,0.2)))
+			elseif w == 17 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#mine_factory", data.tile2world(vmath.vector3(x,y,0.2)))
+			elseif w == 18 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#dart_factory", data.tile2world(vmath.vector3(x,y,0.2)))
+			elseif w == 20 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#bomb_factory", data.tile2world(vmath.vector3(x,y,0.2)))
+			elseif w == 22 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#probe_factory", data.tile2world(vmath.vector3(x,y,0.2)))
+			elseif w == 125 or w == 127 then
+				factory.create("#trig_factory", data.tile2world(vmath.vector3(x,y,0.2)), nil, {id = w})
+			end
+		end
+	end
+end
+
+function init(self)
+	parse(self)
+end

@@ -1,0 +1,59 @@
+local data = require "main.data"
+
+go.property("move", vmath.vector3(0,-1,0))
+go.property("shoot", 0)
+go.property("energy", 1)
+
+function init(self)
+	self.pos = go.get_position()
+	self.time = math.random(0, self.shoot)
+	self.flash = false
+end
+
+local function move(self)
+	self.pos = self.pos + self.move
+	if not data.onscreen(self.pos, 16) then
+		go.delete()
+	else
+		go.set_position(data.snap(self.pos))
+	end
+end
+
+local function shoot(self)
+	if self.time % self.shoot == 0 then
+		local move = vmath.vector3(0.25,-0.75,0)
+		if self.pos.x > 32 then move.x = -0.25 end
+		factory.create("#fac_fire", nil, nil, {move = move})
+		sound.play("main:/sound#spit")
+	end
+end
+
+local function flash(self)
+	if self.flash then
+		sprite.set_constant("#sprite", "tint", vmath.vector4(8,8,8,1))
+		self.flash = false
+	else
+		sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+	end
+end
+
+function update(self, dt)
+	move(self)
+	flash(self)
+	if self.shoot > 0 then shoot(self) end
+	self.time = self.time + 1
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		self.energy = self.energy - 1
+		if self.energy <= 0 then
+			msg.post("common/effects", "explode", {pos = go.get_position()})
+			go.delete()
+
+			if message.other_group == hash("weap") then data.score = data.score + 50 end
+		else
+			self.flash = true
+		end
+	end
+end

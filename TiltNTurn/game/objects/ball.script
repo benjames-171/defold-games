@@ -1,0 +1,80 @@
+local data = require "main.data"
+local obj = require "game.objects.obj"
+
+function init(self)
+	self.dead = false
+end
+	
+local function tile(self)
+	local pos = go.get_position()
+	local r = math.atan2(pos.y, pos.x) - data.angle
+	local l = vmath.length(pos)	
+	pos.x = math.cos(r) * l
+	pos.y = math.sin(r) * l
+	pos = data.world2tile(pos)
+
+	return pos
+end
+
+local function pick(self)
+	local pos = tile(self)
+	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+
+	if t == 3 then
+		self.dead = true
+		tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 0)
+		msg.post("/common/view#gameover", "show")
+		msg.post("#sprite", "disable")
+		particlefx.play("#exp")
+		sound.play("main:/sound#explode")
+	elseif t == 4 then
+		tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 0)
+		data.gems = data.gems + 1
+		sound.play("main:/sound#gem")
+	elseif t >= 5 and t <= 8 then
+		if data.gems == data.gemstot or data.balls + 1 < data.ballstot then
+			data.balls = data.balls + 1
+			self.dead = true
+			msg.post("#sprite", "disable")
+			msg.post("#co", "disable")
+			particlefx.play("#pfx")
+			sound.play("main:/sound#exit")
+		end
+
+		if data.gems == data.gemstot and data.balls == data.ballstot then
+			if data.level < 16 then
+				msg.post("/common/view#clear", "show")
+			else
+				msg.post("/common/view#complete", "show")
+			end
+		end
+	end
+end
+
+local function bounds(self)
+	local ok = true
+	local pos = go.get_position()
+
+	local r = (data.SCR_SIZE / 4) + 12
+	
+	if pos.x < -r then ok = false
+	elseif pos.x > r then ok = false
+	elseif pos.y < -r then ok = false
+	elseif pos.y > r then ok = false
+	end
+
+	if not ok then
+		self.dead = true
+		msg.post("/common/view#gameover", "show", {out = true})
+		sound.play("main:/sound#out")
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING and not self.dead then
+		tile(self)
+		pick(self)
+		bounds(self)
+	end
+end
+

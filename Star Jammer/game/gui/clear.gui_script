@@ -1,0 +1,18 @@
+local data = require "main.data"
+
+function init(self)
+	self.node = gui.get_node("container")
+	gui.set_enabled(self.node, false)
+end
+
+local function show(self)
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(640,340,0), gui.EASING_INOUTQUAD, 0.5)
+	data.state = data.STATE_LEVELCLEAR
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	end
+end

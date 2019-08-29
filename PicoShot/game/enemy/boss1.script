@@ -1,0 +1,90 @@
+local data = require "main.data"
+
+function init(self)
+	self.origin = vmath.vector3(32, 100, 0.2)
+	self.time = 0
+	self.energy = 100
+	self.flash = false
+end
+
+local function move(self)
+	if self.origin.y > 48 then self.origin.y = self.origin.y - 0.25 end
+	local sin = vmath.vector3(math.sin(self.time/50) * 24, math.sin(self.time/100) * 8, 0)
+
+	go.set_position(data.snap(self.origin + sin))
+end
+
+local function shoot(self)
+	local pos = go.get_position()
+
+	local t = self.time % 120
+	
+	if t == 0 then
+		pos.x = pos.x - 11
+		pos.y = pos.y - 3
+	elseif t == 30 then
+		pos.x = pos.x - 4
+		pos.y = pos.y - 9
+	elseif t == 60 then
+		pos.x = pos.x + 4
+		pos.y = pos.y - 9
+	elseif t == 90 then
+		pos.x = pos.x + 11
+		pos.y = pos.y - 3
+	else
+		return
+	end
+
+	factory.create("#fac_fire", pos, nil, {move = vmath.vector3(0, -1.3, 0)})
+	sound.play("main:/sound#shot_boss")
+end
+
+local function flash(self)
+	if self.flash then
+		sprite.set_constant("#sprite", "tint", vmath.vector4(8,8,8,1))
+		self.flash = false
+	else
+		sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+	end
+end
+
+local function dead(self)
+	if self.time % 10 == 0 then
+		local pos = go.get_position()
+		pos.x = pos.x + math.random(1,24) - 12
+		pos.y = pos.y + math.random(1,24) - 12
+		msg.post("/common/effects", "explode", {pos = pos})
+	end
+
+	if self.time == 150 then
+		msg.post("/common/effects", "explode_large", {pos = go.get_position()})
+		msg.post("#sprite", "disable")
+		msg.post("/common/view#clear", "show")
+	end
+end
+
+function update(self, dt)
+	if data.state ~= data.STATE_LEVELCLEAR then
+		if self.energy > 0 then
+			move(self)
+			if self.origin.y == 48 then shoot(self) end
+		else
+			dead(self)
+		end
+		
+		flash(self)
+		
+		self.time = self.time + 1
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		self.flash = true
+		self.energy = self.energy - 1
+		if self.energy <= 0 then
+			msg.post("#co", "disable")
+			self.time = 0
+		end
+	end
+end
