@@ -1,8 +1,0 @@
-function init(self)
-	self.rot = 0
-end
-
-function update(self, dt)
-	self.rot = self.rot - 0.2
-	go.set_rotation(vmath.quat_rotation_z(self.rot))
-end
