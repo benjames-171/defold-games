@@ -1,7 +1,0 @@
-function on_message(self, message_id, message, sender)
-	if message_id == hash("pos") then
-		go.set_position(message.pos)
-		go.set_rotation(message.rot)
-	end
-end
-
