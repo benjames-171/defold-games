@@ -1,0 +1,33 @@
+local data = require "main.data"
+
+local MOVE = 60
+local COOLDOWN = 10
+
+go.property("move", vmath.vector3(0,0,0))
+
+function init(self)
+	self.time = 0
+end
+
+local function move(self, dt)
+	local pos = go.get_position()
+	pos = pos + (self.move * data.capdelta(dt))
+	go.set_position(pos)
+end
+	
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		move(self, dt)
+		if self.time > 0 then self.time = self.time - 1 end
+		self.contact = false
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.other_group == hash("world") and self.time <= 0 then
+			self.move = -self.move
+			self.time = COOLDOWN
+		end
+	end
+end

@@ -1,0 +1,31 @@
+local data = require "main.data"
+
+local function removetiles(min, max)
+	local pos = data.world2tile(data.screenpos)
+
+	for y = pos.y, pos.y + 9 do
+		for x = pos.x, pos.x + 16 do
+			local t = tilemap.get_tile("/level#tilemap", "world", x, y)
+			if t >= min and t <= max then
+				tilemap.set_tile("/level#tilemap", "world", x, y, 0)
+			end
+		end
+	end
+end
+
+
+local function useitem(item)
+	if item == 17 then msg.post("platform", "start")
+	elseif item == 19 then msg.post("door", "open")
+	elseif item == 20 then msg.post("door2", "open")
+	elseif item == 21 then msg.post("platform2", "start")
+	elseif item == 22 then data.rods = data.rods + 1
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("use") then
+		useitem(message.item)
+	end
+end
+

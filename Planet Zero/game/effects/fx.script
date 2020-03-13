@@ -1,0 +1,10 @@
+local data = require "main.data"
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("explode") then
+		go.set_position(message.pos)
+		particlefx.play("#explode")
+		sound.play("main:/sound#explode")
+	end
+end
+

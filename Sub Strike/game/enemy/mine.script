@@ -1,0 +1,33 @@
+local data = require "main.data"
+
+function init(self)
+	self.rot = 0
+	self.spin = math.random(-10,10) / 100
+	self.move = vmath.vector3(0, math.random(30,50) / 70, 0)
+	local pos = go.get_position()
+	pos.z = pos.z -0.1
+	go.set_position(pos)
+	
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	pos = pos + self.move
+	go.set_position(pos)
+
+	self.rot = self.rot + self.spin
+	go.set_rotation(vmath.quat_rotation_z(self.rot))
+
+	if pos.y > (data.SCR_H / data.PIXEL_SIZE) - 64 then
+		msg.post("/effect1", "splash", {pos = go.get_position()})
+		go.delete()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		msg.post("/effect", "explode", {pos = go.get_position()})
+		go.delete()
+	end
+end
+

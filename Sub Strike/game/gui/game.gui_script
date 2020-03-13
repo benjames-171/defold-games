@@ -1,0 +1,31 @@
+local data = require "main.data"
+
+function init(self)
+	gui.set_text(gui.get_node("hiscore"), string.format("HI SCORE %05d", data.hiscore))
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		local t = 4
+		for n = 1, 4 do
+			if data.timer[n] > 0 then
+				t = t - 1
+				data.timer[n] = data.timer[n] - dt
+				if data.timer[n] <= 0 then sound.play("main:/sound#pickup") end
+			end
+		end
+
+		for n = 1, t do
+			local node = gui.get_node(tostring(n))
+			gui.set_enabled(node, true)
+		end
+
+		for n = t+1, 4 do
+			local node = gui.get_node(tostring(n))
+			gui.set_enabled(node, false)
+		end
+	end
+
+	gui.set_text(gui.get_node("score"), string.format("SCORE %05d", data.score))
+end
+

@@ -1,0 +1,26 @@
+local data = require "main.data"
+
+function init(self)
+	local node = gui.get_node("area")
+	gui.set_text(node, "AREA "..tostring(data.level))
+	local col = gui.get_color(node)
+	col.w = 0
+	gui.animate(node, gui.PROP_COLOR, col, gui.EASING_LINEAR, 0.25, 1.5)
+end
+
+function update(self, dt)
+	gui.set_text(gui.get_node("rocks"), tostring(data.rocks))
+	gui.set_text(gui.get_node("keys"), tostring(data.keys))
+	
+	for h = 1, data.hearts do
+		local node = gui.get_node(string.format("heart%d", h))
+		gui.set_texture(node, "game")
+		gui.play_flipbook(node, "heart")
+	end
+
+	for h = data.hearts+1, 5 do
+		local node = gui.get_node(string.format("heart%d", h))
+		gui.set_texture(node, "game")
+		gui.play_flipbook(node, "heart_empty")
+	end
+end

@@ -1,0 +1,68 @@
+local data = require "main.data"
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local frames = {
+		vmath.vector3(166,167,0),
+		vmath.vector3(170,173,0),
+		vmath.vector3(174,177,0),
+		vmath.vector3(189,192,0)
+	}
+
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			if t == 1 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				msg.post("/player", "position", {pos = data.tile2world(vmath.vector3(x, y, 0.1))})
+			elseif t == 3 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#mine_factory", data.tile2world(vmath.vector3(x, y, 0.1)), nil, {move = vmath.vector3(60,0,0)})
+			elseif t == 4 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				local pos = data.tile2world(vmath.vector3(x, y, 0))
+				factory.create("#lift_factory", pos + vmath.vector3(8,-8, 0.5))
+			elseif t == 5 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#robot_factory", data.tile2world(vmath.vector3(x, y, 0.1)), nil, {move = vmath.vector3(0,60,0)})
+			else
+				for k,v in pairs(frames) do
+					if t >= frames[k].x and t <= frames[k].y then
+						table.insert(self.anim, vmath.vector4(x, y, frames[k].x, frames[k].y))
+					end
+				end
+			end
+		end
+	end
+end
+
+function init(self)
+	self.anim = {}
+	self.time = 0
+	parse(self)
+end
+
+local ANIM_TIME = 0.07
+
+local function animate(self, dt)
+	self.time = self.time + dt
+	if self.time >= ANIM_TIME then
+		self.time = 0
+		for k,v in pairs(self.anim) do
+			local t = tilemap.get_tile("/level#tilemap", "world", self.anim[k].x, self.anim[k].y)
+			t = t + 1
+			if t > self.anim[k].w then t = self.anim[k].z end
+			tilemap.set_tile("/level#tilemap", "world", self.anim[k].x, self.anim[k].y, t)
+		end
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		animate(self, dt)
+	end
+end
+
+
+
+

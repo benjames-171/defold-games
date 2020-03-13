@@ -1,0 +1,28 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /render/custom.renderc
+
+[display]
+width = 1024
+height = 576
+vsync = 0
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[script]
+shared_state = 1
+
+[project]
+title = Star Runner
+
+[html5]
+splash_image = /assets/png/splash.png
+
+[physics]
+debug = 0
+
+[tilemap]
+max_tile_count = 3000
+

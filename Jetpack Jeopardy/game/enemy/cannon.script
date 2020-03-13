@@ -1,0 +1,25 @@
+local data = require "main.data"
+
+local FREQ = 60
+
+function init(self)
+	self.time = 0
+end
+
+local function fire(self)
+	local pos = go.get_position()
+	pos.z = -0.1
+	factory.create("#ball-factory", pos)
+	sound.play("main:/sound#cannon")
+end
+
+function update(self, dt)
+	if data.onscreen(go.get_position(), 0) then
+		self.time = self.time + 1
+		if self.time >= FREQ then
+			self.time = 0
+			fire(self)
+		end
+	end	
+end
+

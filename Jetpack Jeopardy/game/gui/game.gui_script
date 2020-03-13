@@ -1,0 +1,25 @@
+local data = require "main.data"
+
+function init(self)
+end
+
+function update(self, dt)
+	gui.set_text(gui.get_node("coins"), tostring(data.coins))
+	gui.set_scale(gui.get_node("fuel"), vmath.vector3(data.fuel / 100, 1, 1))
+
+	for h = 1, data.hp do
+		local node = gui.get_node(string.format("heart%d", h))
+		--gui.set_texture(node, "game")
+		gui.play_flipbook(node, "heart")
+	end
+
+	for h = data.hp+1, 5 do
+		local node = gui.get_node(string.format("heart%d", h))
+		--gui.set_texture(node, "game")
+		gui.play_flipbook(node, "heart-empty")
+	end
+end
+
+function on_message(self, message_id, message, sender)
+end
+

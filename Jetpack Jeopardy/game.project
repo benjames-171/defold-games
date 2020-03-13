@@ -1,0 +1,24 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /render/custom.renderc
+
+[display]
+width = 1280
+height = 704
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[script]
+shared_state = 1
+
+[project]
+title = JetpackJeopardy
+
+[html5]
+splash_image = /assets/png/splash.png
+
+[tilemap]
+max_tile_count = 4096
+

@@ -1,0 +1,30 @@
+local data = require "main.data"
+
+go.property("move", vmath.vector3())
+
+function init(self)
+	local pos = go.get_position()
+	
+	if self.move.y < 0 then
+		msg.post("#sprite", "play_animation", {id = hash("top")})
+		pos.y = pos.y + 100
+	else
+		pos.y = pos.y - 100
+	end
+	go.set_position(pos)
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		local pos = go.get_position()
+		local d = pos.x - data.scrollpos.x
+
+		if d < 240 and d > 20 then
+			pos = pos + self.move
+		elseif d < 20 and d > -50 then
+			pos = pos - (self.move * 4)
+		end
+		go.set_position(pos)
+	end
+end
+

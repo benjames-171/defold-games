@@ -1,0 +1,36 @@
+local data = require "main.data"
+
+go.property("move", vmath.vector3())
+
+function init(self)
+	self.time = 0
+	local pos = go.get_position()
+	pos.z = pos.z - 0.1
+	go.set_position(pos)
+	sound.play("main:/sound#shot")
+	particlefx.play("#pfx")
+	msg.post("#co", "disable")
+end
+
+local function move(self, dt)
+	local pos = go.get_position() + (self.move * dt)
+	go.set_position(pos)
+
+	if not data.onscreen(pos, 8) then
+		particlefx.stop("#pfx")
+		go.delete()
+	end
+end
+
+function update(self, dt)
+	move(self, dt)
+	self.time = self.time + dt
+	if self.time > 0.1 then msg.post("#co", "enable") end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		particlefx.stop("#pfx")
+		go.delete()
+	end
+end

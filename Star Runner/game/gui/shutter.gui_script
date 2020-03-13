@@ -1,0 +1,12 @@
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+local function hide(self)
+	gui.animate(gui.get_node("left"), gui.PROP_POSITION, vmath.vector3(0, 288, 0), gui.EASING_INOUTQUAD, 0.5, 0.2, disablenode)
+	gui.animate(gui.get_node("right"), gui.PROP_POSITION, vmath.vector3(1024, 288, 0), gui.EASING_INOUTQUAD, 0.5, 0.2, disablenode)
+end
+
+function init(self)
+	hide(self)
+end

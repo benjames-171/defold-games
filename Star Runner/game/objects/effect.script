@@ -1,0 +1,7 @@
+function on_message(self, message_id, message, sender)
+	if message_id == hash("disintegrate") then
+		go.set_position(message.pos)
+		particlefx.play("#disintegrate")
+	end
+end
+

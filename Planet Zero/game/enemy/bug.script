@@ -1,0 +1,37 @@
+local data = require "main.data"
+
+function init(self)
+	self.flip = false
+	self.move = vmath.vector3(0,1,0)
+end
+
+local function move(self)
+	local pos = go.get_position()
+	if data.onscreen(pos) then
+		pos = pos + self.move
+		go.set_position(pos)
+	end
+end
+	
+function update(self, dt)
+	move(self)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.other_group == hash("rock") then
+			msg.post("/common/fx", "explode", {pos = go.get_position()})
+			go.delete()
+		elseif message.other_group ~= hash("player") then
+			self.move = -self.move
+			move(self)
+			self.flip = not self.flip
+			sprite.set_vflip("#sprite", self.flip)
+		end
+	end
+end
+
+
+
+
+

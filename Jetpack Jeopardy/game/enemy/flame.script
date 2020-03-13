@@ -1,0 +1,21 @@
+local data = require "main.data"
+
+local SPEED = 1
+
+function init(self)
+	local pos = go.get_position()
+	if pos.y < 0 then self.move = vmath.vector3(0,SPEED,0) 
+	else self.move = vmath.vector3(0,-SPEED,0)
+	end
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	local offset = vmath.vector3(70,0,0)
+	if data.onscreen(pos + offset, 0) then
+		local pos = go.get_position()
+		pos = pos + self.move
+		go.set_position(pos)
+	end
+end
+

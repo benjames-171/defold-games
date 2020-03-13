@@ -1,0 +1,16 @@
+local data = require "main.data"
+
+function init(self)
+	local tint = {"#262e41", "#382241", "#21294d", "#1e3444"}
+	local col = data.hex2rgba(tint[data.level])
+	sprite.set_constant("#sprite", "tint", col)
+	sprite.set_constant("#sprite1", "tint", col)
+end
+
+function update(self, dt)
+	local pos = vmath.vector3(data.scrollpos / 2)
+	pos.x = data.scrollpos.x - (pos.x % 320)
+	pos.z = -0.5
+	go.set_position(pos)
+end
+

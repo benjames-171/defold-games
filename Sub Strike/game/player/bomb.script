@@ -1,0 +1,41 @@
+local data = require "main.data"
+
+local ACCEL = 0.1
+local MAX = 1
+
+go.property("offset", vmath.vector3())
+
+function init(self)
+	self.bubble = false
+	self.move = vmath.vector3(self.offset.x / 30, 2, 0)
+	self.rot = 0
+	self.spin = math.random(-10,10) / 100
+end
+
+function update(self, dt)
+	self.rot = self.rot + self.spin
+	go.set_rotation(vmath.quat_rotation_z(self.rot))
+	
+	local pos = go.get_position()
+	self.move.x = self.move.x * 0.98
+	if pos.y < data.CANV_H - 80 then
+		if not self.bubble then
+			particlefx.play("#bubble")
+			self.bubble = true
+		end
+	end
+	self.move.y = self.move.y - ACCEL
+	if self.move.y < -MAX then self.move.y = -MAX end
+	pos = pos + self.move
+	go.set_position(pos)
+	if pos.y <= 0 then
+		go.delete()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		msg.post("/effect", "explode", {pos = go.get_position()})
+		go.delete()
+	end
+end

@@ -1,0 +1,90 @@
+local data = require "main.data"
+
+local MARGIN = 24
+local LAND = 96
+local SPACE = 18
+local MINE_TIME = 3
+
+go.property("super", false)
+
+function init(self)
+	self.rot = 0
+	self.spin = 0
+	self.move = vmath.vector3()
+	self.minetime = 3
+	self.time = math.random(0, self.minetime)
+	local spawn = {-MARGIN, data.CANV_W + MARGIN}
+	local pos = vmath.vector3()
+	local depth = math.random(1,5) * 2
+	pos.x = spawn[math.random(1,2)] 
+	pos.y = depth * SPACE
+
+	self.move.x = (depth / 10)
+	
+	if pos.x > 0 then
+		sprite.set_hflip("#sprite", true)
+		self.move.x = -self.move.x
+		pos.y = pos.y + SPACE
+		particlefx.play("#pfx-right")
+	else
+		particlefx.play("#pfx-left")
+	end
+
+	if self.super then
+		sprite.play_flipbook("#sprite", "super")
+		self.minetime = 2
+	end
+
+	go.set_position(pos)
+end
+
+local function move(self)
+	local pos = go.get_position()
+	pos = pos + self.move
+	go.set_position(pos)
+
+	if pos.x < -MARGIN or pos.x > data.CANV_W + MARGIN or pos.y < -MARGIN then go.delete() end
+
+	self.rot = self.rot + self.spin
+	go.set_rotation(vmath.quat_rotation_z(self.rot))
+
+	if self.move.y ~= 0 then
+		self.move.y = self.move.y - 0.01
+		self.move.x = self.move.x * 0.99
+		if self.move.y < -1 then
+			self.move.y = -1
+		end
+	end
+end
+
+local function mine(self, dt)
+	local pos = go.get_position()
+		
+	if self.move.y == 0 and pos.x > LAND and pos.x < data.CANV_W - LAND then
+		self.time = self.time + dt
+		if self.time > self.minetime and data.state == data.STATE_PLAYING then
+			self.time = 0
+			factory.create("#mine_factory")
+		end
+	end
+end	
+
+function update(self, dt)
+	move(self)
+	mine(self, dt)
+end
+
+local function hit(self)
+	self.move.y = -0.01
+	self.spin = math.random(5,10) / 2000
+	if math.random(1,2) == 1 then self.spin = -self.spin end
+	msg.post("#co", "disable")
+	particlefx.play("#sink")
+	data.score = data.score + 10
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") and not self.super then hit(self)
+	end
+end
+

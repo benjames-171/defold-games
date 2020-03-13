@@ -1,0 +1,29 @@
+local data = require "main.data"
+
+function init(self)
+	msg.post("#camera", "acquire_camera_focus")
+	self.pos = vmath.vector3()
+	self.flip = true
+end
+
+local function newscreen(self, pos)
+	data.spawnpos = data.playerpos
+	self.flip = not self.flip
+	sprite.set_hflip("#sprite", self.flip)
+	sprite.set_vflip("#sprite", self.flip)
+	msg.post("view#map", "newroom")
+	--sound.play("main:/sound#chirp")
+end
+
+function update(self, dt)
+	local x = math.floor(data.playerpos.x / data.SCR_W) * data.SCR_W
+	local y = math.floor(data.playerpos.y / data.SCR_H) * data.SCR_H
+
+	local pos = vmath.vector3(x, y, -0.5)
+	if pos ~= self.pos then newscreen(self, pos) end
+	self.pos = pos
+
+	go.set_position(pos)
+	data.screenpos = pos
+end
+

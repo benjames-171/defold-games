@@ -1,0 +1,11 @@
+local function open(self)
+	local pos = go.get_position()
+	pos.y = pos.y + 32
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, pos.y, go.EASING_INOUTQUAD, 0.5)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("open") then
+		open(self)
+	end
+end

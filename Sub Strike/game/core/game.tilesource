@@ -1,0 +1,91 @@
+image: "/assets/png/tiles.png"
+tile_width: 48
+tile_height: 16
+tile_margin: 0
+tile_spacing: 0
+collision: "/assets/png/tiles.png"
+material_tag: "tile"
+convex_hulls {
+  index: 0
+  count: 10
+  collision_group: ""
+}
+convex_hulls {
+  index: 10
+  count: 13
+  collision_group: ""
+}
+convex_hulls {
+  index: 23
+  count: 13
+  collision_group: ""
+}
+convex_hulls {
+  index: 36
+  count: 13
+  collision_group: ""
+}
+convex_hulls {
+  index: 49
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 49
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 49
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 53
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 57
+  count: 4
+  collision_group: ""
+}
+animations {
+  id: "arrow"
+  start_tile: 2
+  end_tile: 2
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "player"
+  start_tile: 1
+  end_tile: 1
+  playback: PLAYBACK_NONE
+  fps: 1
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "sub"
+  start_tile: 3
+  end_tile: 3
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "super"
+  start_tile: 2
+  end_tile: 2
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+extrude_borders: 2
+inner_padding: 0
+sprite_trim_mode: SPRITE_TRIM_MODE_OFF

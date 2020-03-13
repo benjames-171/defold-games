@@ -1,0 +1,86 @@
+local data = require "main.data"
+
+function init(self)
+	self.handpos = 1
+	self.arrowpos = {
+		gui.get_position(gui.get_node("1")),
+		gui.get_position(gui.get_node("2")),
+		gui.get_position(gui.get_node("3")),
+	}
+	msg.post(".", "acquire_input_focus")
+	self.node = gui.get_node("container")
+	gui.set_position(self.node, vmath.vector3(data.SCR_W/2, (data.SCR_H/2), 0))
+	gui.set_text(gui.get_node("hiscore"), string.format("HI SCORE %05d", data.hiscore))
+	sound.play("main:/sound#ambience", {gain = 0.5})
+	data.state = data.STATE_MENU
+end
+
+local function startgame(self)
+	data.timer = {0.6, 0.8, 1.0, 1.2}
+	data.score = 0
+	data.state = data.STATE_PLAYING
+	msg.post("main:/sound", "stop_sound")
+	sound.play("main:/sound#music", {gain = 0.7})
+	msg.post("main:/handler", "show_game")
+end	
+
+local function show(self)
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(data.SCR_W/2, data.SCR_H/2, 0), gui.EASING_INOUTQUAD, 0.25)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_INOUTQUAD, 0.25)
+	data.state = data.STATE_MENU
+end
+
+local function hide(self)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(data.SCR_W/2, (data.SCR_H/2) - data.GUI_DROP, 0), gui.EASING_INOUTQUAD, 0.25, 0, disablenode)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.25)
+end
+
+function update(self, dt)
+	if data.state == data.STATE_MENU then
+		local pos = vmath.vector3(self.arrowpos[self.handpos].x - 20, self.arrowpos[self.handpos].y + 6, 0)
+		gui.set_position(gui.get_node("arrow"), pos)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	end
+end
+
+local function controls(self)
+	hide(self)
+	msg.post("#controls", "show", {})
+end
+
+local function credits(self)
+	hide(self)
+	msg.post("#credits", "show", {})
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_MENU then
+		if action_id == hash("up") and action.pressed then
+			self.handpos = self.handpos - 1
+			if self.handpos < 1 then self.handpos = 3 end
+			sound.play("main:/sound#sonar")
+		elseif action_id == hash("down") and action.pressed then
+			self.handpos = self.handpos + 1
+			if self.handpos > 3 then self.handpos = 1 end
+			sound.play("main:/sound#sonar")
+		elseif action_id == hash("action") and action.pressed then
+			if self.handpos == 1 then
+				startgame(self)
+			elseif self.handpos == 2 then
+				controls(self)
+				sound.play("main:/sound#sonar")
+			elseif self.handpos == 3 then
+				credits(self)
+				sound.play("main:/sound#sonar")
+			end
+		elseif action_id == hash("exit") and action.pressed then
+			msg.post("@system:", "exit", {code = 0})
+		end
+	end
+end

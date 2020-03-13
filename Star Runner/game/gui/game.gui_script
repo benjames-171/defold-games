@@ -1,0 +1,30 @@
+local data = require "main.data"
+
+local function disablenode(self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	gui.set_enabled(gui.get_node("status"), false)
+end
+
+function update(self, dt)
+	local node = gui.get_node("inv")
+	gui.set_texture(node, "game")
+	gui.play_flipbook(node, tostring(data.item))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("status") then
+		local node = gui.get_node("statustext")
+		gui.set_text(node, message.text)
+		local m = gui.get_text_metrics_from_node(node)
+		gui.set_size(gui.get_node("statusbg"), vmath.vector3(m.width + 8, m.height, 0))
+
+		local node = gui.get_node("status")
+		gui.set_color(node, vmath.vector4(1,1,1,1))
+		gui.set_enabled(node, true)
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_LINEAR, 0.25, 3.0, disablenode)
+	end
+end
+

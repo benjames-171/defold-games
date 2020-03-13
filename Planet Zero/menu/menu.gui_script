@@ -1,0 +1,91 @@
+local data = require "main.data"
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.node = gui.get_node("container")
+	self.lock = 2
+	self.handpos = 1
+	self.rad = 0
+	self.handpos_y = {
+		gui.get_position(gui.get_node("1")),
+		gui.get_position(gui.get_node("2")),
+		gui.get_position(gui.get_node("3"))
+	}
+	data.state = data.STATE_MENU
+	local str = "START "
+	if data.maxlevel > 1 then str = str .. string.format("(AREA %d)", data.maxlevel) end
+	gui.set_text(gui.get_node("1"), str)
+end
+
+function update(self, dt)
+	local ease = math.sin(self.rad) * 16
+	local pos = vmath.vector3(self.handpos_y[self.handpos].x - 32 + ease, self.handpos_y[self.handpos].y - 16, 0)
+	gui.set_position(gui.get_node("hand"), pos)
+	self.rad = self.rad + 0.05
+	if data.state == data.STATE_MENU then
+		if self.lock > 0 then self.lock = self.lock - 1 end
+	end
+end
+
+local function show(self)
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(0, 0, 0), gui.EASING_INOUTQUAD, 0.25)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_INOUTQUAD, 0.25)
+	data.state = data.STATE_MENU
+	self.lock = 2
+end
+
+local function hide(self)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(0, -50, 0), gui.EASING_INOUTQUAD, 0.25, 0, disablenode)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.25)
+	self.lock = 2
+end
+
+local function startgame(self)
+	data.level = data.maxlevel
+	data.keys = 0
+	data.rocks = 0
+	data.hearts = 5
+	sound.play("main:/sound#music", {gain = 0.5})
+	msg.post("main:/handler", "show_game")
+end
+
+local function controls(self)
+	hide(self)
+	sound.play("main:/sound#chirp", {gain = 0.5})
+	msg.post("#controls", "show", {})
+end
+
+local function credits(self)
+	hide(self)
+	sound.play("main:/sound#chirp", {gain = 0.5})	
+	msg.post("#credits", "show", {})
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_MENU and self.lock == 0 then
+		if action_id == hash("up") and action.pressed then
+			self.handpos = self.handpos - 1
+			if self.handpos < 1 then self.handpos = 3 end
+			sound.play("main:/sound#beep")
+		elseif action_id == hash("down") and action.pressed then
+			self.handpos = self.handpos + 1
+			if self.handpos > 3 then self.handpos = 1 end
+			sound.play("main:/sound#beep")
+		elseif action_id == hash("action") and action.pressed then
+			if self.handpos == 1 then startgame(self)
+			elseif self.handpos == 2 then controls(self)
+			elseif self.handpos == 3 then credits(self)
+			end
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then show(self)
+	end
+end

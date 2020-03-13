@@ -1,0 +1,19 @@
+local data = require "main.data"
+
+local GRAV = 0.05
+
+function init(self)
+	self.move = vmath.vector3(-2,3,0)
+end
+
+function update(self, dt)
+	if data.onscreen(go.get_position(), 16) then
+		local pos = go.get_position()
+		self.move.y = self.move.y - GRAV
+		pos = pos + self.move
+		go.set_position(pos)
+	else
+		go.delete()
+	end
+end
+

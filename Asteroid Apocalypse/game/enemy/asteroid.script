@@ -1,0 +1,60 @@
+local data = require "main.data"
+
+go.property("size", 16)
+
+local SPEED = 4
+
+function init(self)
+	self.correction = vmath.vector3()
+	self.ang = 0
+	self.spin = math.random(-100, 100) / 5000
+end
+
+local function move(self, dt)
+	local pos = go.get_position()
+	local v = vmath.vector3(data.SCR_W / 2, data.SCR_H / 2, 0) - pos
+
+	v = vmath.normalize(v)
+	pos = pos + (v * SPEED * dt)
+	go.set_position(pos)
+
+	self.ang = self.ang + self.spin
+	go.set_rotation(vmath.quat_rotation_z(self.ang))
+end
+
+function update(self, dt)
+	move(self, dt)
+
+	self.correction = vmath.vector3()
+end
+
+local function collision(self, message)
+	if message.distance > 0 then
+		local proj = vmath.project(self.correction, message.normal * message.distance)
+		if proj < 1 then
+			local comp = (message.distance - message.distance * proj) * message.normal
+			go.set_position(go.get_position() + comp)
+			self.correction = self.correction + comp
+		end
+	end
+end
+
+local function dead(self)
+	go.set_rotation(vmath.quat_rotation_z(0))
+	particlefx.play("#pfx")
+	sound.play("main:/sound#explosion")
+	msg.post("gen", "dead", {pos = go.get_position(), size = self.size})
+	data.score = data.score + 10
+	go.delete()
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.other_group == hash("shot") or message.other_group == hash("player") then
+			dead(self)
+		else
+			collision(self, message)
+		end
+	end
+end
+

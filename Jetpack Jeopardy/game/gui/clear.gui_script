@@ -1,0 +1,42 @@
+local data = require "main.data"
+
+local function disable_node (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	self.node = gui.get_node("container")
+	gui.set_enabled(self.node, false)
+	gui.set_color(self.node, vmath.vector4(1,1,1,0))
+	gui.set_position(self.node, vmath.vector3(640,300, 0))
+end
+
+local function scoring(self)
+	local heart = data.hp * 100
+	local coin = data.coins * 10
+	data.score = data.score + heart + coin
+
+	local text = string.format("%05d\n%05d\n%05d", heart, coin, data.score)
+	gui.set_text(gui.get_node("right"), text)
+end
+
+local function show(self)
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(640,360,0), gui.EASING_INOUTQUAD, 0.25, 0.0)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_INOUTQUAD, 0.25, 0.0)
+	data.state = data.STATE_LEVELCLEAR
+	scoring(self)
+end
+
+local function hide(self)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(640,300,0), gui.EASING_INOUTQUAD, 0.25, 0, disable_node)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.25, 0)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	elseif message_id == hash("hide") then
+		hide(self)
+	end
+end

@@ -1,0 +1,18 @@
+local data = require "main.data"
+
+function init(self)
+	gui.animate(gui.get_node("status"), gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.25, 5)
+end
+
+local function cooldown(self, message)
+	local scale = message.level / message.max
+	gui.set_scale(gui.get_node("bar"), vmath.vector3(4, scale, 1))
+	gui.set_text(gui.get_node("score"), string.format("%05d", data.score))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("cooldown") then
+		cooldown(self, message)
+	end
+end
+

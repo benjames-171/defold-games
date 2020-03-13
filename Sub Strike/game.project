@@ -1,0 +1,26 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /render/custom.renderc
+
+[display]
+width = 1024
+height = 576
+vsync = 0
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[script]
+shared_state = 1
+
+[project]
+title = Sub Strike
+
+[html5]
+splash_image = /assets/png/loading.png
+
+[particle_fx]
+max_count = 100
+max_particle_count = 2048
+

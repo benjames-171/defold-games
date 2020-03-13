@@ -1,0 +1,11 @@
+local data = require "main.data"
+
+function init(self)
+	msg.post("#camera", "acquire_camera_focus")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("snap_to") then
+		go.set_position(message.position)
+	end
+end

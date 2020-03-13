@@ -1,0 +1,23 @@
+local data = require "main.data"
+
+go.property ("large", true)
+
+local MARGIN = 64
+
+function init(self)
+	self.speed = math.random(100, 200) / 100
+	if self.large then self.speed = self.speed * 0.1
+	else self.speed = self.speed * 0.05
+	end
+	sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0.75))
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	pos.x = pos.x - self.speed
+	if pos.x < -MARGIN then
+		pos.x = data.CANV_W + MARGIN
+		pos.y = math.random(250,280)
+	end
+	go.set_position(pos)
+end

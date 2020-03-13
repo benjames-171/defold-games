@@ -1,0 +1,18 @@
+images {
+  image: "/assets/png/bg.png"
+}
+images {
+  image: "/assets/png/box-red.png"
+}
+images {
+  image: "/assets/png/bg-menu.png"
+}
+images {
+  image: "/assets/png/logo.png"
+}
+images {
+  image: "/assets/png/box-green.png"
+}
+margin: 0
+extrude_borders: 0
+inner_padding: 0

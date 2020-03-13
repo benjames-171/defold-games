@@ -1,0 +1,22 @@
+local data = require "main.data"
+
+local function init(self)
+	self.open = false
+end
+
+local function opendoor(self)
+	local pos = go.get_position()
+	pos.y = pos.y + 32
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, pos, go.EASING_INOUTQUAD, 1)
+	sound.play("main:/sound#door")
+	self.open = true
+	data.keys = data.keys - 1
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.other_group == hash("player") and data.keys > 0 and not self.open then
+			opendoor(self)
+		end
+	end
+end

@@ -1,0 +1,63 @@
+local data = require "main.data"
+
+local SIZE = 6
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+local function flashcursor(self, node)
+	gui.set_color(node, vmath.vector4(1,1,1,0.5))
+	gui.animate(node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_LINEAR, 0.5, 0, flashcursor)
+		
+end
+
+function init(self)
+	self.node = gui.get_node("container")
+	gui.set_position(self.node, vmath.vector3(512, 200, 0))
+	gui.set_enabled(self.node, false)
+	flashcursor(self, gui.get_node("cursor"))
+
+	for y = 1, SIZE do
+		for x = 1, SIZE do
+			local node = gui.get_node(tostring(x)..tostring(y))
+			gui.set_color(node, vmath.vector4(1,1,1,0))
+		end
+	end
+end
+
+local function setcursor(self)
+	local x = math.floor(data.screenpos.x / data.SCR_W) + 1
+	local y = math.floor(data.screenpos.y / data.SCR_H) + 1
+	local node = gui.get_node(tostring(x)..tostring(y))
+	local pos = gui.get_position(node)
+	gui.set_position(gui.get_node("cursor"), pos)
+end
+
+local function show(self)
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(512, 288, 0), gui.EASING_INOUTQUAD, 0.25)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_INOUTQUAD, 0.25)
+	setcursor(self)
+	data.state = data.STATE_MAP
+end
+
+local function hide(self)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(512, 200, 0), gui.EASING_INOUTQUAD, 0.25, 0, disablenode)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.25)
+	data.state = data.STATE_PLAYING
+end
+
+local function newroom(self)
+	local x = math.floor(data.screenpos.x / data.SCR_W) + 1
+	local y = math.floor(data.screenpos.y / data.SCR_H) + 1
+	local node = gui.get_node(tostring(x)..tostring(y))
+	gui.set_color(node, vmath.vector4(1,1,1,1))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then show(self)
+	elseif message_id == hash("hide") then hide(self)
+	elseif message_id == hash("newroom") then newroom(self)
+	end
+end
