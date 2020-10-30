@@ -1,0 +1,90 @@
+local data = require "main.data"
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	local frames = {
+		vmath.vector3(76,80,0),
+		vmath.vector3(60,64,0),
+		vmath.vector3(56,59,0),
+		vmath.vector3(203,207,0),
+	}
+
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			if t == 1 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				msg.post("player", "position", {pos = data.tile2world(vmath.vector3(x, y, 0.5))})
+			elseif t == 12 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				local pos = data.tile2world(vmath.vector3(x, y, 0.5))
+				factory.create("#man-factory", pos)
+				table.insert(data.target, pos)
+				data.minerstotal = data.minerstotal + 1
+			elseif t == 14 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#geo-factory", data.tile2world(vmath.vector3(x, y, 0.1)))
+			elseif t == 15 then
+				data.gemstotal = data.gemstotal + 1
+			elseif t == 81 then
+				tilemap.set_tile("#tilemap", "world", x, y, math.random(81,84))
+			end
+
+			for k,v in pairs(frames) do
+				if t >= frames[k].x and t <= frames[k].y then
+					table.insert(self.anim, vmath.vector4(x, y, frames[k].x, frames[k].y))
+				end
+			end
+		end
+	end
+end
+
+function init(self)
+	data.miners = 0
+	data.minerstotal = 0
+	data.gems = 0
+	data.gemstotal = 0
+	data.time = 60 * 10
+	data.timetotal = 0
+	data.secrets = 0
+	data.map = {}
+	data.target = {}
+	data.art = 0
+	self.time = 0
+	self.anim = {}
+	parse(self)
+end
+
+local ANIM_TIME = 0.1
+
+local function animate(self, dt)
+	self.time = self.time + dt
+	if self.time >= ANIM_TIME then
+		self.time = 0
+		for k,v in pairs(self.anim) do
+			local t = tilemap.get_tile("/level#tilemap", "world", self.anim[k].x, self.anim[k].y)
+			t = t + 1
+			if t > self.anim[k].w then t = self.anim[k].z end
+			tilemap.set_tile("/level#tilemap", "world", self.anim[k].x, self.anim[k].y, t)
+		end
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING or
+		data.state == data.STATE_LAUNCH then
+		animate(self, dt)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("rescued") then
+		for k,v in pairs(data.target) do
+			if message.pos == v then
+				table.remove(data.target, k)
+			end
+		end
+	end
+end
+

@@ -1,0 +1,32 @@
+local data = require "main.data"
+
+function init(self)
+	msg.post("#camera", "acquire_camera_focus")
+	self.pos = vmath.vector3(0,0,0)
+	self.flip = false
+end
+
+local function newscreen(self, pos)
+	data.spawnpos = data.playerpos
+	self.flip = not self.flip
+	sprite.set_hflip("#bg", self.flip)
+
+	local x = (pos.x / 240) + 1
+	local y = (pos.y / 120) + 1
+	data.cell = (x*10) + y
+	data.map[data.cell] = true
+end
+
+function update(self, dt)
+	local h = data.CANV_H - 15
+	local x = math.floor(data.playerpos.x / data.CANV_W) * data.CANV_W
+	local y = math.floor(data.playerpos.y / h) * h
+
+	local pos = vmath.vector3(x, y, 0)
+	if pos ~= self.pos then newscreen(self, pos) end
+	self.pos = pos
+
+	go.set_position(pos)
+	data.screenpos = pos
+end
+

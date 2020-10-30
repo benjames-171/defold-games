@@ -1,0 +1,12 @@
+local data = require "main.data"
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		data.miners = data.miners + 1
+		particlefx.play("#pfx")
+		sound.play("main:/sound#teleport")
+		msg.post("view#game", "status", {text = "RESCUED A MINER!"})
+		msg.post("level", "rescued", {pos = go.get_position()})
+		go.delete()
+	end
+end

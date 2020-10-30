@@ -1,0 +1,33 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+local function populate(self)
+	local text = string.format("%d/%d\n%d/%d\n%d/4\n%s", data.miners, data.minerstotal, data.gems, data.gemstotal, data.art, data.ms2str(data.timetotal))
+	gui.set_text(gui.get_node("right"), text)
+
+	if data.miners == 10 and data.gems == data.gemstotal and data.art == 4 then
+		text = "PERFECT RUN"
+	else
+		text = "RANK: "
+		if data.miners == 10 and data.gems >= 40 and data.art >= 4 then text = text.."A"
+		elseif data.miners == 10 and data.gems >= 30 and data.art >= 3 then text = text.."B"
+		elseif data.miners == 10 and data.gems >= 30 then text = text.."C"
+		else text = text.."F"
+		end
+	end
+
+	gui.set_text(gui.get_node("rank"), text)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		ui.show(self.node)
+		populate(self)
+		data.state = data.STATE_GAMEOVER
+	end
+end

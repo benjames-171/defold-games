@@ -1,0 +1,43 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+local function flash(self, node)
+	if data.state == data.STATE_MAP then
+		gui.set_color(node, data.hex2rgba("#a4e8df"))
+		gui.animate(node, "color.w", 0.25, gui.EASING_LINEAR, 1, 0, flash)
+	end
+end
+
+local function populate(self)
+	for y = 1, 5 do
+		for x = 1, 5 do
+			local i = (x * 10) + y
+			local node = gui.get_node(tostring(i))
+
+			if i == data.cell then
+				flash(self, node)
+			elseif data.map[i] then
+				gui.cancel_animation(node, "color.w")
+				gui.set_color(node, data.hex2rgba("#326b3c"))
+			else
+				gui.cancel_animation(node, "color.w")
+				gui.set_color(node, data.hex2rgba("#242d42"))
+			end
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		ui.show(self.node)
+		data.state = data.STATE_MAP
+		populate(self)
+	elseif message_id == hash("hide") then
+		ui.hide(self.node)
+	end
+end

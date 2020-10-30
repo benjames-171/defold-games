@@ -1,0 +1,37 @@
+local data = require "main.data"
+
+function init(self)
+	msg.post("#sprite", "disable")
+end
+
+local function complete(self, message_id, message, sender)
+	msg.post("#sprite", "disable")
+end	
+
+local function show(self)
+	local nearpos = vmath.vector3(data.rocketpos)
+	local dist = 999999
+	
+	for k,v in pairs(data.target) do
+		local d = vmath.length_sqr(data.playerpos - v)
+		if d < dist then
+			dist = d
+			nearpos = v
+		end
+	end
+
+	local a = math.atan2(data.playerpos.y - nearpos.y, data.playerpos.x - nearpos.x)
+	go.set_rotation(vmath.quat_rotation_z(math.pi + a))
+	
+	msg.post("#sprite", "enable")
+	sprite.play_flipbook("#sprite", "anim", complete)
+
+	sound.play("main:/sound#tracker")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	end
+end
+

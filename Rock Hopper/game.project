@@ -1,0 +1,26 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /render/custom.renderc
+
+[display]
+width = 960
+height = 540
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+verify_graphics_calls = 0
+
+[script]
+shared_state = 1
+
+[project]
+title = Rock Hopper
+dependencies = https://github.com/subsoap/defos/archive/master.zip
+
+[html5]
+splash_image = /assets/png/splash.png
+
+[tilemap]
+max_tile_count = 8192
+

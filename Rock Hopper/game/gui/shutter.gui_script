@@ -1,0 +1,7 @@
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	gui.animate(gui.get_node("cover"), "rotation.z", "-90", gui.EASING_INOUTQUAD, 0.5, 0.25, disablenode)
+end

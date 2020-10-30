@@ -1,0 +1,44 @@
+local data = require "main.data"
+
+function init(self)
+	gui.set_enabled(gui.get_node("status"), false)
+end
+
+function update(self, dt)
+	local text = tostring(data.miners)
+	gui.set_text(gui.get_node("miners"), text)
+
+	text = tostring(data.gems)
+	gui.set_text(gui.get_node("gems"), text)
+
+	text = data.ms2str(data.time)
+	gui.set_text(gui.get_node("time"), text)
+
+	if data.miners >= 10 then gui.set_color(gui.get_node("miners"), data.hex2rgba("#64b450"))
+	end
+	if data.gems >= 30 then gui.set_color(gui.get_node("gems"), data.hex2rgba("#64b450"))
+	end
+end
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("status") then
+		local node = gui.get_node("status")
+		gui.set_text(node, message.text)
+		gui.set_enabled(node, true)
+		local col = gui.get_color(node)
+		col.w = 1
+		gui.set_color(node, col)
+		gui.animate(node, "color.w", 0, gui.EASING_LINEAR, 0.25, 4, disablenode)
+	elseif message_id == hash("art") then
+		data.art = data.art + 1
+		local node = "art"..tostring(data.art)
+		local anim = "art"..tostring(message.id)
+		gui.play_flipbook(gui.get_node(node), anim)
+	elseif message_id == hash("tracker") then
+		gui.play_flipbook(gui.get_node("tracker"), "tracker")
+	end
+end

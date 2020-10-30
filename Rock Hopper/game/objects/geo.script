@@ -1,0 +1,18 @@
+local data = require "main.data"
+
+local function complete(self, url, property)
+	sprite.play_flipbook("#sprite", "geo-green")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") and message.enter then
+		sound.play("main:/sound#rachet")
+		local pos = go.get_position()
+		pos.y = pos.y - 5
+		go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, pos, go.EASING_INOUTQUAD, 0.5, 0, complete)
+		msg.post("#co", "disable")
+		msg.post("view#game", "status", {text = "STABILISER ACTIVATED +2 MINUTES"})
+		
+		data.time = data.time + (60 * 2)
+	end
+end

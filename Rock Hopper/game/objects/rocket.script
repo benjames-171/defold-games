@@ -1,0 +1,58 @@
+local data = require "main.data"
+
+function init(self)
+	self.time = 0
+	self.count = 0
+
+	msg.post("#1", "disable")
+	msg.post("#2", "disable")
+	msg.post("#3", "disable")
+
+	data.rocketpos = go.get_position()
+end
+
+function update(self, dt)
+	if data.state == data.STATE_LAUNCH then
+		self.time = self.time + dt
+
+		local t = math.floor(self.time)
+		if self.count ~= t then
+			self.count = t
+
+			if self.count == 1 then
+			elseif self.count == 2 then
+				particlefx.play("#pfx")
+				sound.play("main:/sound#launch")
+			elseif self.count == 3 then
+				local pos = go.get_position()
+				go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, pos.y + 1000, go.EASING_INSINE, 12)
+				msg.post("#1", "enable")
+				msg.post("#2", "enable")
+				msg.post("#3", "enable")
+			elseif self.count == 10 then
+				msg.post("view#rank", "show")
+			end
+		end
+	end
+end
+
+local function trigger(self)
+	if data.miners < data.minerstotal then
+		msg.post("view#game", "status", {text = "RESCUE ALL 10 MINERS BEFORE LAUNCH!"})
+		sound.play("main:/sound#alarm")
+	elseif data.gems < data.GEMS_NEEDED then
+		local text = string.format("%d MORE POWER CRYSTALS NEEDED FOR LAUNCH!", data.GEMS_NEEDED - data.gems)
+		msg.post("view#game", "status", {text = text})
+		sound.play("main:/sound#alarm")
+	else
+		msg.post("player", "teleport")
+		self.time = 0
+		data.state = data.STATE_LAUNCH
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") and message.enter then
+		trigger(self)
+	end	
+end

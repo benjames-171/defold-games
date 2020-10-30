@@ -1,0 +1,27 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+local function populate(self, id)
+	local msg = {
+		"RESCUE 10 MINERS AND COLLECT AT LEAST 30 CRYSTALS.",
+		"FIND THE HIDDEN PASSAGE TO THE RIGHT OF THIS SIGN.",
+		"YOU FOUND THE TRACKER! PRESS 'C' TO OPERATE IT."
+	}
+
+	gui.set_text(gui.get_node("text"), msg[id])
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		ui.show(self.node)
+		data.state = data.STATE_MSG
+		populate(self, message.id)
+	elseif message_id == hash("hide") then
+		ui.hide(self.node)
+	end
+end
