@@ -1,0 +1,31 @@
+go.property("dir", 0)
+go.property("tile", 0)
+
+function init(self)
+	local anim = "belt-"
+	if self.dir == -1 then anim = anim.."left"
+	else anim = anim.."right"
+	end
+
+	if self.tile == 219 then
+		anim = anim.."-west"
+		msg.post("#co-west", "disable")
+	elseif self.tile == 233 then
+		anim = anim.."-mid"
+		msg.post("#co-mid", "disable")
+	elseif self.tile == 247 then
+		anim = anim.."-east"
+		msg.post("#co-east", "disable")
+	end
+
+	sprite.play_flipbook("#sprite", anim)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.other_group == hash("player") then
+			if message.normal.y < 0 then msg.post("/common/player", "move", {move = vmath.vector3(self.dir / 2, 0, 0)}) end
+		end
+	end
+end
+

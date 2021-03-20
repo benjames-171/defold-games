@@ -1,0 +1,72 @@
+local data = require "main.data"
+
+function init(self)
+	self.o2 = false
+	self.boss = false
+	self.flash = false
+	gui.set_enabled(gui.get_node("o2container"), false)
+	gui.set_enabled(gui.get_node("bosscontainer"), false)
+end
+
+local function flasho2(self, node)
+	if data.o2 <= 0 then
+		self.flash = true
+		gui.set_color(node, data.hex2rgba("#a63c1e"))
+		gui.animate(node, gui.PROP_COLOR, data.hex2rgba("#050505"), gui.EASING_LINEAR, 0.2, 0, flasho2)
+	end
+end
+
+function update(self, dt)
+	for h = 1, data.hp do
+		local node = gui.get_node(string.format("heart%d", h))
+		gui.set_texture(node, "game")
+		gui.play_flipbook(node, "heart")
+	end
+
+	for h = data.hp+1, 5 do
+		local node = gui.get_node(string.format("heart%d", h))
+		gui.set_texture(node, "game")
+		gui.play_flipbook(node, "heart-empty")
+	end
+	
+	gui.set_text(gui.get_node("gems"), string.format("%d/%d", data.gems, data.totalgems))
+
+	gui.set_text(gui.get_node("boom"), tostring(data.boom))
+	
+	if data.o2 < 1 then
+		self.o2 = true
+		local node = gui.get_node("o2container")
+		gui.set_color(node, vmath.vector4(1,1,1,1))
+		gui.set_enabled(node, true)
+		gui.set_scale(gui.get_node("o2"), vmath.vector3(data.o2, 1, 1))
+		if not self.flash then flasho2(self, gui.get_node("o2bg")) end
+	elseif self.o2 then
+		self.o2 = false
+		self.flash = false
+		gui.animate(gui.get_node("o2container"), gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_LINEAR, 0.1)
+	end
+
+	if self.boss then
+		gui.set_scale(gui.get_node("bosshp"), vmath.vector3(data.bosshp / 100, 1, 1))
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("status") then
+		local node = gui.get_node("statuscontainer")
+		gui.set_text(gui.get_node("status"), message.text)
+		gui.set_color(node, vmath.vector4(1,1,1,1))
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_LINEAR, 0.25, 2)
+	elseif message_id == hash("boss") then
+		self.boss = message.flag
+		local node = gui.get_node("bosscontainer")
+		if self.boss then
+			gui.set_color(node, vmath.vector4(1,1,1,0))
+			gui.set_enabled(node, true)
+			gui.animate(node, gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_LINEAR, 0.25, 1)
+		else
+			gui.set_enabled(node, false)
+		end
+	end	
+end
+

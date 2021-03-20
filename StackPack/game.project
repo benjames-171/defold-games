@@ -1,0 +1,26 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /render/custom.renderc
+
+[display]
+width = 1280
+height = 720
+vsync = 0
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[script]
+shared_state = 1
+
+[project]
+title = StackPack
+
+[html5]
+splash_image = /assets/png/splash.png
+cssfile = /builtins/manifests/web/dark_theme.css
+
+[tilemap]
+max_tile_count = 3000
+

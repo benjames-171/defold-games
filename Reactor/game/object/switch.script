@@ -1,0 +1,39 @@
+go.property("stick", false)
+go.property("id", 1)
+
+function init(self)
+	self.enter = 0
+	self.pair = "/door"..tostring(self.id)
+
+	if self.stick then
+		self.on = hash("switch2-on")
+		self.off = hash("switch2-off")
+	else
+		self.on = hash("switch-on")
+		self.off = hash("switch-off")
+	end
+	msg.post("#sprite", "play_animation", {id = self.off})
+end
+
+local function trigger(self, enter)
+	if enter or (not enter and not self.stick) then
+		if enter then self.enter = self.enter + 1
+		else self.enter = self.enter - 1
+		end
+
+		if self.enter == 0 or (self.enter == 1 and enter) then msg.post(self.pair, "switch", {enter = enter}) end
+
+		if self.enter > 0 then msg.post("#sprite", "play_animation", {id = self.on})
+		else msg.post("#sprite", "play_animation", {id = self.off})
+		end
+
+		if (self.enter == 1 and enter) or (self.enter == 0 and not enter) then sound.play("main:/sound#switch") end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		trigger(self, message.enter)
+	end
+end
+

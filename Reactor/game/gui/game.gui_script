@@ -1,0 +1,26 @@
+local data = require "main.data"
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	disablenode(self, gui.get_node("status"))
+end
+
+function update(self, dt)
+	local scale = data.rads / 100
+	if scale < 0.01 then scale = 0 end
+	gui.set_scale(gui.get_node("left"), vmath.vector3(scale, 1, 1))
+	gui.set_scale(gui.get_node("right"), vmath.vector3(scale, 1, 1))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("status") then
+		local node = gui.get_node("status")
+		gui.set_text(node, message.text)
+		gui.set_enabled(node, true)
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.5, 1.5, disablenode)
+	end
+end
+

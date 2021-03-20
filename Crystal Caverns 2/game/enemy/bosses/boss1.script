@@ -1,0 +1,128 @@
+local data = require "main.data"
+
+local DAMAGE = 5
+local SPIT = 0.2
+local ROTSPEED = 0.02
+local OUTSPEED = 0.003
+local TIME = 8
+
+local function reset(self)
+	self.on = false
+	self.open = false
+	self.flash = false
+	self.time = 0
+	self.origin = vmath.vector3()
+	self.radius = 0
+	self.rot = 0
+	self.spit = 0
+	self.spitrot = 0
+	data.bosshp = 100
+	msg.post("#sprite", "disable")
+	msg.post("#halo", "disable")
+	msg.post("#co", "disable")
+	sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0))
+	sprite.set_constant("#halo", "tint", vmath.vector4(1,1,1,0))
+	sprite.play_flipbook("#sprite", "boss1a")
+end
+
+function init(self)
+	reset(self)
+end
+
+function move(self)
+	local r = math.sin(self.radius) * 64
+	local pos = vmath.vector3(math.cos(self.rot) * r * 1.7, math.sin(self.rot) * r, 0)
+	go.set_position(self.origin + pos)
+end
+
+function switch(self)
+	if self.open then
+		self.open = false
+		sprite.play_flipbook("#sprite", "boss1a")
+		sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+		go.animate("#halo", "tint.w", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_LINEAR, 0.5)
+	else
+		self.open = true
+		sprite.play_flipbook("#sprite", "boss1b")
+		go.animate("#halo", "tint.w", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_LINEAR, 0.5)
+	end
+end
+
+local function deaddrop(self, url, property)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y - 200, go.EASING_INSINE, 1)
+end
+
+function update(self, dt)
+	if self.on then
+		self.rot = self.rot + ROTSPEED
+		move(self)
+		self.time = self.time + dt
+		if self.time > TIME then
+			switch(self)
+			self.time = 0
+		end
+		if self.open then
+			self.spit = self.spit + dt
+			self.radius = self.radius - OUTSPEED
+			if self.spit > SPIT then
+				self.spitrot = self.spitrot + 0.5
+				self.spit = 0
+				local move = vmath.vector3(math.cos(self.spitrot), math.sin(self.spitrot), 0)
+				move = vmath.normalize(move)
+				factory.create("#bullet-factory", nil, nil, {move = move})
+			end
+			if self.flash then
+				sprite.set_constant("#sprite", "tint", vmath.vector4(8,8,8,1))
+				self.flash = false
+			else sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+			end
+		else
+			self.radius = self.radius + OUTSPEED
+		end
+	elseif data.bosshp <= 0 then
+		self.time = self.time + 1
+		if data.state == data.STATE_PLAYING and (self.time % 10) == 1 then
+			msg.post("/common/effect", "explode", {pos = go.get_position() + vmath.vector3(math.random(-16,16), math.random(-16,16), 0)})
+		end
+	end
+end
+
+local function endlevel(self, url, property)
+	msg.post("/common/player", "levelclear")
+end
+
+local function hurt(self)
+	data.bosshp = data.bosshp - DAMAGE
+	self.flash = true
+	if data.bosshp <= 0 then
+		data.bosshp = 0
+		self.on = false
+		self.time = 0
+		msg.post("#co", "disable")
+		msg.post("#halo", "disable")
+		go.animate("#sprite", "tint.w", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_LINEAR, 2, 0, endlevel)
+		go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y + 40, go.EASING_OUTSINE, 1, 0, deaddrop)
+		particlefx.play("#pfx")
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		if message.other_group == hash("boom") and self.on and self.open then
+			hurt(self)
+		end
+	elseif message_id == hash("activate") then
+		self.on = true
+		go.set_position(message.pos)
+		self.origin = message.pos
+		msg.post("#sprite", "enable")
+		msg.post("#halo", "enable")
+		msg.post("#co", "enable")
+		go.animate("#sprite", "tint.w", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_LINEAR, 1, 0.5)
+		go.animate("#halo", "tint.w", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_LINEAR, 1, 0.5)
+		sound.play("main:/sound#boss")
+	elseif message_id == hash("reset") then
+		reset(self)
+	end
+end
+

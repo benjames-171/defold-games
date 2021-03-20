@@ -1,0 +1,26 @@
+local data = require "main.data"
+
+go.property("id", 1)
+
+function init(self)
+	self.open = false
+end
+
+local function opened(self, url, property)
+	go.delete()
+end
+	
+local function opendoor(self)
+	local pos = go.get_position()
+	pos.y = pos.y + 32
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, pos, go.EASING_INOUTQUAD, 1, 0, opened)
+	sound.play("main:/sound#door")
+	self.open = true
+end
+
+function update(self, dt)
+	if data.onscreen(go.get_position(), -32) and not self.open and data.key[self.id] then
+		opendoor(self)
+	end
+end
+

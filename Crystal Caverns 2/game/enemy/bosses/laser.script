@@ -1,0 +1,14 @@
+local SPEED = 8
+
+function update(self, dt)
+	local pos = go.get_position()
+	pos.y = pos.y - SPEED
+	go.set_position(pos)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		go.delete()
+	end
+end
+

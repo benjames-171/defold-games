@@ -1,0 +1,37 @@
+local WAIT = 0.4
+local DROP = 4000
+
+function init(self)
+	self.origin = go.get_position()
+	self.time = 0
+end
+
+local function respawn(self, url, property)
+	sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0))
+	go.animate("#sprite", "tint.w", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_LINEAR, 1)
+	go.set_position(self.origin)
+	msg.post("#co", "enable")
+end
+
+local function collapse(self)
+	msg.post("#co", "disable")
+	local pos = go.get_position()
+	pos.y = pos.y - DROP
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, pos.y, go.EASING_INQUAD, 3, 0, respawn)
+end
+
+function update(self, dt)
+	if self.time > 0 then
+		self.time = self.time - dt
+		if self.time <= 0 then collapse(self) end
+		local wobble = vmath.vector3(math.random(-1,1), 0, 0)
+		go.set_position(self.origin + wobble)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") and message.other_group == hash("player") and self.time <= 0 and message.normal.y == -1 then
+		self.time = WAIT
+	end
+end
+

@@ -1,0 +1,24 @@
+local data = require "main.data"
+
+function init(self)
+	msg.post("#camera", "acquire_camera_focus")
+	self.pos = vmath.vector3()
+	self.swap = true
+end
+
+local function newscreen(self)
+	self.flip = not self.flip
+end
+
+function update(self, dt)
+	local x = math.floor((data.playerpos.x - 8) / data.VP_W) * data.VP_W
+	local y = math.floor((data.playerpos.y - 8) / data.VP_H) * data.VP_H
+
+	local pos = vmath.vector3(x, y, 0)
+	pos = pos - vmath.vector3(88, 18, 0)
+	if pos ~= self.pos then newscreen(self) end
+	self.pos = pos
+	go.set_position(pos)
+	data.scrollpos = pos
+end
+

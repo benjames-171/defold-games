@@ -1,0 +1,70 @@
+local data = require "main.data"
+
+function init(self)
+	local node = gui.get_node("status")
+	gui.set_enabled(node, false)
+	self.map = {}
+	self.cell = nil
+	self.last = nil
+	self.statuspos = gui.get_position(node)
+	self.scrolling = false
+
+	for y = 1, 7 do
+		for x = 1, 7 do
+			local clone = gui.clone_tree(gui.get_node("mask"))
+			gui.set_position(clone[hash("mask")], vmath.vector3((x*32)-124, (y*32)-132, 0))
+			table.insert(self.map, clone)
+		end
+	end
+end
+
+local function flash(self, node)
+	if self.cell == node then
+		local color = data.hex2rgba("#bd2f40")
+		color.w = 0.5
+		gui.set_color(self.cell, color)
+		color.w = 0
+		gui.animate(self.cell, gui.PROP_COLOR, color, gui.EASING_LINEAR, 1, 0, flash)
+	end
+end
+
+local function posmap(self)
+	local x = math.floor ((data.playerpos.x - 8) / 8 / 16)
+	local y = math.floor ((data.playerpos.y - 8) / 8 / 16)
+	local i = (y * 7) + 7 - x
+	self.cell = self.map[i][hash("mask")]
+	gui.set_size(self.cell, vmath.vector3(28,28,0))
+
+	if self.cell ~= self.last then
+		flash(self, self.cell)
+	end
+	self.last = self.cell
+end
+
+local function stats(self)
+	gui.set_text(gui.get_node("stat1"), string.format("%02d/%02d", data.crates[1], data.cratestotal[1]))
+	gui.set_text(gui.get_node("stat2"), string.format("%02d/%02d", data.crates[2], data.cratestotal[2]))
+	gui.set_text(gui.get_node("stat3"), string.format("%02d/%02d", data.crates[3], data.cratestotal[3]))
+end
+
+function update(self, dt)
+	posmap(self)
+	stats(self)
+end
+
+local function complete(self, node)
+	self.scrolling = false
+	gui.set_enabled(node, false)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("status") and not self.scrolling then
+		self.scrolling = true
+		local node = gui.get_node("status")
+		gui.set_enabled(node, true)
+		gui.set_position(node, self.statuspos)
+		gui.set_text(node, message.text)
+		gui.animate(node, gui.PROP_POSITION, self.statuspos - vmath.vector3(2000,0,0), gui.EASING_LINEAR, 10, 0, complete)
+	end
+end
+

@@ -1,0 +1,46 @@
+local data = require "main.data"
+
+local function disable_node (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	self.node = gui.get_node("container")
+	gui.set_enabled(self.node, false)
+	gui.set_color(self.node, vmath.vector4(1,1,1,0))
+	gui.set_position(self.node, vmath.vector3(data.SCR_W/2, (data.SCR_H/2) - data.GUI_DROP, 0))
+	if data.level == data.MAX_LEVELS then
+		gui.set_text(gui.get_node("levelclear"), "GAME COMPLETE!")
+	end
+end
+
+local function show(self)
+	local p = ""
+	if data.gems == data.totalgems then p = " - PERFECT!" end
+	local node = gui.get_node("gems")
+	gui.set_text(node, string.format("%d/%d%s", data.gems, data.totalgems, p))
+	local m = gui.get_text_metrics_from_node(node)
+	gui.set_position(gui.get_node("gemicon"), -vmath.vector3(m.width/2 + 30, 0,0))
+	gui.set_text(gui.get_node("time"), string.format("TIME %s", data.ms2str(os.clock() - data.time)))
+	gui.set_text(gui.get_node("secrets"), string.format("SECRETS %d/%d", data.secrets, data.totalsecrets))
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(data.SCR_W/2, (data.SCR_H/2), 0), gui.EASING_INOUTQUAD, 0.25, 0.0)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_INOUTQUAD, 0.25, 0.0)
+	data.state = data.STATE_CLEAR
+
+	sound.stop("main:/sound#music-game")
+	sound.play("main:/sound#music-clear")
+end
+
+local function hide(self)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(data.SCR_W/2, (data.SCR_H/2) - data.GUI_DROP, 0), gui.EASING_INOUTQUAD, 0.25, 0, disable_node)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.25, 0)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	elseif message_id == hash("hide") then
+		hide(self)
+	end
+end

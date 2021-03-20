@@ -1,0 +1,5 @@
+
+function update(self, dt)
+	sprite.set_constant("#glow", "tint", vmath.vector4(1,1,1, math.random(25,35) / 100))
+end
+

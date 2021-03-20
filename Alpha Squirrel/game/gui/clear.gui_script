@@ -1,0 +1,23 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		ui.show(self.node)
+		if data.level >= data.MAX_LEVELS then
+			gui.set_text(gui.get_node("title"), "COMPLETED!")
+		end
+		gui.set_text(gui.get_node("acorns"), string.format("%d/%d", data.acorns, data.totalacorns))
+		gui.set_text(gui.get_node("time"), data.ms2str(os.clock() - data.time))
+		data.score = data.score + 1000 + (data.acorns * 25)
+		gui.set_text(gui.get_node("score"), string.format("SCORE %05d", data.score))
+		if data.hiscore < data.score then data.hiscore = data.score
+		end
+		data.state = data.STATE_CLEAR
+	end
+end

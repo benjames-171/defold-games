@@ -1,0 +1,20 @@
+local data = require "main.data"
+
+local FREQ = 1
+
+function init(self)
+	self.time = math.random(1,100) / 1
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	if data.onscreen(pos, 32) and pos.y > data.playerpos.y then
+		self.time = self.time + dt
+		if self.time >= FREQ then
+			self.time = 0
+			pos.x = pos.x + 8
+			pos.y = pos.y + 8
+			factory.create("#block-factory", pos)
+		end
+	end
+end

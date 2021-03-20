@@ -1,0 +1,8 @@
+local function scroll(self, node)
+	gui.set_position(node, vmath.vector3())
+	gui.animate(node, gui.PROP_POSITION, vmath.vector3(-1024, 0, 0), gui.EASING_LINEAR, 20, 0, scroll)
+end
+
+function init(self)
+	scroll(self, gui.get_node("trees"))
+end

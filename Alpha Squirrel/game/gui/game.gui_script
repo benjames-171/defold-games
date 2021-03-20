@@ -1,0 +1,39 @@
+local data = require "main.data"
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+function update(self, dt)
+	gui.set_text(gui.get_node("greys"), string.format("%d/%d", data.greys, data.totalgreys))
+	gui.set_text(gui.get_node("acorns"), string.format("%d/%d", data.acorns, data.totalacorns))
+
+	for h = 1, data.hp do
+		local node = gui.get_node(string.format("heart%d", h))
+		gui.play_flipbook(node, "heart")
+	end
+
+	for h = data.hp+1, 5 do
+		local node = gui.get_node(string.format("heart%d", h))
+		gui.play_flipbook(node, "heart-empty")
+	end
+
+	--gui.set_scale(gui.get_node("meter"), vmath.vector3(1, data.heat/data.HEAT_THRESH, 1))
+end
+
+local function status(self, text)
+	local node = gui.get_node("status")
+	gui.set_text(node, text)
+	gui.set_enabled(node, true)
+	local col = gui.get_color(node)
+	col.w = 1
+	gui.set_color(node, col)
+	gui.animate(node, "color.w", 0, gui.EASING_LINEAR, 0.1, 3, disablenode)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("status") then
+		status(self, message.text)
+	end
+end
+

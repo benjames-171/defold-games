@@ -1,0 +1,42 @@
+local data = require "main.data"
+
+local SPEED = 0.15
+
+function init(self)
+	msg.post("#camera", "acquire_camera_focus")
+	self.target = vmath.vector3()
+	self.pos = go.get_world_position()
+	particlefx.play("#rads")
+end
+
+local function bounds(pos)
+	if pos.x < data.bounds.x then pos.x = data.bounds.x end
+	if pos.x > data.bounds.z then pos.x = data.bounds.z end
+	if pos.y < data.bounds.y then pos.y = data.bounds.y end
+	if pos.y > data.bounds.w then pos.y = data.bounds.w end
+
+	return pos
+end
+
+local function move(self)
+	local v = vmath.vector3((self.target.x - self.pos.x) * SPEED, (self.target.y - self.pos.y) * SPEED, 0)
+	self.pos = self.pos + v
+end
+
+function update(self, dt)
+	move(self)
+	local pos = bounds(self.pos - data.offset)
+	go.set_position(pos)
+	data.scrollpos = pos
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("look_at") then
+		self.target = message.position + vmath.vector3(0, 8, 0)
+	elseif message_id == hash("snap_to") then
+		self.pos = message.position
+		self.target = message.position + vmath.vector3(0, 8, 0)
+	elseif message_id == hash("reset") then
+		go.set_position(vmath.vector3(0,0,0))
+	end
+end

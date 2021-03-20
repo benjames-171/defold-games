@@ -1,0 +1,19 @@
+local data = require "main.data"
+
+local ACCEL = 0.05
+
+function init(self)
+	self.drop = 0
+	self.move = 0
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	if data.onscreen(pos, 32) then
+		self.move = self.move + ACCEL
+		pos.y = pos.y - self.move
+		go.set_position(pos)
+	else
+		go.delete()
+	end
+end

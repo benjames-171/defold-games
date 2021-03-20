@@ -1,0 +1,25 @@
+local data = require "main.data"
+
+local TIME = 1.5
+local DELAY = 0.1
+
+local function swingleft(self, url, property)
+	go.animate(".", "euler.z", go.PLAYBACK_ONCE_FORWARD, -90, go.EASING_INOUTCUBIC, TIME, DELAY, swingright)
+	if data.onscreen(go.get_position(), 32) then
+		if self.start then sound.play("main:/sound#axe", {gain = 0.25})
+		else self.start = true
+		end
+	end
+end
+
+function swingright(self, url, property)
+	go.animate(".", "euler.z", go.PLAYBACK_ONCE_FORWARD, 90, go.EASING_INOUTCUBIC, TIME, DELAY, swingleft)
+	if data.onscreen(go.get_position(), 32) then sound.play("main:/sound#axe", {gain = 0.25}) end
+end
+
+function init(self)
+	self.start = false
+	swingleft(self)
+end
+
+

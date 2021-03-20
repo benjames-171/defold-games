@@ -1,0 +1,138 @@
+local data = require "main.data"
+
+local LOCK = 30
+
+local function setarrowstate(self, state)
+	msg.post("#sprite", state)
+	msg.post("arrowhead", state)
+end
+
+local function screen2world(x, y)
+	return vmath.vector3((x / data.PIXEL_SIZE) + data.scrollpos.x, (y / data.PIXEL_SIZE) + data.scrollpos.y, 0)
+end
+
+local function spawnball(self, pos)
+	self.ball = factory.create("#ball-factory", pos, nil, {}, vmath.vector3(1,1,1))
+	go.set_position(pos)
+end
+
+function init(self)
+	self.lock = LOCK
+	self.snap = true
+	self.drag = false
+	self.ball = nil
+	self.origin = vmath.vector3()
+	self.respawn = vmath.vector3()
+	setarrowstate(self, "disable")
+	sound.play("main:/sound#music")
+end
+
+local function quit2menu(self)
+	msg.post("main:/sound", "stop_sound")
+	msg.post("main:/handler", "show_menu")
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		if self.snap then
+			msg.post("view", "hole", {hole = data.hole})
+			self.snap = false
+		end
+	end
+
+	if data.ballpos.y < 0 then
+		go.delete(self.ball)
+		spawnball(self, data.restart)
+	end
+	
+	self.lock = self.lock - 1
+end
+
+local function nexthole(self)
+	data.card [data.hole] = data.holescore
+	data.score = data.score + data.holescore
+	data.holescore = 0
+	sound.play("main:/sound#win")
+
+	local pos = data.world2tile(data.ballpos)
+	tilemap.set_tile("/level#tilemap", "world", pos.x - 1, pos.y + 1, 0)
+	tilemap.set_tile("/level#tilemap", "world", pos.x - 1, pos.y + 2, 0)
+
+	if data.hole >= 9 then msg.post("view#clear", "show")
+	else
+		data.hole = data.hole + 1
+		msg.post("/common/view", "hole", {hole = data.hole})
+	end
+end
+
+local function hitball(self, action)
+	self.drag = false
+	setarrowstate(self, "disable")
+	local v = screen2world(action.x, action.y) - self.origin
+	self.respawn = vmath.vector3(data.ballpos)
+	if data.holescore == 0 then data.restart = vmath.vector3(data.ballpos) end
+	if vmath.length(v) > 10 then
+		msg.post(self.ball, "hit", {force = v})
+		sound.play("main:/sound#hit")
+		data.holescore = data.holescore + 1
+	end
+end
+
+local function click(self, action)
+	if action.pressed then
+		self.drag = true
+		setarrowstate(self, "enable")
+		self.origin = screen2world(action.x, action.y, 0)
+		go.set_position(data.ballpos)
+	elseif action.released and self.drag then
+		hitball(self, action)
+	end
+
+	if self.drag then
+		local pos = screen2world(action.x, action.y)
+		local v = pos - self.origin
+		local a = -math.atan2 (v.x, v.y)
+		local r = vmath.quat_rotation_z(a)
+		go.set_rotation(r)
+		local len = math.sqrt((v.x * v.x) + (v.y * v.y))
+		if len == 0 then len = 0.1 end
+		go.set_scale(vmath.vector3(1, len/data.TILE_SIZE, 1))
+		msg.post("arrowhead", "pos", {pos = v + go.get_position(), rot = r})
+	end
+end
+
+local function input_playing(self, action_id, action)
+	if action_id == hash("action") then
+		click(self, action)
+	elseif action_id == hash("exit") and action.pressed then
+		msg.post("main:/sound", "stop_sound")
+		msg.post("main:/handler", "show_menu")
+	elseif action_id == hash("debug") and action.pressed then
+		msg.post("view#clear", "show")
+	end
+end
+
+local function input(self, action_id, action)
+	if self.lock > 0 then return end
+	
+	if data.state == data.STATE_PLAYING then
+		input_playing(self, action_id, action)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("spawn") then
+		spawnball(self, message.pos)
+	elseif message_id == hash("reset") then
+		spawnball(self, self.respawn)
+	elseif message_id == hash("restart") then
+		go.delete(self.ball)
+		sound.play("main:/sound#out")
+		spawnball(self, data.restart)
+	elseif message_id == hash("nexthole") then
+		nexthole(self)
+	elseif message_id == hash("input") then
+		input(self, message.action_id, message.action)
+	end
+end
+

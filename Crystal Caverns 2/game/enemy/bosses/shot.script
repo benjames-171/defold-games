@@ -1,0 +1,18 @@
+go.property("move", vmath.vector3())
+
+local SPEED = 2
+local ACCEL = 0.02
+
+function update(self, dt)
+	self.move.y = self.move.y - ACCEL
+	local pos = go.get_position()
+	pos = pos + (self.move * SPEED)
+	go.set_position(pos)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		go.delete()
+	end
+end
+

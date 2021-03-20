@@ -1,0 +1,44 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /custom/custom.renderc
+
+[display]
+width = 1024
+height = 576
+vsync = 1
+update_frequency = 60
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[script]
+shared_state = 1
+
+[project]
+title = Crystal Caverns 2
+dependencies = https://github.com/subsoap/defos/archive/master.zip
+
+[html5]
+splash_image = /assets/png/splash.png
+scale_mode = fit
+
+[physics]
+debug = 0
+gravity_y = -200.0
+
+[spine]
+max_count = 0
+
+[model]
+max_count = 0
+
+[label]
+max_count = 0
+
+[sprite]
+max_count = 256
+
+[tilemap]
+max_tile_count = 4096
+

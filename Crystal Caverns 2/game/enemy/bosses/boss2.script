@@ -1,0 +1,115 @@
+local data = require "main.data"
+
+local DAMAGE = 3
+local TIME = 1
+local ACCEL = 0.1
+local STANDOFF = 80
+local HEIGHT = 70
+local MAX = 3
+
+local function reset(self)
+	self.on = false
+	self.flash = 0
+	self.time = 0
+	self.origin = vmath.vector3()
+	self.target = vmath.vector3()
+	self.move = vmath.vector3()
+	data.bosshp = 100
+	msg.post("#sprite", "disable")
+	msg.post("#sprite-exhaust", "disable")
+	msg.post("#co", "disable")
+	sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0))
+	sprite.set_constant("#sprite-exhaust", "tint", vmath.vector4(1,1,1,0))
+end
+
+function init(self)
+	reset(self)
+end
+
+function move(self)
+	if self.time == 0 then
+		local pos = self.origin - data.playerpos
+		if pos.x < 0 then
+			self.target.x = self.origin.x - STANDOFF
+			self.move.x = 1
+			sprite.set_hflip("#sprite", false)
+		else
+			self.target.x = self.origin.x + STANDOFF
+			self.move.x = -1
+			sprite.set_hflip("#sprite", true)
+		end
+		self.target.y = self.origin.y + math.random(-HEIGHT, HEIGHT)
+		go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, self.target, go.EASING_OUTQUAD, 2)
+	end
+end
+
+local function deaddrop(self, url, property)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y - 200, go.EASING_INSINE, 1)
+end
+
+function update(self, dt)
+	if self.on then
+		move(self)
+		self.time = self.time + dt
+		if self.time > TIME then
+			self.time = 0
+			local pos = go.get_position()
+			pos.z = pos.z - 0.1
+			factory.create("#shot-factory", pos, nil, {move = self.move})
+			sound.play("main:/sound#shot")
+		end
+
+		if self.flash == 2 then
+			sprite.set_constant("#sprite", "tint", vmath.vector4(8,8,8,1))
+			self.flash = 1
+		elseif self.flash == 1 then
+			sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+			self.flash = 0
+		end
+	elseif data.bosshp <= 0 then
+		self.time = self.time + 1
+		if data.state == data.STATE_PLAYING and (self.time % 10) == 1 then
+			msg.post("/common/effect", "explode", {pos = go.get_position() + vmath.vector3(math.random(-16,16), math.random(-16,16), 0)})
+		end
+	end
+end
+
+local function endlevel(self, url, property)
+	msg.post("/common/player", "levelclear")
+end
+
+local function hurt(self)
+	data.bosshp = data.bosshp - DAMAGE
+	self.flash = 2
+	if data.bosshp <= 0 then
+		data.bosshp = 0
+		self.on = false
+		self.time = 0
+		msg.post("#co", "disable")
+		msg.post("#sprite-exhaust", "disable")
+		go.animate("#sprite", "tint.w", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_LINEAR, 2, 0, endlevel)
+		go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y + 40, go.EASING_OUTSINE, 1, 0, deaddrop)
+		particlefx.play("#pfx")
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		if message.other_group == hash("boom") and self.on then
+			hurt(self)
+		end
+	elseif message_id == hash("activate") then
+		self.on = true
+		self.origin = message.pos
+		go.set_position(message.pos)
+		msg.post("#sprite", "enable")
+		msg.post("#sprite-exhaust", "enable")
+		msg.post("#co", "enable")
+		go.animate("#sprite", "tint.w", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_LINEAR, 1, 0.5)
+		go.animate("#sprite-exhaust", "tint.w", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_LINEAR, 1, 0.5)
+		sound.play("main:/sound#boss")
+	elseif message_id == hash("reset") then
+		reset(self)
+	end
+end
+

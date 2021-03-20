@@ -1,0 +1,21 @@
+local data = require "main.data"
+
+function init(self)
+	self.deploy = go.get_position()
+	self.deploy.y = self.deploy.y - 4
+	self.origin = go.get_position()
+	self.origin.y = self.origin.y - 12
+	go.set_position(self.origin)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		if message.enter then
+			go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, self.deploy, go.EASING_INSINE, 0.25)
+		else
+			go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, self.origin, go.EASING_INSINE, 0.25)
+		end
+	end	
+end
+
+

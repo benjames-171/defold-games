@@ -1,0 +1,59 @@
+local SPEED = 0.5
+local GRAVITY = 0.2
+local JUMP = 4.5
+local JUMPTIME = 70
+local COOLDOWN = 60
+
+local function setdir(self)
+	if self.move.x > 0 then sprite.set_hflip("#sprite", false)
+	else sprite.set_hflip("#sprite", true)
+	end
+end
+
+function init(self)
+	self.time = math.random(0, JUMPTIME)
+	self.cool = 0
+	self.move = vmath.vector3(SPEED, 0,0)
+	self.origin = go.get_position()
+	if math.random(1,2) == 1 then self.move.x = -SPEED end
+	setdir(self)
+end
+
+local function move(self)
+	self.move.y = self.move.y - GRAVITY
+	local pos = go.get_position()
+	pos = pos + self.move
+	if pos.y < self.origin.y then
+		pos.y = self.origin.y
+		self.move.y = 0 
+	end
+	go.set_position(pos)
+end
+
+local function jump(self)
+	if self.time >= JUMPTIME then
+		self.move.y = JUMP
+		self.time = 0
+	end
+end
+
+function update(self, dt)
+	self.time = self.time + 1
+	self.cool = self.cool - 1
+	move(self)
+	jump(self)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		if message.other_group == hash("world") and self.cool <= 0 then
+			self.move.x = -self.move.x
+			setdir(self)
+			self.cool = COOLDOWN
+		elseif message.other_group == hash("boom") then
+			msg.post("/common/effect", "explode", {pos = go.get_position()})
+			go.delete()
+		end
+	end
+end
+

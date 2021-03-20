@@ -1,0 +1,59 @@
+local data = require "main.data"
+
+local DRAG = 0.15
+
+go.property("move", vmath.vector3())
+
+local function flyback(self, url, property)
+	self.back = true
+end
+
+function init(self)
+	local pos = go.get_position()
+	pos.z = -0.15
+	go.set_position(pos)
+	self.back = false
+	self.rot = 0
+	self.time = 0
+	self.backtime = 0.8
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, go.get_position() + self.move, go.EASING_OUTSINE, 0.5, 0, flyback)
+end
+
+local function remove(self)
+	self.time = 0
+	data.boom = data.boom + 1
+	go.delete()
+end
+
+function update(self, dt)
+	self.time = self.time + dt
+	if self.back then
+		local pos = vmath.vector3(data.playerpos)
+		pos.z = 0
+		go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, pos, go.EASING_OUTSINE, self.backtime)
+		self.backtime = self.backtime - 0.03
+	end
+	self.rot = self.rot + 0.25
+	go.set_rotation(vmath.quat_rotation_z(self.rot))
+
+	local pos = data.world2tile(go.get_position())
+	local t = tilemap.get_tile("/level#tilemap", "top", pos.x, pos.y)
+	if t == 19 then
+		tilemap.set_tile("/level#tilemap", "top", pos.x, pos.y, 0)
+		msg.post("/common/effect", "explode", {pos = data.tile2world(pos)})
+		remove(self)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") and self.time > 0.015 then
+		if message.other_group == hash("player") then
+			remove(self)
+			sound.play("main:/sound#catch")
+		else 
+			sound.play("main:/sound#woodhit")
+			remove(self)
+		end
+	end
+end
+

@@ -1,0 +1,15 @@
+local data = require "main.data"
+
+function init(self)
+	msg.post("#sprite", "disable")
+end
+
+function update(self, dt)
+	if data.ballpos.y > data.CANV_H then
+		msg.post("#sprite", "enable")
+		go.set_position(vmath.vector3(data.ballpos.x, data.CANV_H, 0.5))
+	else
+		msg.post("#sprite", "disable")
+	end
+end
+

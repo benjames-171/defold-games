@@ -1,0 +1,23 @@
+local ACCEL = 0.1
+local WAIT = 0.5
+
+function init(self)
+	self.time = 0
+	self.move = vmath.vector3()
+end
+
+function update(self, dt)
+	if self.time > WAIT then
+		self.move.y = self.move.y - ACCEL
+		local pos = go.get_position()
+		go.set_position(pos + self.move)
+	else
+		self.time = self.time + dt
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") and message.other_group == hash("world") then
+		go.delete()
+	end
+end

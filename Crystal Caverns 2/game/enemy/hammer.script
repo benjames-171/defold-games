@@ -1,0 +1,25 @@
+local data = require "main.data"
+
+local WAIT = 90
+
+function init(self)
+	self.time = math.random(1, WAIT)
+	self.origin = go.get_position()
+	self.origin.y = self.origin.y + 1
+	self.deploy = go.get_position()
+	self.deploy.y = self.deploy.y - 32
+end
+
+local function complete(self, url, property)
+	if data.onscreen(go.get_position(), 16) then sound.play("main:/sound#boom") end
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, self.origin, go.EASING_INOUTQUAD, 1)
+end
+
+function update(self, dt)
+	self.time = self.time - 1
+	if self.time <= 0 then
+		self.time = WAIT
+		go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, self.deploy, go.EASING_INSINE, 0.1, 0, complete)
+	end
+end
+

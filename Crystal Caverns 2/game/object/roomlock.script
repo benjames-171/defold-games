@@ -1,0 +1,21 @@
+local data = require "main.data"
+
+function init(self)
+	self.active = true
+	msg.post("/common/player", "bossroom")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") and self.active then
+		msg.post("/common/view#script", "lock", {position = go.get_position()})
+		msg.post("/boss", "activate", {pos = go.get_position() + data.offset - vmath.vector3(8,8,0)})
+		msg.post("/common/view#game", "boss", {flag = true})
+		msg.post("#co", "disable")
+		self.active = false
+	elseif message_id == hash("reset") then
+		msg.post("#co", "enable")
+		msg.post("/common/view#game", "boss", {flag = false})
+		self.active = true
+	end
+end
+

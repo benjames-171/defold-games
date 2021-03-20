@@ -1,0 +1,197 @@
+local data = require "main.data"
+
+local function belt(self, t, x, y)
+	local w = tilemap.get_tile("#tilemap", "world", x, y)
+	tilemap.set_tile("#tilemap", "world", x, y, 0)
+	tilemap.set_tile("#tilemap", "top", x, y, 0)
+		
+	local dir = 1
+	if t == 48 then dir = -1
+	end
+
+	factory.create("#belt-factory", data.tile2world(vmath.vector3(x, y, 0.1)), nil, {dir = dir, tile = w} )
+end
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local portal = 1
+	local frames = {
+		vmath.vector3(13,14,0),
+		vmath.vector3(40,41,0),
+	}
+
+	data.bounds = vmath.vector4(
+		(sx - 1) * data.TILE_SIZE,
+		(sy - 1) * data.TILE_SIZE,
+		((sx + w - 1) * data.TILE_SIZE) - data.CANV_W,
+		((sy + h - 1) * data.TILE_SIZE) - data.CANV_H)
+
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "top", x, y)
+			if t == 1 or t == 2 then
+				local dir = 1
+				if t == 2 then dir = -1 end
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				msg.post("common/player", "position", {pos = data.tile2world(vmath.vector3(x, y, -0.1)), dir = dir})
+			elseif t >=3 and t <= 5 then
+				data.totalgems = data.totalgems + 1
+			elseif t == 7 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#lift-factory", data.tile2world(vmath.vector3(x, y, 0.1)))
+			elseif t == 9 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#disc-factory", data.tile2world(vmath.vector3(x, y, -0.2)))
+			elseif t == 11 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#box-factory", data.tile2world(vmath.vector3(x, y, 0)))
+			elseif t == 15 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#ball-factory", data.tile2world(vmath.vector3(x, y, 0)))
+			elseif t == 24 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#spike-factory", data.tile2world(vmath.vector3(x, y, 0)))
+			elseif t == 25 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				tilemap.set_tile("#tilemap", "back", x, y, 25)
+				factory.create("#respawn-factory", data.tile2world(vmath.vector3(x, y, -0.2)))
+			elseif t == 27 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#hammer-factory", data.tile2world(vmath.vector3(x, y, 0.1)))
+			elseif t == 29 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#torch-factory", data.tile2world(vmath.vector3(x, y, -0.2)))
+			elseif t >= 31 and t <= 33 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#door-factory", data.tile2world(vmath.vector3(x, y, -0.2)), nil, {id  = t - 30})
+			elseif t == 40 then
+				factory.create("#toxic-factory", data.tile2world(vmath.vector3(x, y, 0)))
+			elseif t == 43 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#axe-factory", data.tile2world(vmath.vector3(x, y, 0)))
+			elseif t == 44 then
+				factory.create("#highlight-factory", data.tile2world(vmath.vector3(x, y, -0.2)))
+			elseif t == 45 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#platform-factory", data.tile2world(vmath.vector3(x, y, 0)))
+			elseif t == 46 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				local pos = data.tile2world(vmath.vector3(x, y, 0))
+				factory.create("#portal-factory", pos, nil, {num = portal})
+				data.portal[portal] = pos + vmath.vector3(8, 0, 0)
+				portal = portal + 1
+			elseif t == 47 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#dripper-factory", data.tile2world(vmath.vector3(x, y, 0)))
+			elseif t == 48 or t == 49 then
+				belt(self, t, x, y)
+			elseif t == 50 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#roomlock-factory", data.tile2world(vmath.vector3(x, y, 0)))
+			elseif t == 52 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#collapse-factory", data.tile2world(vmath.vector3(x, y, 0)))
+			elseif t == 57 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#blockdropper-factory", data.tile2world(vmath.vector3(x, y, 0)))
+			elseif t == 60 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#secret-factory", data.tile2world(vmath.vector3(x, y, 0.8)))
+				data.totalsecrets = data.totalsecrets + 1
+			elseif t == 155 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				for n=1, 5 do 
+					factory.create("#fly-factory", data.tile2world(vmath.vector3(x, y, 0.1)))
+				end
+			elseif t == 157 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#arc-factory", data.tile2world(vmath.vector3(x, y, 0.1)))
+			elseif t == 160 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#blob-factory", data.tile2world(vmath.vector3(x, y, 0.1)))
+			elseif t == 162 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#eyestalk-factory", data.tile2world(vmath.vector3(x, y, 0.1)))
+			elseif t == 166 then
+				tilemap.set_tile("#tilemap", "top", x, y, 0)
+				factory.create("#spider-factory", data.tile2world(vmath.vector3(x, y, 0.1)))
+			end
+
+			for k,v in pairs(frames) do
+				if t >= frames[k].x and t <= frames[k].y then
+					table.insert(self.anim, vmath.vector4(x, y, frames[k].x, frames[k].y))
+				end
+			end
+		end
+	end
+end
+
+local function decorate(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+
+			if t == 76 then
+				local a = 1
+				if y < h+sy-1 then
+					a = tilemap.get_tile("#tilemap", "world", x, y+1)
+				end
+				if a > 0 then t = math.random(85,88)
+				else t = math.random(71,74)
+				end
+				tilemap.set_tile("#tilemap", "world", x, y, t)
+			end
+			
+			if (t >= 71 and t <= 74) or (t >= 85 and t <= 88) then
+				if math.random(1,2) == 1 then
+					if tilemap.get_tile("#tilemap", "top", x, y) == 0 then
+						tilemap.set_tile("#tilemap", "top", x, y, math.random(257, 260))
+					end
+				end
+				if y > 1 then
+					local w = tilemap.get_tile("#tilemap", "world", x, y-1)
+					t = tilemap.get_tile("#tilemap", "top", x, y-1)
+					if w == 0 and t == 0 then tilemap.set_tile("#tilemap", "top", x, y-1, math.random(253, 256)) end
+				end
+			end
+		end
+	end
+end
+
+function init(self)
+	data.gems = 0
+	data.totalgems = 0
+	data.secrets = 0
+	data.totalsecrets = 0
+	data.key = {false,false,false}
+	self.anim = {}
+	self.time = 0
+	parse(self)
+	decorate(self)
+	data.time = os.clock()
+end
+
+local ANIM_TIME = 0.3
+
+local function animate(self, dt)
+	self.time = self.time + dt
+	if self.time >= ANIM_TIME then
+		self.time = 0
+		for k,v in pairs(self.anim) do
+			local t = tilemap.get_tile("/level#tilemap", "top", self.anim[k].x, self.anim[k].y)
+			t = t + 1
+			if t > self.anim[k].w then t = self.anim[k].z end
+			tilemap.set_tile("/level#tilemap", "top", self.anim[k].x, self.anim[k].y, t)
+		end
+	end
+end
+
+function update(self, dt)
+	animate(self, dt)
+end
+
+
+
+

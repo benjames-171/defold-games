@@ -1,0 +1,27 @@
+local data = require "main.data"
+
+function init(self)
+	self.active = false
+	self.origin = go.get_position()
+end
+
+function update(self, dt)
+	if self.active then
+		if self.origin ~= data.respawn  then
+			go.delete()
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") and message.other_group == hash("player") then
+		if self.origin ~= data.respawn then
+			self.active = true
+			data.respawn = self.origin
+			sound.play("main:/sound#checkpoint")
+			go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y + data.TILE_SIZE, go.EASING_INOUTQUAD, 0.5)
+			msg.post("/common/view#game", "status", {text = "CHECKPOINT"})
+		end
+	end	
+end
+

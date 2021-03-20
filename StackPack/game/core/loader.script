@@ -1,0 +1,36 @@
+local data = require "main.data"
+
+local function unloadlevel(self)
+	if self.loaded > 0 then
+		msg.post (string.format("#level%d", self.loaded), "unload")
+	end
+end
+
+local function loadlevel(self)
+	msg.post (string.format("#level%d", data.level), "load")
+	self.loaded = data.level
+end
+
+function init(self)
+	self.loaded = 0
+	self.reload = false
+	msg.post(".", "acquire_input_focus")
+	loadlevel(self)
+end
+
+function on_message(self, message_id, message,sender)
+	if message_id == hash("new_level") then
+		unloadlevel(self)
+		loadlevel(self)
+	elseif message_id == hash("proxy_loaded") then
+		msg.post(sender, "enable")
+	elseif message_id == hash("reload_level") then 
+		unloadlevel(self)
+		self.reload = true
+	elseif message_id == hash("proxy_unloaded") then
+		if self.reload then
+			self.reload = false
+			loadlevel(self)
+		end
+	end
+end	

@@ -1,0 +1,33 @@
+local data = require "main.data"
+
+local SPREAD = 16
+local RANGE = 0.5
+
+function init(self)
+	self.sine = vmath.vector3(0,0,0)
+	self.sineadd = vmath.vector3(math.random(50,100)/1000, math.random(50,100)/1000,0)
+	local pos = go.get_position()
+	pos.x = pos.x + math.random(-SPREAD, SPREAD)
+	pos.y = pos.y + math.random(-SPREAD, SPREAD)
+	go.set_position(pos)
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	--if data.onscreen(pos, data.TILE_SIZE) then
+		self.sine = self.sine + self.sineadd
+		pos.x = pos.x + math.sin(self.sine.x) * RANGE
+		pos.y = pos.y + math.sin(self.sine.y) * RANGE
+		go.set_position(pos)
+	--end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		if message.other_group == hash("boom") then
+			msg.post("/common/effect", "explode", {pos = go.get_position()})
+			go.delete()
+		end
+	end
+end
+

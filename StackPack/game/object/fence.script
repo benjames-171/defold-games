@@ -1,0 +1,28 @@
+local data = require "main.data"
+
+go.property("vert", false)
+
+function init(self)
+	if self.vert then
+		sprite.play_flipbook("#sprite", "fence-v")
+		msg.post("#co-h", "disable")
+	else
+		msg.post("#co-v", "disable")
+	end
+end
+
+function update(self, dt)
+	go.set("#sprite", "tint.w", data.fence)
+
+	local pos = go.get_position()
+	if pos.y < data.playerpos.y or self.vert then
+		pos.z = data.playerpos.z + 0.1
+	else
+		pos.z = data.playerpos.z - 0.1
+	end
+	go.set_position(pos)
+end
+
+function on_message(self, message_id, message, sender)
+end
+

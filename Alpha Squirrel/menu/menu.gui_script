@@ -1,0 +1,78 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.handpos = 1
+	self.arrowpos = {
+		gui.get_position(gui.get_node("1")),
+		gui.get_position(gui.get_node("2")),
+		gui.get_position(gui.get_node("3")),
+	}
+	msg.post(".", "acquire_input_focus")
+	self.node = gui.get_node("container")
+	gui.set_position(self.node, vmath.vector3(data.SCR_W/2, (data.SCR_H/2), 0))
+	gui.set_text(gui.get_node("hiscore"), string.format("HISCORE %05d", data.hiscore))
+	sound.play("main:/sound#music-menu", {gain = 0.4})
+	data.state = data.STATE_MENU
+end
+
+local function startgame(self)
+	data.score = 0
+	sound.stop("main:/sound")
+	sound.play("main:/sound#music", {gain = 0.4})
+	msg.post("main:/handler", "show_game")
+end	
+
+local function show(self)
+	ui.show(self.node)
+	data.state = data.STATE_MENU
+end
+
+function update(self, dt)
+	if data.state == data.STATE_MENU then
+		local pos = vmath.vector3(self.arrowpos[self.handpos].x - 48, self.arrowpos[self.handpos].y + 1, 0)
+		gui.set_position(gui.get_node("arrow"), pos)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	end
+end
+
+local function controls(self)
+	ui.hide(self.node)
+	msg.post("#controls", "show", {})
+end
+
+local function credits(self)
+	ui.hide(self.node)
+	msg.post("#credits", "show", {})
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_MENU then
+		if action_id == hash("up") and action.pressed then
+			self.handpos = self.handpos - 1
+			if self.handpos < 1 then self.handpos = 3 end
+			sound.play("main:/sound#jump")
+		elseif action_id == hash("down") and action.pressed then
+			self.handpos = self.handpos + 1
+			if self.handpos > 3 then self.handpos = 1 end
+			sound.play("main:/sound#jump")
+		elseif action_id == hash("action") and action.pressed then
+			if self.handpos == 1 then
+				startgame(self)
+			elseif self.handpos == 2 then
+				controls(self)
+				sound.play("main:/sound#squeak")
+			elseif self.handpos == 3 then
+				credits(self)
+				sound.play("main:/sound#squeak")
+			end
+		elseif action_id == hash("exit") and action.pressed then
+			msg.post("@system:", "exit", {code = 0})
+		end
+	end
+end

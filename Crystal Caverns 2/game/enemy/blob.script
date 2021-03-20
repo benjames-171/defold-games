@@ -1,0 +1,35 @@
+local data = require "main.data"
+
+local FREQ = 0.1
+local AMP = 16
+local SPEED = 0.5
+local COOLDOWN = 60
+
+function init(self)
+	self.cool = 0
+	self.origin = go.get_position()
+	self.theta = math.random(0, math.pi * 200 ) / 100
+	self.move = vmath.vector3(-SPEED, 0, 0)
+end
+
+function update(self, dt)
+	self.theta = self.theta + FREQ
+	local pos = go.get_position()
+	self.move.y = math.sin(self.theta) * AMP
+	pos.y = self.origin.y
+	go.set_position(pos + self.move)
+	self.cool = self.cool - 1
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		if message.other_group == hash("world") and self.cool <= 0 then
+			self.move.x = -self.move.x
+			self.cool = COOLDOWN
+		elseif message.other_group == hash("boom") then
+			msg.post("/common/effect", "explode", {pos = go.get_position()})
+			go.delete()
+		end
+	end
+end
+

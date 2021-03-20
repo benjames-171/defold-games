@@ -1,0 +1,108 @@
+local data = require "main.data"
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+local function starttext(self)
+	local node = gui.get_node("1")
+	if data.maxlevel > 1 then gui.set_text(node, string.format("CONTINUE (%d)", data.maxlevel)) 
+	else gui.set_text(node, "NEW GAME")
+	end
+end
+
+function init(self)
+	self.handpos = 1
+	self.arrowpos = {
+		gui.get_position(gui.get_node("1")),
+		gui.get_position(gui.get_node("2")),
+		gui.get_position(gui.get_node("3")),
+	}
+	msg.post(".", "acquire_input_focus")
+	self.node = gui.get_node("container")
+	disablenode(self, gui.get_node("reset"))
+	data.loadgamefile()
+	starttext(self)
+	sound.play("main:/sound#music-menu")
+	data.state = data.STATE_MENU
+end
+
+local function startgame(self)
+	data.level = data.maxlevel
+	sound.stop("main:/sound")
+	sound.play("main:/sound#music-game")
+	msg.post("main:/handler", "show_game")
+end	
+
+local function show(self)
+	gui.set_enabled(self.node, true)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(640, 360, 0), gui.EASING_INOUTQUAD, 0.25)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_INOUTQUAD, 0.25)
+	data.state = data.STATE_MENU
+end
+
+local function hide(self)
+	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(640, 300, 0), gui.EASING_INOUTQUAD, 0.25, 0, disablenode)
+	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.25)
+end
+
+function update(self, dt)
+	if data.state == data.STATE_MENU then
+		local pos = vmath.vector3(self.arrowpos[self.handpos].x - 64, self.arrowpos[self.handpos].y + 4, 0)
+		gui.set_position(gui.get_node("arrow"), pos)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	end
+end
+
+local function controls(self)
+	hide(self)
+	msg.post("#controls", "show", {})
+end
+
+local function credits(self)
+	hide(self)
+	msg.post("#credits", "show", {})
+end
+
+local function resetprogress(self)
+	local node = gui.get_node("reset")
+	gui.set_enabled(node, true)
+	gui.animate(node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.5, 2, disablenode)
+	data.maxlevel = 1
+	data.savegamefile()
+	starttext(self)
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_MENU then
+		if action_id == hash("up") and action.pressed then
+			self.handpos = self.handpos - 1
+			if self.handpos < 1 then self.handpos = 3 end
+			sound.play("main:/sound#tick")
+		elseif action_id == hash("down") and action.pressed then
+			self.handpos = self.handpos + 1
+			if self.handpos > 3 then self.handpos = 1 end
+			sound.play("main:/sound#tick")
+		elseif action_id == hash("action") and action.pressed then
+			if self.handpos == 1 then
+				startgame(self)
+			elseif self.handpos == 2 then
+				sound.play("main:/sound#tick")
+				controls(self)
+			elseif self.handpos == 3 then
+				sound.play("main:/sound#tick")
+				credits(self)
+			end
+		elseif action_id == hash("reload") and action.pressed and data.maxlevel > 1 then
+			sound.play("main:/sound#laser")
+			resetprogress(self)
+		elseif action_id == hash("exit") and action.pressed then
+			msg.post("@system:", "exit", {code = 0})
+		end
+	end
+end

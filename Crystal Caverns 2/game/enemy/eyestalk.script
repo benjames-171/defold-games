@@ -1,0 +1,40 @@
+local data = require "main.data"
+
+local SHOTFREQ = 3
+
+function init(self)
+	self.time = math.random (0, (SHOTFREQ * 100) / 100)
+	local pos = data.world2tile(go.get_position())
+	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y+1)
+	if t > 0 then sprite.set_vflip("#sprite", true) end
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+
+	if data.onscreen(pos, 0) then
+		self.time = self.time + dt
+		if self.time > SHOTFREQ then
+			local cast = physics.raycast(pos, data.playerpos, {hash("world")})
+			if cast == nil then
+				self.time = 0
+				local move = data.playerpos - pos
+				move = vmath.normalize(move)
+				factory.create("#bullet-factory", pos, nil, {move = move})
+				if pos.x > data.playerpos.x then sprite.set_hflip("#sprite", false)
+				else sprite.set_hflip("#sprite", true)
+				end
+			end
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		if message.other_group == hash("boom") then
+			msg.post("/common/effect", "explode", {pos = go.get_position()})
+			go.delete()
+		end
+	end
+end
+

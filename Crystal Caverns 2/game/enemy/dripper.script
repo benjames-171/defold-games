@@ -1,0 +1,18 @@
+local data = require "main.data"
+
+local FREQ = 30
+local RANGE = 32
+
+function init(self)
+	self.time = 0
+end
+
+function update(self, dt)
+	if not data.onscreen(go.get_position(), RANGE) then return end
+	self.time = self.time + 1
+	if self.time >= FREQ then
+		self.time = 0
+		local pos = go.get_position() + vmath.vector3(math.random(-RANGE, RANGE), -6, 0)
+		factory.create("#drip-factory", pos)
+	end
+end

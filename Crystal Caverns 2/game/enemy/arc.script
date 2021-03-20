@@ -1,0 +1,39 @@
+local data = require "main.data"
+
+local SPEED = 2
+local WAIT = 1
+
+function init(self)
+	self.origin = go.get_position()
+	self.move = vmath.vector3(SPEED, 0, 0)
+	self.time = WAIT
+	msg.post("#sprite", "disable")
+	msg.post("#co", "disable")
+end
+
+function update(self, dt)
+	if not data.onscreen(go.get_position(), 32) then return end
+	
+	if self.time <= 0 then
+		local pos = go.get_position() + self.move
+		go.set_position(pos)
+
+		pos.x = pos.x + 8
+		pos = data.world2tile(pos)
+		local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+		if t > 0 then
+			self.time = WAIT
+			msg.post("#sprite", "disable")
+			msg.post("#co", "disable")
+		end
+	else
+		self.time = self.time - dt
+		if self.time <= 0 then
+			go.set_position(self.origin)
+			msg.post("#sprite", "enable")
+			msg.post("#co", "enable")
+			sound.play("main:/sound#arc")
+		end
+	end
+end
+

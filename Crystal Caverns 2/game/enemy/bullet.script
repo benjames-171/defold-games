@@ -1,0 +1,24 @@
+local data = require "main.data"
+
+go.property("move", vmath.vector3())
+
+function init(self)
+	sound.play("main:/sound#spit")
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	if data.onscreen(pos, 4) then
+		pos = pos + self.move
+		go.set_position(pos)
+	else
+		go.delete()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		go.delete()
+	end
+end
+

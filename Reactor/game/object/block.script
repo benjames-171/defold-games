@@ -1,0 +1,29 @@
+local THRESH = 1.5
+local LOCK = 30
+
+function init(self)
+	self.curr = go.get_position()
+	self.last = go.get_position()
+	self.lock = LOCK
+end
+
+function update(self, dt)
+	self.last = self.curr
+	self.curr = go.get_position()
+	self.lock = self.lock - 1
+end
+
+local function makesound(self)
+	local diff = math.abs(self.curr.y - self.last.y)
+
+	if diff >= THRESH and self.lock <= 0 then
+		sound.play("main:/sound#clunk", {gain = 0.5})
+		self.lock = LOCK
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		makesound(self)
+	end
+end

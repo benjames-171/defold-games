@@ -1,0 +1,44 @@
+local data = require "main.data"
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	data.bounds = vmath.vector4(
+		(sx - 1) * data.TILE_SIZE,
+		(sy - 1) * data.TILE_SIZE,
+		((sx + w - 1) * data.TILE_SIZE) - data.CANV_W,
+		((sy + h - 1) * data.TILE_SIZE) - data.CANV_H)
+	
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			local c = tilemap.get_tile("#tilemap", "control", x, y)
+			if t == 1 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				msg.post("common/player", "position", {pos = data.tile2world(vmath.vector3(x, y, 0.5))})
+			elseif t == 2 then
+				data.totalacorns = data.totalacorns + 1
+			elseif t == 3 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#grey-factory", data.tile2world(vmath.vector3(x, y, 0.4)))
+				data.totalgreys = data.totalgreys + 1
+			elseif c == 4 then
+				tilemap.set_tile("#tilemap", "control", x, y, 0)
+				factory.create("#fire-factory", data.tile2world(vmath.vector3(x, y, 1)) + vmath.vector3(0,12,0))
+			end
+		end
+	end
+end
+
+function init(self)
+	data.time = os.clock()
+	data.heat = 0
+	data.hp = 5
+	data.acorns = 0
+	data.greys = 0
+	data.totalacorns = 0
+	data.totalgreys = 0
+	data.state = data.STATE_PLAYING
+	msg.post("/common/view#game", "status", {text = "AREA "..tostring(data.level)})
+	parse(self)
+end

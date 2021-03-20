@@ -1,0 +1,26 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		ui.show(self.node)
+		data.state = data.STATE_CONTROLS
+	end
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_CONTROLS then
+		if (action_id == hash("action") or action_id == hash("exit")) and action.pressed then
+			ui.hide(self.node)
+			msg.post("#menu", "show", {})
+			sound.play("main:/sound#pickup")
+		end
+	end
+end
+

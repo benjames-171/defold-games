@@ -1,0 +1,31 @@
+local data = require "main.data"
+
+go.property("inputs", 1)
+
+function init(self)
+	self.count = 0
+	self.origin = go.get_position()
+end
+
+local function toggle(self, enter)
+	if enter then self.count = self.count + 1
+	else self.count = self.count - 1
+	end
+
+	if self.count >= self.inputs then
+		go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, self.origin + vmath.vector3(0, data.TILE_SIZE, 0), go.EASING_INOUTQUAD, 0.5)
+	else
+		go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, self.origin, go.EASING_INOUTQUAD, 0.5)
+	end
+
+	if (enter and self.count >= self.inputs) or (not enter and self.count == self.inputs - 1) then
+		sound.play("main:/sound#door")
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("switch") then
+		toggle(self, message.enter)
+	end	
+end
+

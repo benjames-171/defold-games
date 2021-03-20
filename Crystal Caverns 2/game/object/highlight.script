@@ -1,0 +1,22 @@
+local data = require "main.data"
+
+function init(self)
+	local pos = go.get_position()
+	go.set_position(pos + vmath.vector3(0,-2,0))
+	particlefx.play("#pfx")
+end
+
+function update(self, dt)
+	local a = math.random(40,70)/100
+	sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,a))
+	sprite.set_constant("#sprite1", "tint", vmath.vector4(1,1,1,a))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		local pos = data.world2tile(go.get_position())
+		if tilemap.get_tile("/level#tilemap", "top", pos.x ,pos.y) == 0 then
+			go.delete()
+		end
+	end
+end

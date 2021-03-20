@@ -1,0 +1,44 @@
+local data = require "main.data"
+
+go.property("color", 1)
+
+local SPEED = 0.15
+
+function init(self)
+	self.normal = vmath.vector3()
+	local anim = "box-"..tostring(self.color)
+	sprite.play_flipbook("#sprite", anim)
+end
+
+local function drop(self, pos)
+	tilemap.set_tile("/level#tilemap", "control", pos.x, pos.y, self.color+2)
+	go.delete()
+end
+
+local function move(self)
+	local move = vmath.vector3()
+	local pos = go.get_position()
+	pos = data.world2tile(pos)
+
+	local t = tilemap.get_tile("/level#tilemap", "control", pos.x, pos.y)
+
+	if t >= 161 and t <= 164 and self.normal.x <= 0 then move.x = -SPEED
+	elseif t >= 166 and t <= 169 and self.normal.x >= 0 then move.x = SPEED
+	end
+	if t == 0 then drop(self, pos)
+	end
+
+	go.set_position(go.get_position() + move)
+	self.normal = vmath.vector3()
+end
+
+function update(self, dt)
+	move(self)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		self.normal = message.normal
+	end
+end
+

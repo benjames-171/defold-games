@@ -1,0 +1,42 @@
+local data = require "main.data"
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local hole = 1
+
+	for x = sx, w+sx-1 do
+		for y = sy, h+sy-1 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			if t == 4 then
+				data.holepos[hole] = x * data.TILE_SIZE
+				hole = hole + 1
+				local pos = data.tile2world(vmath.vector3(x, y, 0.1))
+				pos.y = pos.y - 12
+				factory.create("#tee-factory", pos)
+			elseif t == 7 then
+				data.holepos[0] = x * data.TILE_SIZE
+				local pos = data.tile2world(vmath.vector3(x, y, 0.5))
+				pos.y = pos.y + 12
+				msg.post("/common/player", "spawn", {pos = pos})
+			elseif t >= 15 and t <= 38 then
+				tilemap.set_tile("#tilemap", "world", x, y, t + 56)
+			elseif t == 39 then
+				tilemap.set_tile("#tilemap", "world", x, y, math.random(95,98))
+			end
+		end
+	end
+end
+
+function init(self)
+	parse(self)
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+
+	end
+end
+
+
+
+

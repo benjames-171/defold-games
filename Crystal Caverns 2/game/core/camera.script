@@ -1,0 +1,59 @@
+local data = require "main.data"
+
+local SPEED = 0.1
+local SLOWSPEED = 0.02
+local SLOWTIME = 2
+
+function init(self)
+	msg.post("#camera", "acquire_camera_focus")
+	self.lock = false
+	self.speed = 0.1
+	self.time = 0
+	self.target = vmath.vector3()
+	self.pos = go.get_world_position()
+end
+
+local function bounds(pos)
+	if pos.x < data.bounds.x then pos.x = data.bounds.x end
+	if pos.x > data.bounds.z then pos.x = data.bounds.z end
+	if pos.y < data.bounds.y then pos.y = data.bounds.y end
+	if pos.y > data.bounds.w then pos.y = data.bounds.w end
+
+	return pos
+end
+
+local function move(self)
+	local v = vmath.vector3((self.target.x - self.pos.x) * self.speed, (self.target.y - self.pos.y) * self.speed, 0)
+	self.pos = self.pos + v
+end
+
+function update(self, dt)
+	move(self)
+	local pos = bounds(self.pos - data.offset)
+	go.set_position(pos)
+	data.scrollpos = pos
+
+	if self.time > 0 then
+		self.time = self.time - dt
+		if self.time < 0 then self.speed = SPEED end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("look_at") and not self.lock then
+		self.target = message.position
+	elseif message_id == hash("snap_to") then
+		self.pos = message.position
+		self.target = message.position
+	elseif message_id == hash("lock") then
+		self.target = message.position + data.offset - vmath.vector3(8,8,0)
+		self.lock = true
+	elseif message_id == hash("unlock") then
+		self.lock = false
+	elseif message_id == hash("reset") then
+		go.set_position(vmath.vector3(0,0,0))
+	elseif message_id == hash("slow") then
+		self.time = SLOWTIME
+		self.speed = SLOWSPEED
+	end
+end

@@ -1,0 +1,6 @@
+function on_message(self, message_id, message, sender)
+	if message_id == hash("pickup") then
+		go.set_position(message.pos)
+		particlefx.play("#pickup")
+	end
+end
