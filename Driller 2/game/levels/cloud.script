@@ -1,0 +1,20 @@
+go.property ("large", true)
+
+local MARGIN = 69
+
+function init(self)
+	self.speed = math.random(100,200) / 100
+	if self.large then self.speed = self.speed * 0.1
+	else self.speed = self.speed * 0.05
+	end
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	pos.x = pos.x - self.speed
+	if pos.x < -MARGIN then
+		pos.x = (640 + MARGIN)
+		pos.y = math.random(310,350)
+	end
+	go.set_position(pos)
+end

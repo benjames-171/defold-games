@@ -1,0 +1,39 @@
+images {
+  image: "/assets/png/bg.png"
+}
+images {
+  image: "/assets/png/cloud-l.png"
+}
+images {
+  image: "/assets/png/cloud-s.png"
+}
+images {
+  image: "/assets/png/logo.png"
+}
+images {
+  image: "/assets/png/arrow.png"
+}
+images {
+  image: "/assets/png/blast.png"
+}
+images {
+  image: "/assets/png/box-green.png"
+}
+images {
+  image: "/assets/png/box-red.png"
+}
+images {
+  image: "/assets/png/box-orange.png"
+}
+images {
+  image: "/assets/png/tutorial.png"
+}
+images {
+  image: "/assets/png/bg_left.png"
+}
+images {
+  image: "/assets/png/bg_right.png"
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0

@@ -1,0 +1,49 @@
+local data = require "main.data"
+
+function init(self)
+	gui.set_enabled(gui.get_node("msg"), false)
+end
+
+function update(self, dt)
+	gui.set_text(gui.get_node("hp"), tostring(data.hp).."%")
+	gui.set_text(gui.get_node("ext"), string.format("%02dm (%02dm)", data.ext, data.max))
+	gui.set_text(gui.get_node("oil"), tostring(data.oil).."/"..tostring(data.totoil))
+
+	local col = "#dad45e"
+	if data.ext == data.max then col = "#6daa2c" end
+	gui.set_color(gui.get_node("ext"), data.hex2rgba(col))
+
+	if data.hp > 25 then col = "#deeed6"
+	elseif data.hp > 15 then col = "#d27d2c"
+	else col = "#d04648"
+	end
+	gui.set_color(gui.get_node("hp"), data.hex2rgba(col))
+
+	if data.state == data.STATE_PLAYING then data.endtime = (os.clock() - data.starttime) end
+	local str = data.ms2str(data.endtime)
+	gui.set_text(gui.get_node("time"), str)
+	if data.endtime <= data.target[data.level] then col = "#6daa2c"
+	else col = "#d04648"
+	end
+	gui.set_color(gui.get_node("time"), data.hex2rgba(col))
+	
+	local t = data.target[data.level]
+	str = data.ms2str(t)
+	gui.set_text(gui.get_node("target"), str)
+
+	gui.set_text(gui.get_node("score"), string.format("%05d", data.score))
+end
+
+local function disable_node (self, node)
+	gui.set_enabled(node, false)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("message") then
+		gui.set_text(gui.get_node("msgtext"), message.text)
+		local node = gui.get_node("msg")
+		gui.set_enabled(node, true)
+		gui.set_color(node, vmath.vector4(1,1,1,1))
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_LINEAR, 0.25, 2, disablenode)
+	end
+end

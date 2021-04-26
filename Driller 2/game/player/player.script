@@ -1,0 +1,301 @@
+local data = require "main.data"
+
+local SPEED = 3
+local SPEED_FAST = 4
+local LOCK_TIME = 40
+
+function init(self)
+	data.hp = 100
+	data.ext = 0
+	data.max = 0
+	data.oil = 0
+	data.starttime = os.clock()
+	self.time = 0
+	self.lock = 0
+	self.drop = false
+	self.frame = 0
+	self.speed = SPEED
+	self.tail = {}
+	self.seg = 2
+	self.last = vmath.vector3()
+	self.move = vmath.vector3(0,0,0)
+	self.correction = vmath.vector3()
+	msg.post(".", "acquire_input_focus")
+	msg.post("view#game", "message", {text = string.format("LEVEL %d", data.level)})
+
+	if data.level == 1 then msg.post("view#tutorial", "show")
+	else data.state = data.STATE_PLAYING
+	end
+end
+
+local function levelclear(self)
+	self.lock = LOCK_TIME
+	sound.play("main:/sound#clear")
+	if data.level < 10 then msg.post("view#clear", "show")
+	else msg.post("view#complete", "show")
+	end
+end
+
+local function quit2menu(self)
+	if data.level > data.maxlevel then data.maxlevel = data.level end
+	if data.score > data.best then data.best = data.score end
+	msg.post("main:/sound", "stop_sound")
+	msg.post("main:/handler", "show_menu")
+end
+
+local function retract(self, action)
+	if data.mode == 3 then
+		if action.pressed then sound.play("main:/sound#no") end
+		return
+	end
+	
+	if self.seg > 2 then
+		self.seg = self.seg - 1
+		tilemap.set_tile("/level#tilemap", "world", self.tail[self.seg].x, self.tail[self.seg].y, 0)
+		go.set_position(data.tile2world(self.tail[self.seg]))
+	end
+
+	if action.pressed and self.seg ~= 2 then sound.play("main:/sound#rewind")
+	elseif action.released or self.seg == 2 then sound.stop("main:/sound#rewind")
+	end
+end
+
+local function move(self)
+	local pos = go.get_position() 
+	if vmath.length(self.move) ~= 0 then pos = pos + (vmath.normalize(self.move) * 8)
+	end
+
+	pos = data.world2tile(pos)
+	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+
+	if t < 33 or t > 39 then
+	elseif pos == self.tail[self.seg-1] then
+		self.seg = self.seg - 1
+		local pos = self.tail[self.seg]
+		tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 0)
+	else self.move = vmath.vector3(0,0,0)
+	end
+
+	pos = go.get_position() + (self.move * self.speed)
+
+	if pos.x < 8 then pos.x = 8
+	elseif pos.x > 632 then pos.x = 632
+	end
+	if pos.y < 8 then pos.y = 8 end
+
+	go.set_position(pos)
+	self.move = vmath.vector3(0,0,0)
+end
+
+local function tail(self)
+	local pos = data.world2tile(go.get_position())
+	if pos ~= self.tail[self.seg] then
+		self.seg = self.seg + 1
+		self.tail[self.seg] = pos
+		local t = 18
+
+		if (self.tail[self.seg].x ~= self.tail[self.seg-1].x and self.tail[self.seg-1].y ~= self.tail[self.seg-2].y) or
+		(self.tail[self.seg].y ~= self.tail[self.seg-1].y and self.tail[self.seg-1].x ~= self.tail[self.seg-2].x) then
+			local v1 = self.tail[self.seg-1] - pos
+			local v2 = self.tail[self.seg-2] - pos
+			
+			if v1 == vmath.vector3(-1,0,0) and v2 == vmath.vector3(-1,-1,0) then t = 35
+			elseif v1 == vmath.vector3(0,1,0) and v2 == vmath.vector3(1,1,0) then t = 35
+			elseif v1 == vmath.vector3(1,0,0) and v2 == vmath.vector3(1,-1,0) then t = 36
+			elseif v1 == vmath.vector3(0,1,0) and v2 == vmath.vector3(-1,1,0) then t = 36
+			elseif v1 == vmath.vector3(0,-1,0) and v2 == vmath.vector3(1,-1,0) then t = 37
+			elseif v1 == vmath.vector3(-1,0,0) and v2 == vmath.vector3(-1,1,0) then t = 37
+			elseif v1 == vmath.vector3(0,-1,0) and v2 == vmath.vector3(-1,-1,0) then t = 38
+			elseif v1 == vmath.vector3(1,0,0) and v2 == vmath.vector3(1,1,0) then t = 38
+			end
+		elseif self.tail[self.seg].x ~= self.tail[self.seg-1].x then t = 33
+		elseif self.tail[self.seg].y ~= self.tail[self.seg-1].y then t = 34
+		end
+
+		tilemap.set_tile("/level#tilemap", "world", self.tail[self.seg-1].x, self.tail[self.seg-1].y, t)
+	end
+end
+
+local function anim(self)
+	local pos = data.tile2world(self.tail[self.seg-1]) - go.get_position()
+	local rad = math.atan2(pos.y, pos.x) + math.pi
+	if self.seg == 2 then rad = math.pi * 1.5 end
+	go.set_rotation(vmath.quat_rotation_z(rad))
+end
+
+local function pick(self)
+	local pos = data.world2tile(go.get_position())
+	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+	if t == 5 then
+		tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 0)
+		data.oil = data.oil + 1
+		data.score = data.score + 10
+		sound.play("main:/sound#pickup")
+		particlefx.play("#eat")
+	elseif t == 2 then
+		tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 0)
+		data.hp = data.hp + 50
+		if data.hp > 100 then data.hp = 100 end
+		sound.play("main:/sound#heart")
+		msg.post("view#game", "message", {text = "DRILL REPAIR!"})
+	elseif t == 49 then
+		tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 0)
+		data.score = data.score + 1000
+		sound.play("main:/sound#heart")
+		msg.post("view#game", "message", {text = "1000 POINTS!"})
+	elseif t == 52 then
+		tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 0)
+		self.speed = SPEED_FAST
+		sound.play("main:/sound#speedup")
+		msg.post("view#game", "message", {text = "SPEED UP!"})
+	elseif t == 68 then
+		tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 0)
+		data.smart = true
+		sound.play("main:/sound#heart")
+		msg.post("view#game", "message", {text = "SMART BOMB!"})
+	end
+end
+
+local function osd(self)
+	data.ext = self.seg - 2
+	if data.ext > data.max then data.max = data.ext
+	end
+end
+
+local function cond(self)
+	if data.oil >= data.totoil then
+		levelclear(self)
+	end
+
+	if data.hp <= 0 then
+		sound.stop("main:/sound#rewind")
+		msg.post("view#gameover", "show")
+		sound.play("main:/sound#gameover")
+		self.lock = LOCK_TIME
+	end
+
+	if self.seg == 2 and data.mode == 1 then
+		if (self.time % 30) == 1 and data.hp < 100 then
+			data.hp = data.hp + 1
+			sound.play("main:/sound#tick", {gain = 0.3})
+		end
+	end
+end
+
+local function drop(self)
+	self.frame = self.frame + 1
+	
+	if self.frame > 1800 and not self.drop then
+		if math.random(1, 1800) == 1 then
+			self.drop = true
+			local t = 1
+			local pos = vmath.vector3()
+			repeat
+				pos.x = math.random(1, 40)
+				pos.y = math.random(1, 16)
+				t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+			until t == 0
+			local spec = {2,52, 49, 68}
+			tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, spec[math.random(1,4)])
+		end
+	end
+end
+
+function update(self, dt)
+	data.smart = false
+	
+	if data.state == data.STATE_PLAYING then
+		anim(self)
+		move(self)
+		tail(self)
+		pick(self)
+		osd(self)
+		cond(self)
+		drop(self)
+	end
+
+	self.correction = vmath.vector3()
+	self.lock = self.lock - 1
+	self.time = self.time + 1
+end
+
+local function collision(self, message)
+	if message.distance > 0 then
+		local proj = vmath.project(self.correction, message.normal * message.distance)
+		if proj < 1 then
+			local comp = (message.distance - message.distance * proj) * message.normal
+			go.set_position(go.get_position() + comp)
+			self.correction = self.correction + comp
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("position") then
+		go.set_position(message.pos)
+		self.last = vmath.vector3(message.pos)
+		self.tail[2] = data.world2tile(message.pos)
+		self.tail[1] = vmath.vector3(self.tail[2])
+		self.tail[1].y = self.tail[1].y - 1
+	elseif message_id == hash("contact_point_response") then
+		collision(self, message)
+	end
+end
+
+local function input_playing(self, action_id, action)
+	if action_id == hash("down") then
+		self.move.y = -action.value
+	elseif action_id == hash("up") then
+		self.move.y = action.value
+	elseif action_id == hash("left") then
+		self.move.x = -action.value
+	elseif action_id == hash("right") then
+		self.move.x = action.value
+	elseif action_id == hash("action") then
+		retract(self, action)
+	elseif action_id == hash("exit") then
+		quit2menu(self)
+	elseif action_id == hash("end") and action.pressed then
+		--levelclear(self)
+	end
+end
+
+local function input_levelclear(self, action_id, action)
+	if action_id == hash("action") and action.pressed then
+		data.level = data.level + 1
+		if data.level > 10 then
+			data.maxlevel = 1
+			data.level = 1
+			quit2menu(self)
+		else
+			msg.post("game:/loader", "new_level", {})
+		end
+	end
+end
+
+local function input_gameover(self, action_id, action)
+	if action_id == hash("action") and action.pressed then
+		quit2menu(self)
+	end
+end
+
+local function input_getready(self, action_id, action)
+	if action_id == hash("action") and action.pressed then
+		msg.post("view#tutorial", "hide")
+		data.state = data.STATE_PLAYING
+	end
+end
+	
+function on_input(self, action_id, action)
+	if self.lock > 0 then return end
+	
+	if data.state == data.STATE_PLAYING then
+		input_playing(self, action_id, action)
+	elseif data.state == data.STATE_LEVELCLEAR then
+		input_levelclear(self, action_id, action)
+	elseif data.state == data.STATE_GAMEOVER then
+		input_gameover(self, action_id, action)
+	elseif data.state == data.STATE_GETREADY then
+		input_getready(self, action_id, action)
+	end
+end
