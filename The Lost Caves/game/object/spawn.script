@@ -1,0 +1,16 @@
+local data = require "main.data"
+
+local FREQ = 10
+
+local function respawn(self)
+	go.animate(".", "scale.x", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_LINEAR, FREQ, 0, respawn)
+	if data.bombs < 3 then
+		tilemap.set_tile("/level#tilemap", "world", self.pos.x, self.pos.y, 302)
+	end
+end
+
+function init(self)
+	self.pos = data.world2tile(go.get_position())
+	go.animate(".", "scale.x", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_LINEAR, FREQ + math.random(0, FREQ), 0, respawn)
+end
+

@@ -1,0 +1,18 @@
+function on_message(self, message_id, message, sender)
+	if message_id == hash("exp48") then
+		go.set_position(message.pos)
+		particlefx.play("#exp48")
+		sound.play("main:/sound#exp1")
+	elseif message_id == hash("exp96") then
+		go.set_position(message.pos)
+		particlefx.play("#exp96")
+		sound.play("main:/sound#exp2")
+	elseif message_id == hash("exp24") then
+		go.set_position(message.pos)
+		particlefx.play("#exp24")
+		sound.play("main:/sound#exp3")
+	elseif message_id == hash("splat") then
+		go.set_position(message.pos)
+		particlefx.play("#splat")
+	end
+end

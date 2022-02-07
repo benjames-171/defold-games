@@ -1,0 +1,36 @@
+local data = require "main.data"
+
+local FREQ = 0.3
+local JUMP = 24
+
+function init(self)
+	self.origin = go.get_position()
+	self.move = vmath.vector3(0.5,0,0)
+end
+
+function update(self, dt)
+	if data.state ~= data.STATE_PAUSE then
+		local pos = go.get_position()
+		go.set_position(pos + self.move)
+	end
+end
+
+local function snake_down(self)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y, go.EASING_INSINE, FREQ)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") and math.abs(message.normal.x) == 1 then
+		self.move.x = -self.move.x
+		go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y + JUMP, go.EASING_OUTSINE, FREQ, 0, snake_down)
+
+		if data.onscreen(go.get_position(), 0) then
+			sound.play("main:/sound#did")
+		end
+		if self.move.x > 0 then sprite.set_hflip("#sprite", false)
+		else sprite.set_hflip("#sprite", true)
+		end
+	end
+end
+
+

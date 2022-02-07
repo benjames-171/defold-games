@@ -1,0 +1,15 @@
+local AMP = 16
+local FREQ = 1
+
+local function bat_up(self)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y + AMP, go.EASING_INOUTQUAD, FREQ, 0, bat_down)
+end
+
+function bat_down(self)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y - AMP, go.EASING_INOUTQUAD, FREQ, 0, bat_up)
+end
+
+function init(self)
+	self.origin = go.get_position()
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y + AMP, go.EASING_INOUTQUAD, FREQ + (math.random(0,100)/100), 0, bat_down)
+end

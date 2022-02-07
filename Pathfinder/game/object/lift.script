@@ -1,0 +1,31 @@
+local data = require "main.data"
+
+function init(self)
+	self.active = false
+end
+
+local function move(self)
+	local pos = go.get_position() + vmath.vector3(0, 8, 0)
+	pos = data.world2tile(pos)
+	local t = tilemap.get_tile("/level#screen", "world", pos.x, pos.y)
+	if t ~= 23 then
+		self.active = false
+		sound.stop("main:/sound#lift")
+	else
+		pos = go.get_position()
+		go.set_position(pos + vmath.vector3(0, 0.5, 0))
+	end
+end
+
+function update(self, dt)
+	if data.state ~= data.STATE_PAUSE and self.active then
+		move(self)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("start") then
+		self.active = true
+		data.playsound("lift")
+	end
+end

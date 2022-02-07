@@ -1,0 +1,12 @@
+function on_message(self, message_id, message, sender)
+	local pos = message.pos
+	pos.x = math.floor(pos.x)
+	pos.y = math.floor(pos.y)
+	go.set_position(pos)
+	
+	if message_id == hash("explode") then
+		particlefx.play("#explode")
+	elseif message_id == hash("dust") then
+		particlefx.play("#dust")
+	end
+end

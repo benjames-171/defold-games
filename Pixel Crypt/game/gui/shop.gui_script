@@ -1,0 +1,102 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+local MAX = 4
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+	self.handpos = 1
+	self.arrowpos = {
+		gui.get_position(gui.get_node("b1")),
+		gui.get_position(gui.get_node("b2")),
+		gui.get_position(gui.get_node("b3")),
+		gui.get_position(gui.get_node("b4")),
+	}
+	self.info = {"FOOD PARCEL", "HEALTH POTION", "SHOT BOOST", "SPEED-UP"}
+	self.cost = {30, 40, 50, 60}
+	self.active = {true, true, true, true}
+end
+
+function update(self, dt)
+	if data.state == data.STATE_SHOP then
+		local pos = vmath.vector3(self.arrowpos[self.handpos].x, self.arrowpos[self.handpos].y, 0)
+
+		gui.set_position(gui.get_node("arrow"), pos)
+		gui.set_text(gui.get_node("info"), self.info[self.handpos])
+		gui.set_text(gui.get_node("gold"), "GOLD "..tostring(data.gold))
+		gui.set_text(gui.get_node("cost"), "COST "..tostring(self.cost[self.handpos]))
+
+		self.active[1] = data.food < 0.95
+		self.active[2] = data.hp < 0.95
+		
+		for n = 1, MAX do
+			local f = false
+			if data.gold >= self.cost[n] then f = true
+			end
+			local node = gui.get_node(tostring(n))
+			local col = gui.get_color(node)
+			if f and self.active[n] then col.w = 1
+			else col.w = 0.1
+			end
+			gui.set_color(node, col)
+		end
+	end
+end
+
+local function buy(self)
+	local cost = self.cost[self.handpos]
+	local s = false
+	
+	if data.gold >= cost then
+		if self.handpos == 1 and self.active[1] then
+			data.food = 1
+			data.gold = data.gold - cost
+			s = true
+		elseif self.handpos == 2 and self.active[2] then
+			data.hp = 1
+			data.gold = data.gold - cost
+			s = true
+		elseif self.handpos == 3 then
+			data.cool = data.cool + 0.015
+			data.gold = data.gold - cost
+			s = true
+		elseif self.handpos == 4 then
+			data.speed = data.speed + 0.1
+			data.gold = data.gold - cost
+			s = true
+		end
+	end
+
+	if s then sound.play("main:/sound#coin")
+	else sound.play("main:/sound#no")
+	end
+end
+
+local function input(self, action_id, action)
+	if action_id == hash("left") and action.pressed then
+		self.handpos = self.handpos - 1
+		if self.handpos < 1 then self.handpos = MAX end
+		sound.play("main:/sound#click")
+	elseif action_id == hash("right") and action.pressed then
+		self.handpos = self.handpos + 1
+		if self.handpos > MAX then self.handpos = 1 end
+		sound.play("main:/sound#click")
+	elseif action_id == hash("action") and action.pressed then
+		buy(self)
+	elseif action_id == hash("exit") then
+		ui.hide(self.node)
+		msg.post("view#game", "status", {text = "BYE!"})
+		sound.play("main:/sound#click")
+		data.state = data.STATE_PLAYING
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		ui.show(self.node)
+		data.state = data.STATE_SHOP
+	elseif message_id == hash("input") then
+		input(self, message.action_id, message.action)
+	end
+end

@@ -1,0 +1,11 @@
+local data = require "main.data"
+
+function init(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	data.bounds = vmath.vector4(
+		(sx - 1) * data.TILE_SIZE,
+		(sy - 1) * data.TILE_SIZE,
+		((sx + w - 1) * data.TILE_SIZE) - data.CANV_W,
+		((sy + h - 1) * data.TILE_SIZE) - data.CANV_H)
+end

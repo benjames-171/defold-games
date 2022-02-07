@@ -1,0 +1,26 @@
+local data = require "main.data"
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	msg.post("handler#menu", "load")
+	msg.post("@render:", "clear_color", {color = data.hex2rgba("#1d1c1f")})
+	math.randomseed(os.time())
+	for n = 1, 5 do
+		local r = math.random()
+	end
+
+	if not html5 then defos.set_window_size(nil,nil, (240*4) + 16, (135*4)+39)
+	end
+end
+
+function on_message(self, message_id, message,sender)
+	if message_id == hash("show_game") then
+		msg.post("handler#menu", "unload")
+		msg.post("handler#game", "load")
+	elseif message_id == hash("show_menu") then
+		msg.post("handler#game", "unload")
+		msg.post("handler#menu", "load")
+	elseif message_id == hash("proxy_loaded") then
+		msg.post(sender, "enable")
+	end
+end	

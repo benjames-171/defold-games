@@ -1,0 +1,132 @@
+local data = require "main.data"
+
+local function copy(self)
+	for y = 1, 9 do
+		for x = 1, 16 do
+			local offset = (data.level - 1) * 16
+			local t = tilemap.get_tile("#tilemap", "world", x + offset, y)
+			tilemap.set_tile("#screen", "world", x, y, t)
+		end
+	end
+end
+
+local function parse(self)
+	for y = 1, 9 do
+		for x = 1, 16 do
+			local t = tilemap.get_tile("#screen", "world", x, y)
+			local pos = data.tile2world(vmath.vector3(x, y, 0.5))
+			local obj = nil
+			
+			if t == 1 then
+				tilemap.set_tile("#screen", "world", x, y, 0)
+				msg.post("common/player", "position", {pos = data.tile2world(vmath.vector3(x, y, 0.5))})
+			elseif t >= 4 and t <= 7 then
+				obj = factory.create("#mirror-factory", pos + vmath.vector3(0, 0, -0.1))
+			elseif t == 9 then
+				tilemap.set_tile("#screen", "world", x, y, 0)
+				obj = factory.create("#fireball-factory", pos, nil, {move = vmath.vector3(0,1,0)})
+			elseif t == 10 then
+				tilemap.set_tile("#screen", "world", x, y, 0)
+				obj = factory.create("#fireball-factory", pos, nil, {move = vmath.vector3(1,0,0)})
+			elseif t == 11 then
+				tilemap.set_tile("#screen", "world", x, y, 0)
+				obj = factory.create("#fireball-factory", pos, nil, {move = vmath.vector3(0,-1,0)})
+			elseif t == 12 then
+				tilemap.set_tile("#screen", "world", x, y, 0)
+				obj = factory.create("#fireball-factory", pos, nil, {move = vmath.vector3(-1,0,0)})
+			elseif t == 13 then
+				tilemap.set_tile("#screen", "world", x, y, 0)
+				obj = factory.create("#crate-factory", pos)
+			elseif t == 16 then
+				tilemap.set_tile("#screen", "world", x, y, 0)
+				self.door = factory.create("#door-factory", pos + vmath.vector3(0, 16, -0.6))
+				table.insert(self.spawned, self.door)
+				obj = factory.create("#exit-factory", pos + vmath.vector3(0, 0, -0.8))
+			elseif t == 22 then
+				tilemap.set_tile("#screen", "world", x, y, 0)
+				obj = factory.create("#float-factory", pos + vmath.vector3(0, -8, 0.1))
+			elseif t == 24 then
+				tilemap.set_tile("#screen", "world", x, y, 53)
+				obj = factory.create("#lift-factory", pos)
+				self.lift = obj
+			elseif t == 29 then
+				tilemap.set_tile("#screen", "world", x, y, math.random(29, 36))
+			elseif t == 55 then
+				tilemap.set_tile("#screen", "world", x, y, 0)
+				obj = factory.create("#pointer-factory", pos)
+			elseif t == 56 then
+				tilemap.set_tile("#screen", "world", x, y, 0)
+				obj = factory.create("#teleport-factory", pos + vmath.vector3(0, 0, 0.3))
+				self.tele = obj
+			elseif t == 70 then
+				self.dest = vmath.vector3(x, y, 0)
+			elseif t == 71 then
+				tilemap.set_tile("#screen", "world", x, y, math.random(71, 78))
+			elseif t == 113 then
+				tilemap.set_tile("#screen", "world", x, y, math.random(113, 120))
+			end 
+
+			if obj ~= nil then
+				table.insert(self.spawned, obj)
+			end
+		end
+	end
+end
+
+local function makelevel(self)
+	self.spawned = {}
+	self.door = nil
+	self.lift = nil
+	self.tele = nil
+	self.dest = vmath.vector3()
+	if data.stars > 1 then
+		data.stars = data.stars - 1
+	end
+	copy(self)
+	parse(self)
+	msg.post("/common/view#game", "newlevel")
+end
+
+function init(self)
+	msg.post("#tilemap", "disable")	
+	makelevel(self)
+end
+
+local function delete(self, id)
+	for k, v in pairs(self.spawned) do
+		if v == id then
+			go.delete(id)
+			table.remove(self.spawned, k)
+		end
+	end
+end
+
+local function swapcrate(self, sender)
+	msg.post(sender, "disable")
+	local pos = data.tile2world(self.dest)
+	pos.z = 0.5
+	local obj = factory.create("#crate-factory", pos)
+	msg.post("/common/effect", "explode", {pos = pos})
+	table.insert(self.spawned, obj)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("reset") then
+		for k, v in pairs(self.spawned) do
+			go.delete(v)
+		end
+		makelevel(self)
+		sound.stop("main:/sound#lift")
+		msg.post("/common/view#shutter", "reset")
+	elseif message_id == hash("delete") then
+		delete(self, message.id)
+	elseif message_id == hash("opendoor") then
+		msg.post(self.door, "open")
+	elseif message_id == hash("startlift") then
+		msg.post(self.lift, "start")
+	elseif message_id == hash("teleport") then
+		msg.post(self.tele, "start", {dest = self.dest})
+	elseif message_id == hash("swapcrate") then
+		swapcrate(self, sender)
+	end 
+end

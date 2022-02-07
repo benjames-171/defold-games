@@ -1,0 +1,13 @@
+function init(self)
+	msg.post("#sprite", "disable")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("explode") then
+		go.set_position(message.pos)
+		msg.post("#sprite", "enable")
+		sprite.play_flipbook("#sprite", "exp")
+	elseif message_id == hash("animation_done") then
+		msg.post("#sprite", "disable")	
+	end
+end

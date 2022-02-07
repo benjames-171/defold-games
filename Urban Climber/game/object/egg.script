@@ -1,0 +1,25 @@
+local SPEED = 2
+
+go.property("color", 1)
+
+local function complete(self)
+	go.delete()
+end
+
+function init(self)
+	local pos = go.get_position()
+
+	pos.y = pos.y - 300
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, pos.y, go.EASING_INSINE, SPEED, 0, complete)
+
+	local anim = "egg"..tostring(self.color)
+	sprite.play_flipbook("#sprite", anim)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		msg.post("effect", "explode", {pos = go.get_position()})
+		go.delete()
+	end
+end
+

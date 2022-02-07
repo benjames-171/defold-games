@@ -1,0 +1,98 @@
+local data = require "main.data"
+
+go.property("move", vmath.vector3(0,0,0))
+
+function init(self)
+	self.active = false
+	particlefx.play("#pfx")
+	self.origin = go.get_position()
+	if self.move.x ~= 0 then
+		go.set_position(self.origin + vmath.vector3(-2, 0, 0))
+		go.animate(".", "position.x", go.PLAYBACK_LOOP_PINGPONG, self.origin.x + 2, go.EASING_INOUTQUAD, 1)
+	else
+		go.set_position(self.origin + vmath.vector3(0, -2, 0))
+		go.animate(".", "position.y", go.PLAYBACK_LOOP_PINGPONG, self.origin.y + 2, go.EASING_INOUTQUAD, 1)
+	end	
+end
+
+local function destroy(self)
+	particlefx.stop("#pfx")
+	msg.post("/level", "delete", {id = go.get_id()})
+	msg.post("/common/effect", "explode", {pos = go.get_position()})
+	go.delete()
+end
+
+local function pick(self)
+	local pos = go.get_position()
+	if pos.x % data.TILE_SIZE == 8 and pos.y % data.TILE_SIZE == 8 then
+		local pos = data.world2tile(pos)
+		local t = tilemap.get_tile("/level#screen", "world", pos.x, pos.y)
+
+		if t == 4 then
+			if self.move.x > 0 then self.move = vmath.vector3(0,1,0)
+			elseif self.move.y < 0 then self.move = vmath.vector3(-1,0,0)
+			else destroy(self)
+			end
+		elseif t == 5 then
+			if self.move.x < 0 then self.move = vmath.vector3(0,1,0)
+			elseif self.move.y < 0 then self.move = vmath.vector3(1,0,0)
+			else destroy(self)
+			end
+		elseif t == 6 then
+			if self.move.x < 0 then self.move = vmath.vector3(0,-1,0)
+			elseif self.move.y > 0 then self.move = vmath.vector3(1,0,0)
+			else destroy(self)
+			end
+		elseif t == 7 then
+			if self.move.x > 0 then self.move = vmath.vector3(0,-1,0)
+			elseif self.move.y > 0 then self.move = vmath.vector3(-1,0,0)
+			else destroy(self)
+			end
+		elseif t == 8 then
+			tilemap.set_tile("/level#screen", "world", pos.x, pos.y, 0)
+			msg.post("/level", "opendoor")
+			destroy(self)
+		elseif t == 20 then
+			tilemap.set_tile("/level#screen", "world", pos.x, pos.y, 0)
+			msg.post("/level", "startlift")
+			destroy(self)
+		elseif t == 21 then
+			tilemap.set_tile("/level#screen", "world", pos.x, pos.y, 0)
+			msg.post("/level", "teleport")
+			destroy(self)
+		end
+
+		if t >= 4 and t <= 7 then
+			data.playsound("deflect")
+		end
+	end
+end
+
+local function move(self)
+	local pos = go.get_position() + (self.move * 2)
+	go.set_position(pos)
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		if self.active then
+			pick(self)
+			move(self)
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		if message.other_group == hash("player") then
+			if not self.active then
+				go.cancel_animations(".", "position")
+				go.set_position(self.origin)
+				self.active = true
+				data.playsound("laser")
+			end
+		else
+			destroy(self)
+		end
+	end
+end

@@ -1,0 +1,26 @@
+local AMP_X = 8
+local AMP_Y = 16
+local FREQ_X = 0.6
+local FREQ_Y = 1.5
+
+local function wasp_up(self)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y + AMP_Y, go.EASING_INOUTQUAD, FREQ_Y, 0, wasp_down)
+end
+
+function wasp_down(self)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y - AMP_Y, go.EASING_INOUTQUAD, FREQ_Y, 0, wasp_up)
+end
+
+local function wasp_left(self)
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, self.origin.x + AMP_X, go.EASING_INOUTQUAD, FREQ_X, 0, wasp_right)
+end
+
+function wasp_right(self)
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, self.origin.x - AMP_X, go.EASING_INOUTQUAD, FREQ_X, 0, wasp_left)
+end
+
+function init(self)
+	self.origin = go.get_position()
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, self.origin.x + AMP_X, go.EASING_INOUTQUAD, FREQ_X + (math.random(0,100)/100), 0, wasp_left)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y + AMP_Y, go.EASING_INOUTQUAD, FREQ_Y + (math.random(0,100)/100), 0, wasp_down)
+end

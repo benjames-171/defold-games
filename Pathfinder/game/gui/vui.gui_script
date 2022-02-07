@@ -1,0 +1,46 @@
+local data = require "main.data"
+
+function init(self)
+	self.touch = false
+	self.node = gui.get_node("container")
+end
+
+local function fade(self)
+	if data.touch then gui.animate(self.node, "color.w", 0.5, gui.EASING_LINEAR, 0.2)
+	else gui.animate(self.node, "color.w", 0, gui.EASING_LINEAR, 0.2)
+	end
+end
+
+function update(self, dt)
+	if self.touch ~= data.touch then fade(self) end
+	self.touch = data.touch
+end
+
+local function input(self, x, y, pressed)
+	if gui.pick_node(gui.get_node("left"), x, y) then
+		msg.post("/common/player", "left")
+	elseif gui.pick_node(gui.get_node("right"), x, y) then
+		msg.post("/common/player", "right")
+	elseif gui.pick_node(gui.get_node("jump"), x, y) and pressed then
+		msg.post("/common/player", "jump")
+	elseif gui.pick_node(gui.get_node("use"), x, y) and pressed then
+		msg.post("/common/player", "use")
+	elseif gui.pick_node(gui.get_node("restart"), x, y) and pressed then
+		msg.post("/common/player", "restart")
+	elseif gui.pick_node(gui.get_node("menu"), x, y) and pressed then
+		msg.post("view#pause", "show")
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("input") then
+		if message.action_id == hash("tap") then
+			input(self, message.action.x, message.action.y, message.action.pressed)
+		elseif message.action_id == hash("multi") then
+			for i, touchdata in ipairs(message.action.touch) do
+				local pos = vmath.vector3(touchdata.x, touchdata.y, 0)
+				input(self, touchdata.x, touchdata.y, touchdata.pressed)
+			end
+		end
+	end
+end

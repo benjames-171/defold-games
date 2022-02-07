@@ -1,0 +1,23 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /render/custom.renderc
+
+[display]
+width = 1024
+height = 576
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[script]
+shared_state = 1
+
+[project]
+dependencies = https://github.com/subsoap/defos/archive/master.zip
+title = Helo Storm
+
+[html5]
+splash_image = /assets/png/splash.png
+cssfile = /builtins/manifests/web/dark_theme.css
+

@@ -1,0 +1,101 @@
+local data = require "main.data"
+
+local TIME = 5
+local SPEED = 0.3
+
+function init(self)
+	self.time = TIME
+
+	repeat
+		self.move = vmath.vector3(math.random(-10, 10), math.random(-10, 10), 0)
+	until vmath.length(self.move) > 0
+
+	self.move = vmath.normalize(self.move) * SPEED
+	
+	local pos = go.get_position()
+	pos.z = 0.1
+	go.set_position(pos)
+
+	local min = 1
+	local max = 4
+
+	pos = data.world2tile(pos)
+	if pos.y >= 73 then 
+		min = 4
+		max = 7
+	elseif pos.y > 49 then
+		min = 3
+		max = 6
+	elseif pos.y > 25 then
+		min = 2
+		max = 5
+	end
+	sprite.play_flipbook("#sprite", tostring(math.random(min,max)))
+
+	if math.random(1,1000) == 1 then
+		sprite.play_flipbook("#sprite", "8")
+		sound.play("main:/sound#goose")
+	end
+end
+
+local function move(self)
+	local pos = go.get_position()
+	go.set_position(pos + self.move)
+
+	if self.move.x > 0 then sprite.set_hflip("#sprite", false)
+	else sprite.set_hflip("#sprite", true)
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		if data.onscreen(go.get_position(), 4) then
+			self.time = TIME
+			move(self)
+		elseif self.time > 0 then
+			self.time = self.time - dt
+			if self.time < 0 then
+				go.delete()
+			end
+		end
+	end
+end
+
+local function collision(self, message)
+	if message.normal.x > 0.5 then
+		self.move.x = math.abs(self.move.x)
+	elseif message.normal.x < -0.5 then
+		self.move.x = -math.abs(self.move.x)
+	end
+
+	if message.normal.y > 0.5 then
+		self.move.y = math.abs(self.move.y)
+	elseif message.normal.y < -0.5 then
+		self.move.y = -math.abs(self.move.y)
+	end
+end
+
+
+local function dead(self)
+	data.kills = data.kills + 1
+	local pos = go.get_position()
+	pos.z = 1
+	go.set_position(pos)
+	self.move = vmath.vector3()
+	msg.post("#co", "disable")
+	sound.play("main:/sound#explode")
+	sprite.play_flipbook("#sprite", "explode")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.other_group == hash("shot") then
+			dead(self)
+		else
+			collision(self, message)
+		end
+	elseif message_id == hash("animation_done") then
+		go.delete()
+	end
+end
+

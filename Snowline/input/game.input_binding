@@ -1,0 +1,28 @@
+key_trigger {
+  input: KEY_X
+  action: "left"
+}
+key_trigger {
+  input: KEY_C
+  action: "right"
+}
+key_trigger {
+  input: KEY_ESC
+  action: "exit"
+}
+key_trigger {
+  input: KEY_END
+  action: "debug"
+}
+key_trigger {
+  input: KEY_F11
+  action: "fullscreen"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_LEFT
+  action: "left"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_RIGHT
+  action: "right"
+}

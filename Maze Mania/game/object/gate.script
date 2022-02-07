@@ -1,0 +1,31 @@
+local data = require "main.data"
+
+local TIME = 1
+
+function init(self)
+	self.hit = false
+	self.open = true
+	self.time = 0
+	self.pos = data.world2tile(go.get_position())
+end
+
+function update(self, dt)
+	self.time = self.time + dt
+
+	if self.time > TIME then
+		self.time = 0
+		self.open = not self.open
+		local t = 42
+		if self.open or self.hit then t = 10
+		end
+		tilemap.set_tile("/level#screen", "world", self.pos.x, self.pos.y, t)
+	end
+
+	self.hit = false
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		self.hit = true
+	end
+end

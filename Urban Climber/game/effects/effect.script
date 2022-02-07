@@ -1,0 +1,11 @@
+function on_message(self, message_id, message, sender)
+	if message_id == hash("explode") then
+		go.set_position(message.pos)
+		particlefx.play("#explode")
+		sound.play("main:/sound#splat")
+	elseif message_id == hash("smash") then
+		go.set_position(message.pos)
+		particlefx.play("#smash")
+		sound.play("main:/sound#smash")
+	end
+end

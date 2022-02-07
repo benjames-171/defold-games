@@ -1,0 +1,115 @@
+image: "/assets/png/48x16.png"
+tile_width: 48
+tile_height: 16
+tile_margin: 0
+tile_spacing: 0
+collision: "/assets/png/48x16.png"
+material_tag: "tile"
+convex_hulls {
+  index: 0
+  count: 9
+  collision_group: ""
+}
+convex_hulls {
+  index: 9
+  count: 10
+  collision_group: ""
+}
+convex_hulls {
+  index: 19
+  count: 11
+  collision_group: ""
+}
+convex_hulls {
+  index: 30
+  count: 13
+  collision_group: ""
+}
+convex_hulls {
+  index: 43
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 43
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 43
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 43
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 43
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 43
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 43
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 43
+  count: 0
+  collision_group: ""
+}
+animations {
+  id: "blade"
+  start_tile: 9
+  end_tile: 12
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 15
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemy1"
+  start_tile: 1
+  end_tile: 1
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemy2"
+  start_tile: 2
+  end_tile: 2
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemy3"
+  start_tile: 3
+  end_tile: 3
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemy4"
+  start_tile: 4
+  end_tile: 4
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+extrude_borders: 2
+inner_padding: 0
+sprite_trim_mode: SPRITE_TRIM_MODE_OFF

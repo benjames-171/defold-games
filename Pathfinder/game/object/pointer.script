@@ -1,0 +1,6 @@
+function init(self)
+	local origin = go.get_position()
+	go.animate(".", "position.y", go.PLAYBACK_LOOP_PINGPONG, origin.y + 12, go.EASING_INOUTQUAD, 1)
+	go.animate("#sprite", "tint.w", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_LINEAR, 0.3, 3)
+end
+

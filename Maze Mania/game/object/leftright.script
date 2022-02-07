@@ -1,0 +1,24 @@
+data = require "main.data"
+
+local SPEED = 0.3
+
+local function move(self)
+	local pos = go.get_position() + (self.move * data.TILE_SIZE)
+	local p = data.world2tile(pos)
+	local t = tilemap.get_tile("/level#screen", "world", p.x, p.y)
+
+	if t >= 41 then
+		self.move.x = -self.move.x
+		pos = go.get_position() + (self.move * data.TILE_SIZE)
+		if self.move.x > 0 then sprite.set_hflip("#sprite", false)
+		else sprite.set_hflip("#sprite", true)
+		end
+	end
+
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, pos, go.EASING_LINEAR, SPEED, 0, move)
+end
+
+function init(self)
+	self.move = vmath.vector3(1,0,0)
+	move(self)
+end

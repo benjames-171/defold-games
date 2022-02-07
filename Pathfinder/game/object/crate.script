@@ -1,0 +1,16 @@
+local function destroy(self)
+	msg.post("/level", "delete", {id = go.get_id()})
+	go.delete()
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") and message.other_group == hash("fireball") then
+		destroy(self)
+	elseif message_id == hash("teleport") then
+		msg.post("/level", "swapcrate")
+	elseif message_id == hash("disable") then
+		msg.post("#sprite", "disable")
+		msg.post("#co", "disable")
+	end
+end
+

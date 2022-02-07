@@ -1,0 +1,14 @@
+local SHAKE = 3
+
+function init(self)
+	go.set_position(vmath.vector3(0,0,0))
+	msg.post(".", "acquire_camera_focus")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("shake") then
+		go.set_position(vmath.vector3(0, SHAKE, 0))
+		go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_OUTQUAD, 0.2)
+	end	
+end
+

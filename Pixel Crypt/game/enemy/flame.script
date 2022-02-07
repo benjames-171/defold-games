@@ -1,0 +1,35 @@
+local data = require "main.data"
+
+local TIME = 5
+
+function init(self)
+	self.time = 0
+	self.move = vmath.vector3(0,1,0)
+end
+
+local function move(self)
+	local pos = go.get_position() + (self.move * data.TILE_SIZE_X)
+	go.set_position(pos)
+	particlefx.play("#pfx")
+
+	pos = data.world2tile(pos)
+	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+
+	if t == 24 then self.move = vmath.vector3(0, 1, 0)
+	elseif t == 25 then self.move = vmath.vector3(0, -1, 0)
+	elseif t == 26 then self.move = vmath.vector3(-1, 0, 0)
+	elseif t == 27 then self.move = vmath.vector3(1, 0, 0)
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		if data.onscreen(go.get_position(), 0) then
+			self.time = self.time + 1
+			if self.time > TIME then
+				self.time = 0
+				move(self)
+			end
+		end
+	end
+end

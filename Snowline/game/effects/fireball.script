@@ -1,0 +1,42 @@
+local data = require "main.data"
+
+function init(self)
+	self.track = {}
+	self.timer = nil
+	self.exp = 4
+end
+
+local function explode(self)
+	local x = self.track[self.exp]
+	local pos = data.tile2world(vmath.vector3(x, 1, 0))
+	go.set_position(pos)
+	particlefx.play("#pfx")
+	sound.play("main:/sound#fireball")
+	tilemap.set_tile("/level#tilemap", "world", x, 1, 19)
+
+	self.exp = self.exp + 1
+	if self.exp > 13 then
+		timer.cancel(self.timer)
+	end
+end
+
+local function explodetrack(self)
+	for n = 4, 13 do
+		self.track[n] = n
+	end
+
+	for n = 4, 13 do
+		local r = math.random(4,13)
+		local t = self.track[r]
+		self.track[r] = self.track[n]
+		self.track[n] = t
+	end
+
+	self.timer = timer.delay(0.1, true, explode)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("gameover") then
+		explodetrack(self)
+	end
+end

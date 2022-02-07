@@ -1,0 +1,59 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+
+	data.setstring("level_clear")
+	data.setstring("continue")
+end
+
+local function continue(self)
+	msg.post("view#clear", "hide")
+	msg.post("/common/player", "nextlevel")
+end
+
+local function input(self, action_id, action)
+	if (action_id == hash("action") or action_id == hash("exit")) and action.pressed then
+		continue(self)
+	elseif action_id == hash("tap") and action.pressed then
+		if gui.pick_node(gui.get_node("continue-bg"), action.x, action.y) then
+			continue(self)
+		end
+	end
+end
+
+local function playsound(self)
+	data.playsound("star")
+end
+
+local function show(self)
+	ui.show(self.node)
+	data.state = data.STATE_CLEAR
+
+	local stars = data.getstarrating(data.world, data.level)
+	if data.stars > stars then
+		data.setstarrating(data.world, data.level, data.stars)
+	end
+	
+	for n = 1, 3 do
+		local node = gui.get_node(n)
+		gui.set_scale(node, vmath.vector3(0,0,0))
+
+		if n <= data.stars then
+			gui.animate(node, "scale", vmath.vector3(1,1,1), gui.EASING_OUTELASTIC, 0.5, n * 0.3)
+			timer.delay(n * 0.3, false, playsound)
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	elseif message_id == hash("hide") then
+		ui.hide(self.node)
+	elseif message_id == hash("input") then
+		input(self, message.action_id, message.action)
+	end
+end

@@ -1,0 +1,94 @@
+local data = require "main.data"
+
+local SNOWBALL_SPEED = 42
+local MELT_TIME = 5
+local TOKEN_FREQ = 25
+
+go.property("split", true)
+
+function init(self)
+	local pos = go.get_position()
+	local target = vmath.vector3(math.random(56, 200), 8, 0)
+	self.move = vmath.normalize(target - pos) * SNOWBALL_SPEED
+	self.land = false
+	self.time = MELT_TIME
+	msg.post("#co-player", "disable")
+end
+
+local function explode(self)
+	sound.play("main:/sound#explode")
+	particlefx.play("#explode")
+	go.delete()
+end
+
+local function hitball(self)
+	if self.split then data.score = data.score + 50
+	else data.score = data.score + 25
+	end
+	particlefx.play("#points")
+	explode(self)
+
+	data.hits = data.hits + 1
+	if data.hits >= TOKEN_FREQ then
+		data.hits = 0
+		factory.create("#token-factory")
+	end
+end
+
+local function land(self)
+	self.land = true
+	msg.post("#co-player", "enable")
+	msg.post("#co-shot", "disable")
+	sprite.play_flipbook("#sprite", "heap")
+	sound.play("main:/sound#explode")
+	particlefx.play("#explode")
+end
+
+local function killgo(self)
+	go.delete()
+end
+
+local function move(self, dt)
+	if not self.land then
+		local pos = go.get_position() + (self.move * dt)
+		pos.z = 0.9
+		go.set_position(pos)
+
+		if pos.y < 12 then
+			if self.split and data.state ~= data.STATE_GAMEOVER then
+				land(self)
+			else
+				explode(self)
+			end
+			if data.hp > 0 then
+				data.hp = data.hp - 1
+				msg.post("view#cam", "shake")
+				sound.play("main:/sound#hit")
+			end
+		end
+	else
+		self.time = self.time - dt
+		if self.time < 0 then
+			self.time = 99
+			msg.post("#co-player", "disable")
+			go.animate("#sprite", "tint.w", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_LINEAR, 0.5, 0, killgo)
+		end
+	end
+end
+
+function update(self, dt)
+	if data.state ~= data.STATE_PAUSE then
+		move(self, dt)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") and message.other_group == hash("shot") then
+		hitball(self)
+		if self.split then
+			local pos = go.get_position()
+			factory.create("#snowball-factory", pos + vmath.vector3(-8, 0, 0), nil, {split = false})
+			factory.create("#snowball-factory", pos + vmath.vector3(8, 0, 0), nil, {split = false})
+		end
+	end
+end

@@ -1,0 +1,33 @@
+local function complete(self)
+	go.delete()
+end
+
+local function launch(self)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, 160, go.EASING_INSINE, 1, 1, complete)
+	--sound.play("main:/sound#whoosh")
+end
+
+function init(self)
+	local pos = go.get_position()
+	pos.z = pos.z + 0.1
+	pos.y = pos.y - 24
+	go.set_position(pos)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_OUTQUAD, 0.5, 0, launch)
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	pos.x = pos.x - 0.6
+	go.set_position(pos)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		msg.post("/effect", "exp48", {pos = go.get_position()})
+		go.delete()
+		if message.other_group == hash("shot") then 
+			data.score = data.score + 50
+		end
+	end
+end
+

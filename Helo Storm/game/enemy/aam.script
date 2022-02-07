@@ -1,0 +1,32 @@
+local data = require "main.data"
+
+local ACCEL = 0.05
+local DRIFT = 0.3
+
+go.property("move", vmath.vector3())
+
+function init(self)
+	self.move.x = 0
+	sound.play("main:/sound#whoosh")
+end
+
+function update(self, dt)
+	self.move.x = self.move.x - ACCEL
+	local pos = go.get_position()
+
+	if pos.y > data.playerpos.y then self.move.y =  -DRIFT
+	else self.move.y = DRIFT
+	end
+	
+	pos = pos + self.move
+	go.set_position(pos)
+		
+	if pos.x < -24 then go.delete()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		go.delete()
+	end
+end

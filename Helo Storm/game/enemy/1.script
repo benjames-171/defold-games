@@ -1,0 +1,64 @@
+local data = require "main.data"
+
+local COOLDOWN = 1.5
+
+function init(self)
+	self.origin = go.get_position()
+	self.speed = math.random(80,120) / 100
+	self.energy = 1
+	self.hit = false
+	self.time = 0
+	self.rad = 0
+end
+
+local function destroy(self)
+	msg.post("/effect", "exp48", {pos = go.get_position()})
+	data.score = data.score + 50
+	go.delete()
+end
+
+local function move(self)
+	local pos = go.get_position()
+	pos.x = pos.x - self.speed
+
+	self.rad = self.rad + 0.02
+	pos.y = self.origin.y + (math.sin(self.rad) * 8)
+	go.set_position(pos)
+
+	if pos.x < -24 then go.delete()
+	end
+end
+
+local function status(self)
+	if self.hit then
+		self.hit = false
+		self.energy = self.energy - 1
+		if self.energy <= 0 then destroy(self)
+		end
+		go.set("#sprite", "tint", vmath.vector4(4,4,4,1))
+	else
+		go.set("#sprite", "tint", vmath.vector4(1,1,1,1))
+	end
+end
+
+local function shoot(self, dt)
+	self.time = self.time - dt
+	if self.time <= 0 then
+		self.time = COOLDOWN
+		local pos = go.get_position()
+		pos.z = pos.z - 0.1
+		factory.create("#rocket-factory", pos, nil, {move = vmath.vector3(-3, 0, 0)})
+	end
+end
+
+function update(self, dt)
+	move(self)
+	status(self)
+	shoot(self, dt)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		self.hit = true
+	end
+end

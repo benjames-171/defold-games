@@ -1,0 +1,32 @@
+local data = require "main.data"
+
+function init(self)
+	self.wait = true
+end
+
+function update(self, dt)
+	if self.wait then
+		go.set("#beam", "tint.w", math.random(20,40) / 100)
+	end
+end
+
+local function complete(self)
+	data.ending = "UFO"
+	msg.post("/view#complete", "show")
+end
+
+local function accend(self)
+	local pos = go.get_position()
+	msg.post("#beam", "disable")
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, pos + vmath.vector3(0,300,0), go.EASING_INSINE, 2, 0, complete)
+	sound.play("main:/sound#accent")
+	self.wait = false
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") and message.enter then
+		data.state = data.STATE_UFO
+		msg.post(data.player, "ufo")
+		go.animate(".", "scale.x", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_LINEAR, 3.5, 0, accend)
+	end
+end

@@ -1,0 +1,29 @@
+local data = require "main.data"
+
+local function complete(self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	self.last = 60
+	gui.animate(gui.get_node("climb"), "color.w", 0, gui.EASING_LINEAR, 0.2, 1.5, complete)
+end
+
+function update(self, dt)
+	if data.time < 0 then data.time = 0
+	end
+
+	local t = math.ceil(data.time)
+	local node = gui.get_node("time")
+	if t <= 10 then 
+		gui.set_color(node, data.hex2rgba("#c64d43"))
+		if t ~= self.last then
+			sound.play("main:/sound#beep")
+		end
+		self.last = t
+	else
+		gui.set_color(node, data.hex2rgba("#f7f9f0"))
+	end
+	gui.set_text(node, t)
+end
+

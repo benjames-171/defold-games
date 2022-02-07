@@ -1,0 +1,55 @@
+image: "/assets/png/tiles24.png"
+tile_width: 24
+tile_height: 24
+tile_margin: 0
+tile_spacing: 0
+collision: ""
+material_tag: "tile"
+animations {
+  id: "bird"
+  start_tile: 11
+  end_tile: 13
+  playback: PLAYBACK_LOOP_PINGPONG
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "climb"
+  start_tile: 1
+  end_tile: 2
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "crab"
+  start_tile: 3
+  end_tile: 4
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "fall"
+  start_tile: 6
+  end_tile: 6
+  playback: PLAYBACK_NONE
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "static"
+  start_tile: 7
+  end_tile: 7
+  playback: PLAYBACK_NONE
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+extrude_borders: 1
+inner_padding: 0
+sprite_trim_mode: SPRITE_TRIM_MODE_OFF

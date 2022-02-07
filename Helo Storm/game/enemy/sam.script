@@ -1,0 +1,31 @@
+local data = require "main.data"
+
+function init(self)
+	self.rad = math.rad(math.random(70,140))
+	self.speed = 1
+	sound.play("main:/sound#whoosh")
+end
+
+function update(self, dt)
+	if self.rad < math.rad(180) then
+		self.rad = self.rad + 0.025
+	end
+
+	local move = vmath.vector3()
+	move.x = math.cos(self.rad)
+	move.y = math.sin(self.rad)
+
+	local pos = go.get_position()
+	self.speed = self.speed + 0.05
+	go.set_position(pos + move * (self.speed))
+	go.set_rotation(vmath.quat_rotation_z(self.rad + math.pi))
+	
+	if pos.x < -16 then go.delete()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		go.delete()
+	end
+end

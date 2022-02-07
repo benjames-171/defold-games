@@ -1,0 +1,55 @@
+local data = require "main.data"
+
+local COOLDOWN = 1.5
+
+local function complete(self)
+	go.delete()
+end
+
+local function landed(self)
+	local pos = go.get_position()
+	local dest = vmath.vector3(-16,24,0)
+	if pos.x < 128 then dest.x = 272
+	end
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, dest, go.EASING_INSINE, 1, 0, complete)
+	sprite.play_flipbook("#sprite", "enemy7b")
+	msg.post("#para", "disable")
+end
+
+function init(self)
+	self.energy = 10
+	self.hit = false
+	self.time = 0
+	go.set_position(vmath.vector3(math.random(50, 200), 160, 0))
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, vmath.vector3(math.random(50,200), 24, 0), go.EASING_LINEAR, 4, 0, landed)
+end
+
+local function destroy(self)
+	msg.post("/effect", "exp48", {pos = go.get_position()})
+	data.score = data.score + 50
+	go.delete()
+end
+
+local function status(self)
+	if self.hit then
+		self.hit = false
+		self.energy = self.energy - 1
+		if self.energy <= 0 then destroy(self)
+		end
+		go.set("#sprite", "tint", vmath.vector4(4,4,4,1))
+	else
+		go.set("#sprite", "tint", vmath.vector4(1,1,1,1))
+	end
+end
+
+
+function update(self, dt)
+	status(self)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		self.hit = true
+	end
+end
+

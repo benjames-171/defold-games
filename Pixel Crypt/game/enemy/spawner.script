@@ -1,0 +1,23 @@
+local data = require "main.data"
+
+local TIME = 3
+
+function init(self)
+	self.time = 0
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		if data.onscreen(go.get_position(), 0) then
+			self.time = self.time + dt
+			if self.time > TIME then
+				self.time = 0
+				factory.create("#enemy-factory")
+				sound.play("main:/sound#spawn")
+			end
+		else
+			self.time = 2.5
+		end
+	end
+end
+

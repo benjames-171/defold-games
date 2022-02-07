@@ -1,0 +1,27 @@
+local data = require "main.data"
+
+local GRAV = 0.1
+
+go.property("move", vmath.vector3())
+
+function init(self)
+	self.speed = 1
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	self.move.y = self.move.y - GRAV
+	go.set_position(pos + self.move)
+		
+	if pos.y < 16 then
+		go.delete()
+		msg.post("/effect", "exp48", {pos = go.get_position()})
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		msg.post("/effect", "exp48", {pos = go.get_position()})
+		go.delete()
+	end
+end

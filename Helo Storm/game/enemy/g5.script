@@ -1,0 +1,25 @@
+local COOLDOWN = 2
+
+function init(self)
+	self.time = 0
+	local pos = go.get_position()
+	pos.y = 8
+	pos.z = 0.9
+	go.set_position(pos)
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	pos.x = pos.x - 0.6
+	go.set_position(pos)
+
+	self.time = self.time + dt
+
+	if self.time >= COOLDOWN then
+		self.time = 0
+		factory.create("#missile-factory")
+	end
+
+	if pos.x < -16 then go.delete()
+	end
+end

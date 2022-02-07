@@ -1,0 +1,26 @@
+local data = require "main.data"
+
+local SPEED = 0.5
+
+function init(self)
+	self.move = vmath.vector3(0, SPEED, 0)
+	local pos = go.get_position()
+	pos.z = 0.1
+	go.set_position(pos)
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		local pos = go.get_position()
+		if data.onscreen(pos, 0) then
+			go.set_position(pos + self.move)
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") and message.other_group == hash("world") then
+		self.move.y = - self.move.y
+	end
+end
+

@@ -1,0 +1,35 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /render/custom.renderc
+
+[display]
+width = 64
+height = 64
+vsync = 0
+update_frequency = 60
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[script]
+shared_state = 1
+
+[html5]
+splash_image = /assets/png/splash.png
+cssfile = /builtins/manifests/web/dark_theme.css
+show_fullscreen_button = 0
+show_made_with_defold = 0
+show_console_banner = 0
+scale_mode = fit
+
+[sprite]
+subpixels = 0
+
+[project]
+title = Pixel Crypt
+dependencies#0 = https://github.com/subsoap/defos/archive/master.zip
+
+[tilemap]
+max_tile_count = 4096
+

@@ -1,0 +1,20 @@
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+local function fadeout(self)
+	gui.animate(gui.get_node("container"), gui.PROP_COLOR, vmath.vector4(1, 1, 1, 0), gui.EASING_LINEAR, 0.5, 0.2, disablenode)
+end
+
+function init(self)
+	fadeout(self)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("fadein") then
+		local node = gui.get_node("container")
+		gui.set_enabled(node, true)
+		gui.set_color(node, vmath.vector4(1,1,1,1))
+		fadeout(self)
+	end
+end

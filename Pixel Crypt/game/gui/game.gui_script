@@ -1,0 +1,41 @@
+local data = require "main.data"
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	gui.set_enabled(gui.get_node("status-bg"), false)
+end
+
+local function snap(n)
+	n = math.ceil((n * 10)) * (1/10)
+	return n
+end
+
+function update(self, dt)
+	gui.set_scale(gui.get_node("hp"), vmath.vector3(snap(data.hp), 1, 1))
+	gui.set_scale(gui.get_node("food"), vmath.vector3(snap(data.food), 1, 1))
+	gui.set_scale(gui.get_node("shot"), vmath.vector3(snap(data.shot), 1, 1))
+	local anim = "key"
+	if not data.key then anim = "key-grey"
+	end
+	gui.play_flipbook(gui.get_node("key"), anim)
+end
+
+local function status(self, text)
+	gui.set_text(gui.get_node("status"), text)
+	local node = gui.get_node("status-bg")
+	local col = gui.get_color(node)
+	gui.set_enabled(node, true)
+	col.w = 1
+	gui.set_color(node, col)
+	gui.animate(node, "color.w", 0, gui.EASING_LINEAR, 0.1, 1.5, disablenode)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("status") then
+		status(self, message.text)
+	end
+end
+

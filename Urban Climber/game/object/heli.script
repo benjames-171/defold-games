@@ -1,0 +1,44 @@
+local data = require "main.data"
+
+local function moveup(self)
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, self.origin + vmath.vector3(0,8,0), go.EASING_INOUTQUAD, 1, 0, movedown)
+end
+
+function movedown(self)
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, self.origin + vmath.vector3(0,-8,0), go.EASING_INOUTQUAD, 1, 0, moveup)
+end
+
+function init(self)
+	self.origin = go.get_position()
+	moveup(self)
+	msg.post("#player", "disable")
+end
+
+local function complete(self)
+	msg.post("view#clear", "show")
+	sound.stop("main:/sound#music")
+	sound.play("main:/sound#clear")
+end
+
+local function flyaway(self)
+	msg.post("player#sprite", "disable")
+	msg.post("#player", "enable")
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, data.playerpos + vmath.vector3(300,200,0), go.EASING_INQUAD, 2, 0, complete)
+end
+
+local function start(self)
+	go.cancel_animations(".", "position")
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, data.playerpos + vmath.vector3(-18,24,0), go.EASING_INOUTQUAD, 2, 0, flyaway)
+	sound.play("main:/sound#heli")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("go") then
+		start(self)
+	elseif message_id == hash("reset") then
+		go.set_position(self.origin)
+		msg.post("#player", "disable")
+		moveup(self)
+	end
+end
+

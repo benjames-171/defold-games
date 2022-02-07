@@ -1,0 +1,41 @@
+local data = require "main.data"
+
+function init(self)
+	self.tile = 0
+	local pos = data.world2tile(go.get_position())
+	local t = tilemap.get_tile("/level#screen", "world", pos.x, pos.y)
+	sprite.play_flipbook("#sprite", "mirror"..tostring(t))
+end
+
+local function complete(self)
+	go.set(".", "euler.z", 0)
+	sprite.play_flipbook("#sprite", "mirror"..tostring(self.tile))
+	local pos = data.world2tile(go.get_position())
+	tilemap.set_tile("/level#screen", "world", pos.x, pos.y, self.tile)
+end
+
+local function switch(self)
+	local pos = data.world2tile(go.get_position())
+	local t = tilemap.get_tile("/level#screen", "world", pos.x, pos.y)
+	if t == 0 then return end
+	t = t + 1
+	if t > 7 then t = 4
+	end
+	self.tile = t
+	tilemap.set_tile("/level#screen", "world", pos.x, pos.y, 0)
+	go.animate(".", "euler.z", go.PLAYBACK_ONCE_FORWARD, -90, go.EASING_LINEAR, 0.1, 0, complete)
+	data.playsound("switch")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		if message.enter then
+			go.animate("#sprite", "tint", go.PLAYBACK_ONCE_FORWARD, vmath.vector4(2,2,2,1), go.EASING_LINEAR, 0.1)
+		else
+			go.animate("#sprite", "tint", go.PLAYBACK_ONCE_FORWARD, vmath.vector4(1,1,1,1), go.EASING_LINEAR, 0.1)
+		end
+	elseif message_id == hash("switch") then
+		switch(self)
+	end
+end
+

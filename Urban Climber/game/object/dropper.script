@@ -1,0 +1,23 @@
+local data = require "main.data"
+
+local DELAY = 4
+
+local function drop(self)
+	sprite.play_flipbook("#sprite", "hide")
+	factory.create("#plant-factory")
+	sound.play("main:/sound#throw")
+end
+
+local function start(self)
+	local pos = data.world2tile(data.playerpos) + vmath.vector3(0, math.random(3,7), 0)
+	local t = tilemap.get_tile("level#tilemap", "world", pos.x, pos.y)
+
+	if t == 29 then
+		go.set_position(data.tile2world(pos))
+		sprite.play_flipbook("#sprite", "drop", drop)
+	end
+end
+
+function init(self)
+	timer.delay(DELAY, true, start)
+end

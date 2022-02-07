@@ -1,0 +1,13 @@
+function init(self)
+	local pos = go.get_position() + vmath.vector3(0, -16, 0)
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, pos, go.EASING_INOUTQUAD, 0.5, 0.5)
+	data.playsound("door")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("open") then
+		local pos = go.get_position() + vmath.vector3(0, 16, 0)
+		go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, pos, go.EASING_INOUTQUAD, 0.5, 0.5)
+		data.playsound("door")
+	end
+end

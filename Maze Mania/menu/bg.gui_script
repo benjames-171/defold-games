@@ -1,0 +1,8 @@
+local function spin(self, node)
+	gui.set_rotation(node, vmath.vector3(0,0,-40))
+	gui.animate(node, gui.PROP_ROTATION, vmath.vector3(0,0,-400), gui.EASING_LINEAR, 120, 0, spin)
+end
+
+function init(self)
+	spin(self, gui.get_node("squares"))
+end

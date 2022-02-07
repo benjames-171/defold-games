@@ -1,0 +1,25 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		ui.show(self.node)
+		data.state = data.STATE_CLEAR
+		local bonus = math.floor(data.time) * 50
+		data.score = data.score + bonus
+		gui.set_text(gui.get_node("bonus"), string.format("%04d", bonus))
+		gui.set_text(gui.get_node("score"), string.format("%05d", data.score))
+
+		if data.level >= data.MAX_LEVELS then
+			gui.set_text(gui.get_node("title"), "COMPLETED!")
+			gui.set_text(gui.get_node("score-title"), "FINAL SCORE")
+		end
+	elseif message_id == hash("hide") then
+		ui.hide(self.node)
+	end
+end

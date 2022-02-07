@@ -1,0 +1,33 @@
+local data = require "main.data"
+
+local AMP_X = 6
+local AMP_Y = 12
+local FREQ_X = 0.4
+local FREQ_Y = 1
+
+local function ghoul_up(self)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y + AMP_Y, go.EASING_INOUTQUAD, FREQ_Y, 0, ghoul_down)
+end
+
+function ghoul_down(self)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y - AMP_Y, go.EASING_INOUTQUAD, FREQ_Y, 0, ghoul_up)
+	local pos = go.get_position()
+	
+	if pos.x > data.playerpos.x then sprite.set_hflip("#sprite", true)
+	else sprite.set_hflip("#sprite", false)
+	end
+end
+
+local function ghoul_left(self)
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, self.origin.x + AMP_X, go.EASING_INOUTQUAD, FREQ_X, 0, ghoul_right)
+end
+
+function ghoul_right(self)
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, self.origin.x - AMP_X, go.EASING_INOUTQUAD, FREQ_X, 0, ghoul_left)
+end
+
+function init(self)
+	self.origin = go.get_position()
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, self.origin.x + AMP_X, go.EASING_INOUTQUAD, FREQ_X + (math.random(0,100)/100), 0, ghoul_left)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.origin.y + AMP_Y, go.EASING_INOUTQUAD, FREQ_Y + (math.random(0,100)/100), 0, ghoul_down)
+end

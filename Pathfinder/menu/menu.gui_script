@@ -1,0 +1,131 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+local function show(self)
+	ui.show(self.node)
+	data.state = data.STATE_MENU
+end
+
+local function icons(self)
+	gui.set_enabled(gui.get_node("music-off"), not data.music)
+	gui.set_enabled(gui.get_node("sfx-off"), not data.sfx)
+end
+
+function init(self)
+	self.handpos = 1
+	self.arrowpos = {
+		gui.get_position(gui.get_node("1")),
+		gui.get_position(gui.get_node("2")),
+		gui.get_position(gui.get_node("3")),
+	}
+
+	msg.post(".", "acquire_input_focus")
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+	show(self)
+	icons(self)
+
+	data.playmusic("music-menu")
+
+	data.setstring("start")
+	data.setstring("controls")
+	data.setstring("credits")
+
+	gui.set_text(gui.get_node("v"), sys.get_config("project.version"))
+end
+
+function update(self, dt)
+	if data.state == data.STATE_MENU then
+		local pos = vmath.vector3(self.arrowpos[self.handpos].x, self.arrowpos[self.handpos].y, 0)
+		gui.set_position(gui.get_node("arrow"), pos)
+		if data.touch then
+			gui.set_enabled(gui.get_node("arrow"), false)
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	end
+end
+
+local function controls(self)
+	ui.hide(self.node)
+	if data.touch then
+		msg.post("#controls-v", "show")
+	else
+		msg.post("#controls", "show")
+	end
+end
+
+local function credits(self)
+	ui.hide(self.node)
+	msg.post("#credits", "show")
+end
+
+local function start(self)
+	ui.hide(self.node)
+	msg.post("#world", "show")
+end
+
+local function input(self, action_id, action)
+	if action_id == hash("up") and action.pressed then
+		self.handpos = self.handpos - 1
+		if self.handpos < 1 then self.handpos = 3 end
+	elseif action_id == hash("down") and action.pressed then
+		self.handpos = self.handpos + 1
+		if self.handpos > 3 then self.handpos = 1 end
+	elseif (action_id == hash("action") or action_id == hash("start")) and action.pressed then
+		if self.handpos == 1 then
+			start(self)
+		elseif self.handpos == 2 then
+			controls(self)
+		elseif self.handpos == 3 then
+			credits(self)
+		end
+	elseif action_id == hash("exit") and action.pressed and not html5 then
+		msg.post("@system:", "exit", {code = 0})
+	elseif action_id == hash("tap") and action.pressed then
+		if gui.pick_node(gui.get_node("start-bg"), action.x, action.y) then
+			start(self)
+		elseif gui.pick_node(gui.get_node("controls-bg"), action.x, action.y) then
+			controls(self)
+		elseif gui.pick_node(gui.get_node("credits-bg"), action.x, action.y) then
+			credits(self)
+		elseif gui.pick_node(gui.get_node("music"), action.x, action.y) then
+			data.music = not data.music
+			if data.music then data.playmusic("music-menu")
+			else sound.stop("main:/sound#music-menu")
+			end
+			icons(self)
+		elseif gui.pick_node(gui.get_node("sfx"), action.x, action.y) then
+			data.sfx = not data.sfx
+			icons(self)
+		end
+	else
+		if gui.pick_node(gui.get_node("start-bg"), action.x, action.y) then
+			self.handpos = 1
+		elseif gui.pick_node(gui.get_node("controls-bg"), action.x, action.y) then
+			self.handpos = 2
+		elseif gui.pick_node(gui.get_node("credits-bg"), action.x, action.y) then
+			self.handpos = 3
+		end
+	end
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_MENU then
+		input(self, action_id, action)
+	elseif data.state == data.STATE_CONTROLS then
+		msg.post("#controls", "input", {action_id = action_id, action = action})
+	elseif data.state == data.STATE_CONTROLS_V then
+		msg.post("#controls-v", "input", {action_id = action_id, action = action})
+	elseif data.state == data.STATE_CREDITS then
+		msg.post("#credits", "input", {action_id = action_id, action = action})
+	elseif data.state == data.STATE_WORLD then
+		msg.post("#world", "input", {action_id = action_id, action = action})
+	elseif data.state == data.STATE_SELECT then
+		msg.post("#select", "input", {action_id = action_id, action = action})
+	end
+end

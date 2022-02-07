@@ -1,0 +1,57 @@
+local data = require "main.data"
+
+function init(self)
+	self.spawn = 0.75
+	self.time = 0
+	self.cell = 0
+	msg.post("#tilemap", "disable")
+
+	if data.diff == 2 then self.spawn = 0.6
+	end
+end
+
+function update(self, dt)
+	if data.state ~= data.STATE_PLAYING then return
+	end
+	
+	self.time = self.time + dt
+	
+	if self.time > self.spawn then
+		self.time = 0
+		self.cell = self.cell + 1
+		local x = 280
+		local t = tilemap.get_tile("#tilemap", "control", self.cell, data.level)
+		if t == 0 then return
+		end
+		local f = nil
+		if t < 32 then f = string.format("#%d-factory", t)
+		elseif t <= 60 then f = string.format("#g%d-factory", t - 32)
+		elseif t == 61 then msg.post("/view#game", "caution")
+		elseif t == 62 then f = "#boss2-factory"
+		elseif t == 63 then
+			f = "#boss-factory"
+			x = 296
+		else self.time = -99999999
+		end
+		if f ~= nil then
+			local y = 136
+			if (data.level % 2) == 0 then y = 100
+			end
+			local pos = vmath.vector3(x, math.random(32, y), 0)
+			factory.create(f, pos)
+
+			if t < 32 and data.diff == 2 and math.random(1, 4) == 1 then
+				pos.y = math.random(32, y)
+				factory.create(f, pos)
+			end
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("reset") then
+		self.time = 0
+		self.cell = 0
+		msg.post("/player", "reset")
+	end
+end

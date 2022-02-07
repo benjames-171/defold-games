@@ -1,0 +1,280 @@
+data = require "main.data"
+
+local DRAG = 0.3
+local ACCEL = 0.5
+local SPEED_MAX = 2
+local FALL_MAX = 4.0
+local GRAVITY = 0.2
+local JUMP = 3
+local BOUNCE = 0.2
+local TILT = 0.2
+local TILT_SPEED = 0.05
+local FIRE_COOLDOWN = 0.1
+local ONGROUND = 10
+local INVUL = 150
+local INPUT_LOCK = 120
+
+local function reset(self)
+	self.jeep = false
+	self.cool = 0
+	self.rot = 0
+	self.move = vmath.vector3()
+	self.dir = vmath.vector3(1,0,0)
+	self.invul = INVUL
+	self.lock = 0
+
+	data.double = false
+	data.coolmult = 2
+	data.energy = 100
+	data.pickup = 1
+
+	if data.level % 2 == 0 then
+		self.jeep = true
+	end
+
+	msg.post("#co", "disable")
+
+	if self.jeep then
+		sprite.play_flipbook("#sprite", "jeep")
+		msg.post("#blade", "disable")
+		go.set_position(vmath.vector3(32,24,0))
+	else
+		sprite.play_flipbook("#sprite", "heli")
+		msg.post("#blade", "enable")
+		go.set_position(vmath.vector3(32,72,0))
+	end
+
+	sprite.play_flipbook("/sky", tostring(data.level))
+
+	sprite.play_flipbook("/bg-back", tostring(data.level).."1")
+	sprite.play_flipbook("/bg-mid", tostring(data.level).."2")
+	sprite.play_flipbook("/bg-fore", tostring(data.level).."3")
+
+	local text = "READY?"
+	if data.complete > 0 and data.level == 1 then text = string.format("COMPLETED X %d", data.complete)
+	end
+	
+	msg.post("view#game", "status", {text = text})
+end
+
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	reset(self)
+end
+
+local function quit2menu(self)
+	msg.post("main:/sound", "stop_sound")
+	msg.post("main:/handler", "show_menu")
+end
+
+local function move(self)
+	local pos = go.get_position() + self.move
+	go.set_position(pos)
+	data.playerpos = pos
+end
+
+local function drag(self)
+	if self.move.x > 0 then self.move.x = self.move.x - DRAG
+		if self.move.x < 0 then self.move.x = 0 end
+	elseif self.move.x < 0 then self.move.x = self.move.x + DRAG
+		if self.move.x > 0 then self.move.x = 0 end
+	end
+
+	if not self.jeep then
+		if self.move.y > 0 then self.move.y = self.move.y - DRAG
+			if self.move.y < 0 then self.move.y = 0 end
+		elseif self.move.y < 0 then self.move.y = self.move.y + DRAG
+			if self.move.y > 0 then self.move.y = 0 end
+		end
+	end
+end
+
+local function gravity(self)
+	if self.jeep then
+		self.move.y = self.move.y - GRAVITY
+		if self.move.y < -FALL_MAX then self.move.y = -FALL_MAX end
+	end
+end
+
+local function bounds(self)
+	local pos = go.get_position()
+	
+	if pos.x < 16 then
+		pos.x = 16
+		self.move.x = 0
+	elseif pos.x > 240 then
+		pos.x = 240
+		self.move.x = 0
+	end
+
+	if pos.y < 24 then
+		pos.y = 24
+		self.move.y = 0
+	elseif pos.y > 136 then
+		pos.y = 136
+		self.move.y = 0
+	end
+
+	go.set_position(pos)
+end
+
+local function tilt(self)
+	if not self.jeep then
+		if (self.dir.x == 1 and self.rot > -TILT) or (self.dir.x == 0 and self.rot > 0) then
+			self.rot = self.rot - TILT_SPEED
+		elseif (self.dir.x == -1 and self.rot < TILT) or (self.dir.x == 0 and self.rot < 0) then
+			self.rot = self.rot + TILT_SPEED
+		end
+
+		if self.dir.x == 0 then
+			if self.rot > 0 and self.rot < TILT_SPEED then self.rot = 0
+			elseif self.rot < 0 and self.rot > -TILT_SPEED then self.rot = 0
+			end
+		end
+	end
+	
+	self.dir = vmath.vector3()
+	go.set_rotation(vmath.quat_rotation_z(self.rot))
+end
+
+local function flash(self)
+	if self.invul > 0 then
+		self.invul = self.invul - 1
+		if self.invul % 10 < 6 then
+			msg.post("#sprite", "enable")
+		else
+			msg.post("#sprite", "disable")
+		end
+
+		if self.invul <= 0 then
+			msg.post("#co", "enable")
+		end
+	end
+end
+
+local function clear(self)
+	go.animate("#sprite", "tint.w", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_INOUTQUAD, 1)
+	msg.post("iew#clear", "show")
+	self.lock = INPUT_LOCK
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		move(self)
+		drag(self)
+		gravity(self)
+		tilt(self)
+		bounds(self)
+		flash(self)
+	end
+
+	if self.lock > 0 then self.lock = self.lock - 1 end
+	if self.cool > 0 then self.cool = self.cool - dt end
+end
+
+local function jump(self)
+	local pos = go.get_position()
+	if pos.y <= 24 then self.move.y = JUMP
+	end
+end
+
+local function fire(self)
+	local pos = go.get_position()
+
+	pos.z = pos.z - 0.1
+
+	if not data.double then
+		pos.y = pos.y - 2
+		factory.create("#shot-factory", pos, vmath.quat_rotation_z(0), {move = vmath.vector3(1,0,0)})
+	else
+		pos.y = pos.y + 1
+		factory.create("#shot-factory", pos, vmath.quat_rotation_z(0), {move = vmath.vector3(1,0,0)})
+		pos.y = pos.y - 6
+		factory.create("#shot-factory", pos, vmath.quat_rotation_z(0), {move = vmath.vector3(1,0,0)})
+	end
+
+	if self.jeep then
+		factory.create("#shot-factory", pos + vmath.vector3(-14,5,0), vmath.quat_rotation_z(0), {move = vmath.vector3(2,1,0)})
+	else factory.create("#shot-factory", pos, vmath.quat_rotation_z(0), {move = vmath.vector3(2,-1,0)})
+	end
+
+	self.cool = FIRE_COOLDOWN * data.coolmult
+	sound.play("main:/sound#shot")
+end
+
+local function hit(self)
+	if self.invul > 0 then return
+	end
+
+	msg.post("/effect", "exp24", {pos = go.get_position()})
+	data.energy = data.energy - 10
+	self.invul = INVUL
+
+	if data.energy <= 0 then
+		data.energy = 0
+		msg.post("/effect", "exp48", {pos = go.get_position()})
+		msg.post("view#gameover", "show")
+		msg.post("#sprite", "disable")
+		msg.post("#blade", "disable")
+		msg.post("#co", "disable")
+		self.lock = INPUT_LOCK
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("reset") then
+		reset(self)
+	elseif message_id == hash("shield") then
+		self.invul = INVUL * 3
+	elseif message_id == hash("collision_response") and message.other_group ~= hash("pickup") then
+		hit(self)
+	end
+end
+
+local DEAD_ZONE = 0.2
+
+local function input_playing(self, action_id, action)
+	if action_id == hash("down") and action.value > DEAD_ZONE and not self.jeep then
+		self.move.y = self.move.y - ACCEL
+		if self.move.y < -SPEED_MAX then self.move.y = -SPEED_MAX end
+		self.dir.y = -1
+	elseif action_id == hash("up") and action.value > DEAD_ZONE and not self.jeep then
+		self.move.y = self.move.y + ACCEL
+		if self.move.y > SPEED_MAX then self.move.y = SPEED_MAX end
+		self.dir.y = 1
+	elseif action_id == hash("left") and action.value > DEAD_ZONE then
+		self.move.x = self.move.x - ACCEL
+		if self.move.x < -SPEED_MAX then self.move.x = -SPEED_MAX end
+		self.dir.x = -1
+	elseif action_id == hash("right") and action.value > DEAD_ZONE then
+		self.move.x = self.move.x + ACCEL
+		if self.move.x > SPEED_MAX then self.move.x = SPEED_MAX end
+		self.dir.x = 1
+	elseif action_id == hash("action") and action.pressed and self.jeep then
+		jump(self)
+	elseif action_id == hash("fire") and self.cool <= 0 then
+		fire(self)
+	elseif action_id == hash("exit") and action.pressed then
+		msg.post("main:/sound", "stop_sound")
+		msg.post("main:/handler", "show_menu")
+	elseif action_id == hash("debug") and action.pressed then
+		--msg.post("/view#shutter", "endlevel")
+	end
+end
+
+local function input_gameover(self, action_id, action)
+	if action.pressed then
+		quit2menu(self)
+	end
+end
+
+function on_input(self, action_id, action)
+	if self.lock > 0 then return
+	end	
+	if data.state == data.STATE_PLAYING then
+		input_playing(self, action_id, action)
+	elseif data.state == data.STATE_GAMEOVER then
+		input_gameover(self, action_id, action)
+	end
+end

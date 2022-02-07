@@ -1,0 +1,29 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		local text = string.format("%s\n%d/%d\n%d/%d\n%d\n%d\n%s", data.ms2str(os.clock() - data.time), data.items, data.totalitems, data.secrets, data.totalsecrets, data.kills, data.deaths, data.ending)
+		gui.set_text(gui.get_node("right"), text)
+
+		if data.items == data.totalitems and data.secrets == data.totalsecrets and data.deaths == 0 then
+			text = "*****"
+		elseif data.items > data.totalitems * 0.8 and data.secrets > data.totalsecrets * 0.7 and data.deaths < 5 then
+			text = "****"
+		elseif data.items > data.totalitems * 0.7 and data.secrets > data.totalsecrets * 0.4 and data.deaths < 10 then
+			text = "***"
+		else
+			text = "**"
+		end
+
+		gui.set_text(gui.get_node("stars"), text)
+		
+		ui.show(self.node)
+		data.state = data.STATE_COMPLETE
+	end
+end

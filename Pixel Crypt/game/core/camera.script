@@ -1,0 +1,17 @@
+local data = require "main.data"
+
+function init(self)
+	msg.post("#camera", "acquire_camera_focus")
+end
+
+function update(self, dt)
+	local w = data.CANV_W - 8
+	local h = data.CANV_H - 16
+	local x = math.floor((data.playerpos.x - 4) / w) * w
+	local y = math.floor((data.playerpos.y - 4) / h) * h
+	local pos = vmath.vector3(x, y, 0)
+
+	go.set_position(pos)
+
+	data.scrollpos = pos
+end

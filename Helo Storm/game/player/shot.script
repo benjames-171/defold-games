@@ -1,0 +1,32 @@
+local data = require "main.data"
+
+local SPEED = 10
+
+go.property("move", vmath.vector3())
+
+function init(self)
+	local r = math.atan2(self.move.y, self.move.x)
+	go.set_rotation(vmath.quat_rotation_z(r))
+
+	local v = vmath.normalize(self.move)
+	self.move = v * SPEED
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	pos = pos + self.move
+	go.set_position(pos)
+
+	if pos.x > data.CANV_W + 8 then 
+		go.delete()
+	elseif pos.y <= 16 then
+		msg.post("/effect", "splat", {pos = go.get_position()})
+		go.delete()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		go.delete()
+	end
+end

@@ -1,0 +1,6 @@
+function init(self)
+	gui.animate(gui.get_node("1"), "scale", vmath.vector3(4, 4, 1), gui.EASING_OUTBOUNCE, 0.8)
+	gui.animate(gui.get_node("2"), "scale", vmath.vector3(4, -4, 1), gui.EASING_OUTBOUNCE, 0.8)
+	gui.animate(gui.get_node("3"), "scale", vmath.vector3(-4, -4, 1), gui.EASING_OUTBOUNCE, 0.8)
+	gui.animate(gui.get_node("4"), "scale", vmath.vector3(-4, 4, 1), gui.EASING_OUTBOUNCE, 0.8)
+end

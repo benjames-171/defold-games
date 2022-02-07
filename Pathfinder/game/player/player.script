@@ -1,0 +1,285 @@
+data = require "main.data"
+
+local DRAG = 0.2
+local ACCEL = 0.6
+local SPEED_MAX = 1
+local FALL_MAX = 3.0
+local GRAVITY = 0.2
+local JUMP = 2.8
+local FLOAT = 0.23
+local BOUNCE = 0.2
+local ONGROUND = 10
+local INVUL = 150
+local INPUT_LOCK = 0.5
+
+local function reset(self)
+	msg.post("#co", "enable")
+	self.move = vmath.vector3()
+	self.correction = vmath.vector3()
+	self.hflip = false
+	self.dust = false
+	self.anim = ""
+	self.onground = 0
+	self.invul = INVUL
+	self.lock = 0
+	self.shift = false
+	self.mirror = nil
+	go.set_scale(vmath.vector3(1,1,1))
+end
+
+function init(self)
+	reset(self)
+	msg.post(".", "acquire_input_focus")
+end
+
+local function quit2menu(self)
+	msg.post("main:/sound", "stop_sound")
+	msg.post("main:/handler", "show_menu")
+end
+
+local function move(self)
+	local pos = go.get_position() + self.move
+	go.set_position(pos)
+end
+
+local function drag(self)
+	if self.move.x > 0 then self.move.x = self.move.x - DRAG
+		if self.move.x < 0 then self.move.x = 0 end
+	elseif self.move.x < 0 then self.move.x = self.move.x + DRAG
+		if self.move.x > 0 then self.move.x = 0 end
+	end
+end
+
+local function gravity(self)
+	self.move.y = self.move.y - GRAVITY
+	if self.move.y < -FALL_MAX then self.move.y = -FALL_MAX end
+end
+
+local function flash(self)
+	if self.invul > 0 then
+		self.invul = self.invul - 1
+		if self.invul % 10 < 6 then
+			msg.post("#sprite", "enable")
+		else
+			msg.post("#sprite", "disable")
+		end
+	end
+end
+
+local function anim(self)
+	local anim = ""
+
+	if self.onground == 0 or self.ice then
+		anim = hash("jump")
+	elseif self.move.x ~= 0 then
+		anim = hash("run")
+	else
+		anim = hash("static")
+	end
+
+	sprite.set_hflip("#sprite", self.hflip)
+
+	if anim ~= self.anim then
+		sprite.play_flipbook("#sprite", anim)
+		self.anim = anim
+	end
+end
+
+local function clear(self)
+	msg.post("view#clear", "show")
+	msg.post("#co", "disable")
+	self.lock = INPUT_LOCK
+	sprite.play_flipbook("#sprite", "jump")
+	local pos = data.world2tile(go.get_position())
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, data.tile2world(pos), go.EASING_INSINE, 0.3)
+	go.animate(".", "scale", go.PLAYBACK_ONCE_FORWARD, vmath.vector3(0,0,0), go.EASING_INSINE, 0.3)
+	particlefx.stop("#dust")
+	data.playsound("warp")
+end
+
+local function dust(self)
+	if self.onground > 0 and not self.dust and self.move.x ~= 0 then
+		self.dust = true
+		particlefx.play("#dust")
+	elseif (self.onground == 0 and self.dust) or self.move.x == 0 then
+		self.dust = false
+		particlefx.stop("#dust")
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		move(self)
+		drag(self)
+		gravity(self)
+		flash(self)
+		anim(self)
+		dust(self)
+	end
+
+	if self.onground > 0 then self.onground = self.onground - 1 end
+	if self.lock > 0 then self.lock = self.lock - dt end
+	self.correction = vmath.vector3()
+end
+
+local function left(self)
+	self.move.x = self.move.x - ACCEL
+	if self.move.x < -SPEED_MAX then self.move.x = -SPEED_MAX end
+	self.hflip = true
+end
+
+local function right(self)
+	self.move.x = self.move.x + ACCEL
+	if self.move.x > SPEED_MAX then self.move.x = SPEED_MAX end
+	self.hflip = false
+end
+
+
+local function jump(self)
+	if self.onground > 0 then
+		self.move.y = JUMP
+		self.onground = 0
+		data.playsound("jump")
+	end
+end
+
+local function use(self)
+	if self.mirror then
+		msg.post(self.mirror, "switch")
+	end
+end
+
+local function collision(self, message)
+	if message.distance > 0 then
+		local proj = vmath.project(self.correction, message.normal * message.distance)
+		if proj < 1 then
+			local comp = (message.distance - message.distance * proj) * message.normal
+			go.set_position(go.get_position() + comp)
+			self.correction = self.correction + comp
+			if math.abs(message.normal.x) == 1 and message.other_group == hash("world") then self.move.x = 0 end
+			if message.normal.y > 0.7 then
+				if self.move.y < -2 then
+					data.playsound("land")
+				end
+				self.move.y = 0
+				self.onground = ONGROUND
+			elseif message.normal.y < -0.8 and self.move.y > 0 then self.move.y = -BOUNCE
+			end
+		end
+	end
+end
+
+local function nextlevel(self)
+	data.level = data.level + 1
+
+	if data.level > data.MAX_LEVELS then
+		quit2menu(self)
+		data.level = data.MAX_LEVELS
+	else
+		reset(self)
+		data.stars = 4
+		msg.post("/level", "reset")
+		data.state = data.STATE_PLAYING
+	end
+
+	if data.savedata[data.world] < data.level then
+		data.savedata[data.world] = data.level
+	end
+	
+	data.savegamefile()
+end
+
+local function mirror(self, id, enter)
+	if enter then
+		self.mirror = id
+	elseif self.mirror == id then
+		self.mirror = nil
+	end
+end
+
+local function teleport(self, dest)
+	self.move = vmath.vector3(0,0,0)
+	dest.z = 0.5 
+	go.set_position(data.tile2world(dest))
+	msg.post("/common/effect", "teleport", {pos = go.get_position()})
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("position") then
+		go.set_position(message.pos)
+		data.spawnpos = message.pos
+	elseif message_id == hash("contact_point_response") then
+		if message.other_group == hash("float") then
+			self.move.y = self.move.y + FLOAT
+		elseif message.other_group ~= hash("fireball") then
+			collision(self, message)
+		end
+	elseif message_id == hash("trigger_response") then
+		if message.other_group == hash("exit") and message.enter then
+			clear(self)
+		elseif message.other_group == hash("mirror") then
+			mirror(self, message.other_id, message.enter)
+		end
+	elseif message_id == hash("left") then
+		left(self)
+	elseif message_id == hash("right") then
+		right(self)
+	elseif message_id == hash("jump") then
+		jump(self)
+	elseif message_id == hash("use") then
+		use(self)
+	elseif message_id == hash("teleport") then
+		teleport(self, message.dest)
+	elseif message_id == hash("restart") then
+		msg.post("/level", "reset")
+	elseif message_id == hash("nextlevel") then
+		nextlevel(self)
+	elseif message_id == hash("quit") then
+		quit2menu(self)
+	end
+end
+
+local function input_playing(self, action_id, action)
+	if action_id == hash("left") then
+		left(self)
+	elseif action_id == hash("right") then
+		right(self)
+	elseif action_id == hash("action") and action.pressed then
+		jump(self)
+	elseif action_id == hash("use") and action.pressed then
+		use(self)
+	elseif action_id == hash("restart") and action.pressed then
+		self.lock = INPUT_LOCK
+		msg.post("/level", "reset")
+	elseif (action_id == hash("exit") or action_id == hash("start")) and action.pressed then
+		msg.post("view#pause", "show")
+	elseif action_id == hash(data.touchname) then
+		msg.post("view#vui", "input", {action_id = action_id, action = action})
+	elseif action_id == hash("shift") then
+		if action.pressed then self.shift = true
+		elseif action.released then self.shift = false
+		end
+	elseif action_id == hash("debug") and action.pressed and self.shift then
+		clear(self)
+	end
+end
+
+local function input_complete(self, action_id, action)
+	if action_id == hash("exit") and action.pressed then
+		quit2menu(self)
+	end
+end
+
+function on_input(self, action_id, action)
+	if self.lock > 0 then return
+	end	
+	if data.state == data.STATE_PLAYING then
+		input_playing(self, action_id, action)
+	elseif data.state == data.STATE_PAUSE then
+		msg.post("view#pause", "input", {action_id = action_id, action = action})
+	elseif data.state == data.STATE_CLEAR then
+		msg.post("view#clear", "input", {action_id = action_id, action = action})
+	elseif data.state == data.STATE_COMPLETE then
+		input_complete(self, action_id, action)
+	end
+end

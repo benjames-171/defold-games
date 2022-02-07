@@ -1,0 +1,10 @@
+local data = require "main.data"
+
+function update(self, dt)
+	if data.state ~= data.STATE_PAUSE then
+		local pos = data.scrollpos
+		pos.y = pos.y / 1.5
+		go.set_position(vmath.vector3(128, pos.y + 72, 0.05))
+	end
+end
+

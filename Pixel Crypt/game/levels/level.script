@@ -1,0 +1,125 @@
+local data = require "main.data"
+
+local anim = {}
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	local total = 0
+
+	data.bounds = vmath.vector4(
+		(sx - 1) * data.TILE_SIZE_X,
+		(sy - 1) * data.TILE_SIZE_Y,
+		((sx + w - 1) * data.TILE_SIZE_X) - data.CANV_W,
+		((sy + h - 1) * data.TILE_SIZE_Y) - data.CANV_H)
+	
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			local pos = data.tile2world(vmath.vector3(x, y, 0))
+			tilemap.set_tile("#tilemap", "grid", x, y, 0)
+
+			if t > 0 then total = total + 1
+			end
+			
+			if t == 0 then
+				if x > 0 and x < 57 then
+					if math.random(1,3) == 1 then
+						tilemap.set_tile("#tilemap", "world", x, y, math.random(167, 176))
+						total = total + 1
+					end
+				end
+			elseif t == 1 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				local p = data.tile2world(vmath.vector3(x, y, 0.5))
+				local fac = "#"..data.class.."-factory"
+				factory.create(fac, p)
+			elseif t == 34 then
+				if math.random(1, 4) == 1 then
+					tilemap.set_tile("#tilemap", "world", x, y, math.random(35,37))
+				end
+
+			elseif t == 7 or t == 8 or (t >= 18 and t <= 23) then
+				data.totalitems = data.totalitems + 1
+			elseif t == 10 then
+				data.totalsecrets = data.totalsecrets + 1
+				
+			elseif t == 66 then
+				if math.random(1, 4) == 1 then
+					tilemap.set_tile("#tilemap", "world", x, y, math.random(67,69))
+				end
+			elseif t == 98 then
+				if math.random(1, 4) == 1 then
+					tilemap.set_tile("#tilemap", "world", x, y, math.random(99,101))
+				end
+			elseif t == 130 then
+				if math.random(1, 4) == 1 then
+					tilemap.set_tile("#tilemap", "world", x, y, math.random(131,133))
+				end
+			elseif t == 49 or t == 81 or t == 113 or t == 145 then
+				factory.create("#shooter-factory", pos + vmath.vector3(4,0,0), nil, {move = vmath.vector3(1,0,0)})
+			elseif t == 50 or t == 82 or t == 114 or t == 146 then
+				factory.create("#shooter-factory", pos + vmath.vector3(-4,0,0), nil, {move = vmath.vector3(-1,0,0)})
+			elseif t == 144 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#spike-factory", pos)
+			elseif t == 157 then
+				tilemap.set_tile("#tilemap", "world", x, y, 24)
+				factory.create("#flame-factory", pos)
+			elseif t == 217 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#keeper-factory", pos)
+			elseif t == 237 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#spawner-factory", pos)
+			end
+		end
+	end
+
+	print("tiles", total)
+end
+
+local function initanim(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local frames = {
+		vmath.vector3(161,162,0),
+		vmath.vector3(163,164,0),
+	}
+
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+
+			for k,v in pairs(frames) do
+				if t >= frames[k].x and t <= frames[k].y then
+					table.insert(anim, vmath.vector4(x, y, frames[k].x, frames[k].y))
+				end
+			end
+		end
+	end
+end
+
+function init(self)
+	self.time = 0
+	initanim(self)
+	parse(self)
+end
+
+local ANIM_TIME = 0.5
+
+local function animate(self, dt)
+	self.time = self.time + dt
+	if self.time >= ANIM_TIME then
+		self.time = 0
+		for k,v in pairs(anim) do
+			local t = tilemap.get_tile("/level#tilemap", "world", anim[k].x, anim[k].y)
+			t = t + 1
+			if t > anim[k].w then t = anim[k].z end
+			tilemap.set_tile("/level#tilemap", "world", anim[k].x, anim[k].y, t)
+		end
+	end
+end
+
+function update(self, dt)
+	animate(self, dt)
+end

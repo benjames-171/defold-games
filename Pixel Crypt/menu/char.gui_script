@@ -1,0 +1,100 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+local MAX = 3
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+	
+	self.handpos = 1
+	self.arrowpos = {
+		gui.get_position(gui.get_node("b1")),
+		gui.get_position(gui.get_node("b2")),
+		gui.get_position(gui.get_node("b3")),
+	}
+	
+	self.class = {"WIZARD", "ELF", "WARRIOR"}
+	self.weap = {"fireball", "arrow", "axe"}
+
+	self.att = {0.9, 0.8, 1.0}
+	self.def = {0.75, 0.8, 0.85}
+	self.spd = {0.9, 1.0, 0.75}
+	self.sta = {0.75, 0.7, 0.8}
+
+	self.shotspd = {1, 1.5, 0.8}
+end
+
+function update(self, dt)
+	if data.state == data.STATE_SHOP then
+		local pos = vmath.vector3(self.arrowpos[self.handpos].x, self.arrowpos[self.handpos].y, 0)
+		gui.set_position(gui.get_node("arrow"), pos)
+		gui.set_text(gui.get_node("class"), self.class[self.handpos])
+		gui.set_scale(gui.get_node("s1"), vmath.vector3((self.att[self.handpos] * 2) - 1, 1, 1))
+		gui.set_scale(gui.get_node("s2"), vmath.vector3((self.def[self.handpos] * 2) - 1, 1, 1))
+		gui.set_scale(gui.get_node("s3"), vmath.vector3((self.spd[self.handpos] * 2) - 1, 1, 1))
+		gui.set_scale(gui.get_node("s4"), vmath.vector3((self.sta[self.handpos] * 2) - 1, 1, 1))
+	end
+end
+
+local function startgame(self)
+	data.level = 1
+	data.hp = 1
+	data.food = 1
+	data.shot = 1
+	data.cool = 0.02
+	data.speed = 0.5
+	data.gold = 0
+	data.key = false
+	data.time = os.clock()
+
+	data.items = 0
+	data.totalitems = 0
+	data.secrets = 0
+	data.totalsecrets = 0
+	data.deaths = 0
+	data.kills = 0
+	data.ending = "???"
+
+	data.attmult = self.att[self.handpos]
+	data.defmult = self.def[self.handpos]
+	data.spdmult = self.spd[self.handpos]
+	data.stamult = self.sta[self.handpos]
+
+	data.shotspd = self.shotspd[self.handpos]
+
+	data.weap = self.weap[self.handpos]
+	data.class = string.lower(self.class[self.handpos])
+	
+	data.state = data.STATE_PLAYING
+	msg.post("main:/handler", "show_game")
+	sound.play("main:/sound#music", {gain = 0.5})
+end
+
+function on_input(self, action_id, action)
+	if data.state == data.STATE_SHOP then
+		if action_id == hash("up") and action.pressed then
+			self.handpos = self.handpos - 1
+			if self.handpos < 1 then self.handpos = MAX end
+			sound.play("main:/sound#click")
+		elseif action_id == hash("down") and action.pressed then
+			self.handpos = self.handpos + 1
+			if self.handpos > MAX then self.handpos = 1 end
+			sound.play("main:/sound#click")
+		elseif action_id == hash("action") and action.pressed then
+			startgame(self)
+		elseif action_id == hash("exit") then
+			ui.hide(self.node)
+			msg.post("#menu", "show")
+			sound.play("main:/sound#click")
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		ui.show(self.node)
+		data.state = data.STATE_SHOP
+	end
+end

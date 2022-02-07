@@ -1,0 +1,38 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /render/custom.renderc
+
+[display]
+width = 1024
+height = 576
+vsync = 0
+update_frequency = 60
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[script]
+shared_state = 1
+
+[html5]
+splash_image = /assets/png/tick.gif
+cssfile = /custom.css
+scale_mode = fit
+show_console_banner = 0
+
+[project]
+title = Pathfinder
+version = v1.02g
+
+[physics]
+gravity_y = -400.0
+scale = 0.1
+debug = 0
+
+[yagames]
+sdk_init_options = { orientation: { value: "landscape", lock: true } }
+sdk_init_snippet = console.log("Yandex Games SDK is ready!");
+service_worker_url = sw.js
+manifest_url = yandex-manifest.json
+

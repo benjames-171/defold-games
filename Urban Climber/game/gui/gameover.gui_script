@@ -1,0 +1,56 @@
+local data = require "main.data"
+
+function init(self)
+	self.node = gui.get_node("container")
+	gui.set_enabled(self.node, false)
+	self.handpos = 1
+	self.arrowpos = {
+		gui.get_position(gui.get_node("1")),
+		gui.get_position(gui.get_node("2")),
+	}
+end
+
+function update(self, dt)
+	if data.state == data.STATE_GAMEOVER then
+		local pos = vmath.vector3(self.arrowpos[self.handpos].x - 48, self.arrowpos[self.handpos].y - 10, 0)
+		gui.set_position(gui.get_node("arrow"), pos)
+	end
+end
+
+local function close(self)
+	gui.set_enabled(self.node, false)
+	data.state = data.STATE_PLAYING
+	msg.post("main:/handler", "set_time_step", {factor = 1, mode = 0})
+end
+
+local function input(self, action_id, action)
+	if action_id == hash("up") and action.pressed then
+		self.handpos = self.handpos - 1
+		if self.handpos < 1 then self.handpos = 2 end
+		sound.play("main:/sound#pop")
+	elseif action_id == hash("down") and action.pressed then
+		self.handpos = self.handpos + 1
+		if self.handpos > 2 then self.handpos = 1 end
+		sound.play("main:/sound#pop")
+	elseif action_id == hash("action") and action.pressed then
+		if self.handpos == 1 then
+			close(self)
+			msg.post("player", "reset")
+			sound.play("main:/sound#music")
+		elseif self.handpos == 2 then
+			msg.post("main:/handler", "set_time_step", {factor = 1, mode = 0})
+			msg.post("player", "quit")
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		gui.set_enabled(self.node, true)
+		data.state = data.STATE_GAMEOVER
+		msg.post("main:/handler", "set_time_step", {factor = 0, mode = 0})
+		sound.stop("main:/sound#music")
+	elseif message_id == hash("input") then
+		input(self, message.action_id, message.action)
+	end
+end

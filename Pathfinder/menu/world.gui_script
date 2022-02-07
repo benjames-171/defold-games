@@ -1,0 +1,83 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+
+	data.setstring("select")
+	data.setstring("easy")
+	data.setstring("normal")
+	data.setstring("hard")
+
+	self.handpos = 1
+	self.arrowpos = {}
+
+	for n = 1, 3 do
+		local node = gui.get_node("button"..tostring(n))
+		self.arrowpos[n] = gui.get_position(node)
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_WORLD then
+		local pos = vmath.vector3(self.arrowpos[self.handpos].x, self.arrowpos[self.handpos].y, 0)
+		gui.set_position(gui.get_node("arrow"), pos)
+		if data.touch then
+			gui.set_enabled(gui.get_node("arrow"), false)
+		end
+	end
+end
+
+local function select(self)
+	ui.hide(self.node)
+	msg.post("#select", "show")
+	data.world = self.handpos
+end
+
+local function back(self)
+	ui.hide(self.node)
+	msg.post("#menu", "show", {})
+end
+
+local function input(self, action_id, action)
+	if action_id == hash("exit") and action.pressed then
+		back(self)
+	elseif (action_id == hash("action") or action_id == hash("start")) and action.pressed then
+		select(self)
+	elseif action_id == hash("up") and action.pressed then
+		self.handpos = self.handpos - 1
+		if self.handpos < 1 then self.handpos = 3 end
+	elseif action_id == hash("down") and action.pressed then
+		self.handpos = self.handpos + 1
+		if self.handpos > 3 then self.handpos = 1 end
+	elseif action_id == hash("tap") and action.pressed then
+		if gui.pick_node(gui.get_node("back"), action.x, action.y) then
+			back(self)
+		else
+			for n = 1, 3 do
+				local node = gui.get_node("bg"..tostring(n))
+				if gui.pick_node(node, action.x, action.y) then
+					select(self)
+				end
+			end
+		end
+	else
+		for n = 1, 3 do
+			local node = gui.get_node("bg"..tostring(n))
+			if gui.pick_node(node, action.x, action.y) then
+				self.handpos = n
+			end
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		self.handpos = 1
+		ui.show(self.node)
+		data.state = data.STATE_WORLD
+	elseif message_id == hash("input") then
+		input(self, message.action_id, message.action)
+	end
+end

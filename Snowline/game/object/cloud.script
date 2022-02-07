@@ -1,0 +1,44 @@
+local data = require "main.data"
+
+go.property("type", 1)
+
+local function resetcloud(self)
+	local pos = vmath.vector3(296, 0, 0)
+	if self.type == 1 then
+		pos.y = math.random(100, 130)
+		self.speed = math.random(25,50) / 10
+	elseif self.type == 2 then
+		pos.y = math.random(100, 130)
+		self.speed = math.random(50,75) / 10
+	else 
+		pos.y = math.random(110, 140)
+		self.speed = math.random(75,100) / 10
+	end
+	go.set_position(pos)
+end
+
+function init(self)
+	self.speed = 0
+	local l = {"s", "m", "l"}
+	local anim = l[self.type]..tostring(math.random(1,6))
+	sprite.play_flipbook("#sprite", anim)
+	resetcloud(self)
+	local pos = go.get_position()
+	pos.x = math.random(-40, 296)
+	go.set_position(pos)
+end
+
+local function move(self, dt)
+	local pos = go.get_position()
+	pos.x = pos.x - (self.speed * dt)
+	go.set_position(pos)
+	if pos.x < -40 then resetcloud(self)
+	end
+end
+
+function update(self, dt)
+	if data.state ~= data.STATE_PAUSE then
+		move(self, dt)
+	end
+end
+

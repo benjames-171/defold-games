@@ -1,0 +1,21 @@
+local data = require "main.data"
+
+go.property("move", vmath.vector3())
+
+local function killgo(self)
+	go.delete()
+end
+
+function init(self)
+	go.set_position(vmath.vector3(128, 72, 0))
+	local target = go.get_position()
+	
+	if self.move.x < 0 then
+		sprite.set_hflip("#sprite", true)
+		target.x = target.x - 136
+	else
+		target.x = target.x + 136
+	end
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, target, go.EASING_LINEAR, 0.25, 0, killgo)
+end
+

@@ -1,0 +1,42 @@
+local data = require "main.data"
+
+function init(self)
+	local anim = "pu"..tostring(data.pickup)
+	sprite.play_flipbook("#sprite", anim)
+
+	if data.level % 2 == 0 then self.move = vmath.vector3(-0.5, 0, 0)
+	else self.move = vmath.vector3(0, 0.25, 0)
+	end
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	pos = pos + self.move
+	go.set_position(pos)
+
+	if pos.y > 584 then go.delete()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		if data.pickup == 1 then
+			data.coolmult = 1
+		elseif data.pickup == 2 then
+			data.double = 1
+		elseif data.pickup == 3 then
+			msg.post("/player", "shield")
+		elseif data.pickup == 4 then
+			data.energy = data.energy + 50
+			if data.energy > 100 then data.energy = 100
+			end
+		else
+			data.score = data.score + 1000
+		end
+
+		data.pickup = data.pickup + 1
+		sound.play("main:/sound#pickup")
+		go.delete()
+	end
+end
+

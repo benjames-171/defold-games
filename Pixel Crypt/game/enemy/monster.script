@@ -1,0 +1,27 @@
+local data = require "main.data"
+
+function init(self)
+	msg.post("#sprite", "disable")
+end
+
+local function complete(self)
+	data.ending = "WATER"
+	data.deaths = data.deaths + 1
+	msg.post("view#complete", "show")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") and message.enter then
+		msg.post(data.player, "monster")
+		msg.post("#sprite", "enable")
+		sprite.play_flipbook("#sprite", "anim")
+		sound.stop("main:/sound")
+		sound.play("main:/sound#monster")
+		sound.play("main:/sound#water")
+		data.state = data.STATE_MONSTER
+	elseif message_id == hash("animation_done") then
+		msg.post("#sprite", "disable")		
+		go.animate(".", "scale.x", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_LINEAR, 3, 0, complete)
+	end
+end
+

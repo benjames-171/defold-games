@@ -1,0 +1,232 @@
+image: "/assets/png/32x16.png"
+tile_width: 32
+tile_height: 16
+tile_margin: 0
+tile_spacing: 0
+collision: "/assets/png/32x16.png"
+material_tag: "tile"
+convex_hulls {
+  index: 0
+  count: 11
+  collision_group: ""
+}
+convex_hulls {
+  index: 11
+  count: 12
+  collision_group: ""
+}
+convex_hulls {
+  index: 23
+  count: 12
+  collision_group: ""
+}
+convex_hulls {
+  index: 35
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 35
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 35
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 35
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 35
+  count: 10
+  collision_group: ""
+}
+convex_hulls {
+  index: 45
+  count: 12
+  collision_group: ""
+}
+convex_hulls {
+  index: 57
+  count: 12
+  collision_group: ""
+}
+convex_hulls {
+  index: 69
+  count: 12
+  collision_group: ""
+}
+convex_hulls {
+  index: 81
+  count: 12
+  collision_group: ""
+}
+convex_hulls {
+  index: 93
+  count: 10
+  collision_group: ""
+}
+convex_hulls {
+  index: 103
+  count: 10
+  collision_group: ""
+}
+convex_hulls {
+  index: 113
+  count: 11
+  collision_group: ""
+}
+convex_hulls {
+  index: 124
+  count: 14
+  collision_group: ""
+}
+convex_hulls {
+  index: 138
+  count: 14
+  collision_group: ""
+}
+convex_hulls {
+  index: 152
+  count: 12
+  collision_group: ""
+}
+convex_hulls {
+  index: 164
+  count: 12
+  collision_group: ""
+}
+convex_hulls {
+  index: 176
+  count: 4
+  collision_group: ""
+}
+convex_hulls {
+  index: 180
+  count: 12
+  collision_group: ""
+}
+animations {
+  id: "blade"
+  start_tile: 4
+  end_tile: 7
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemy1"
+  start_tile: 8
+  end_tile: 8
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemy2"
+  start_tile: 9
+  end_tile: 10
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 24
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemy3"
+  start_tile: 11
+  end_tile: 12
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemy4"
+  start_tile: 15
+  end_tile: 15
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemy5"
+  start_tile: 16
+  end_tile: 17
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 4
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemy6"
+  start_tile: 13
+  end_tile: 14
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 6
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemy7a"
+  start_tile: 18
+  end_tile: 18
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemy7b"
+  start_tile: 18
+  end_tile: 19
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 15
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "gamepad"
+  start_tile: 21
+  end_tile: 21
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "heli"
+  start_tile: 1
+  end_tile: 1
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "jeep"
+  start_tile: 2
+  end_tile: 3
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "silo"
+  start_tile: 20
+  end_tile: 20
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+extrude_borders: 2
+inner_padding: 0
+sprite_trim_mode: SPRITE_TRIM_MODE_OFF

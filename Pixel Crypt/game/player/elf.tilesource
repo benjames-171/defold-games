@@ -1,0 +1,91 @@
+image: "/assets/png/elf.png"
+tile_width: 8
+tile_height: 8
+tile_margin: 0
+tile_spacing: 0
+collision: ""
+material_tag: "tile"
+animations {
+  id: "dead"
+  start_tile: 25
+  end_tile: 36
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 15
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "static-down"
+  start_tile: 24
+  end_tile: 24
+  playback: PLAYBACK_NONE
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "static-left"
+  start_tile: 6
+  end_tile: 6
+  playback: PLAYBACK_NONE
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "static-right"
+  start_tile: 3
+  end_tile: 3
+  playback: PLAYBACK_NONE
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "static-up"
+  start_tile: 17
+  end_tile: 17
+  playback: PLAYBACK_NONE
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "walk-down"
+  start_tile: 9
+  end_tile: 12
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "walk-left"
+  start_tile: 5
+  end_tile: 8
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "walk-right"
+  start_tile: 1
+  end_tile: 4
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "walk-up"
+  start_tile: 13
+  end_tile: 16
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+extrude_borders: 2
+inner_padding: 0
+sprite_trim_mode: SPRITE_TRIM_MODE_OFF

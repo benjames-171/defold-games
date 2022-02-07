@@ -1,0 +1,19 @@
+local data = require "main.data"
+
+go.property("speed", 0.5)
+go.property("offset", 0)
+
+function init(self)
+	local pos = go.get_position()
+	pos.y = self.offset
+	go.set_position(pos)
+end
+
+function update(self, dt)
+	local pos = go.get_position()
+	pos.x = pos.x - self.speed
+	if pos.x < -256 then pos.x = pos.x + 256
+	end
+	go.set_position(pos)
+end
+

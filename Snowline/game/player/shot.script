@@ -1,0 +1,25 @@
+local data = require "main.data"
+
+go.property("move", vmath.vector3())
+
+local function move(self, dt)
+	local pos = go.get_position() + (self.move * dt)
+	go.set_position(pos)
+
+	if pos.y > 290 then
+		go.delete()
+	end
+end
+
+function update(self, dt)
+	if data.state ~= data.STATE_PAUSE then
+		move(self, dt)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		go.delete()
+	end
+end
+

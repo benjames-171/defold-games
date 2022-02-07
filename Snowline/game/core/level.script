@@ -1,0 +1,29 @@
+local data = require "main.data"
+
+local SNOWBALL_FREQ = 2
+local PROG_SPEED = 0.0001
+
+function init(self)
+	self.time = -2
+	self.sub = 0
+end
+
+function update(self, dt)
+	if data.state ~= data.STATE_PAUSE then
+		self.time = self.time + dt
+		if data.state == data.STATE_PLAYING then
+			self.sub = self.sub + PROG_SPEED
+			if self.sub > 1.5 then self.sub = 1.5
+			end
+		end
+		if self.time >= SNOWBALL_FREQ - self.sub then
+			self.time = 0
+			local pos = vmath.vector3(math.random(24, 232), 160, 1)
+			factory.create("#snowball-factory", pos, nil, {split = true})
+		end
+	end
+
+	if data.state == data.STATE_GAMEOVER then
+		self.sub = 0
+	end
+end

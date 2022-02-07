@@ -1,0 +1,13 @@
+local data = require "main.data"
+
+function update(self, dt)
+	local pos = go.get_position()
+	if data.onscreen(pos, 0) then
+		if pos.x > data.playerpos.x then
+			sprite.set_hflip("#sprite", true)
+		else
+			sprite.set_hflip("#sprite", false)
+		end
+	end
+end
+

@@ -1,0 +1,52 @@
+local data = require "main.data"
+
+function init(self)
+	local node = gui.get_node("caution")
+	gui.set_enabled(node, false)
+end
+
+function update(self, dt)
+	gui.set_text(gui.get_node("level"), string.format("LEVEL %d", data.level))
+	gui.set_text(gui.get_node("score"), string.format("SCORE %06d", data.score))
+	gui.set_scale(gui.get_node("energy"), vmath.vector3(1-(data.energy / 100), 1, 1))
+end
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+local function cautionout(self, node)
+	gui.animate(node, gui.PROP_POSITION, vmath.vector3(512, -100, 0), gui.EASING_INQUAD, 0.5, 2, disablenode)
+end	
+
+local function caution(self)
+	sound.play("main:/sound#caution")
+	
+	local node = gui.get_node("caution")
+	gui.set_enabled(node, true)
+	gui.set_position(node, vmath.vector3(512,680,0))
+	gui.animate(node, gui.PROP_POSITION, vmath.vector3(512, 288, 0), gui.EASING_OUTBOUNCE, 0.5, 0, cautionout)
+
+	node = gui.get_node("c1")
+	gui.set_position(node, vmath.vector3(-512,-66,0))
+	gui.animate(node, gui.PROP_POSITION, vmath.vector3(-768, -66, 0), gui.EASING_LINEAR, 3)
+
+	node = gui.get_node("c2")
+	gui.set_position(node, vmath.vector3(-768,66,0))
+	gui.animate(node, gui.PROP_POSITION, vmath.vector3(-512, 66, 0), gui.EASING_LINEAR, 3)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("caution") then
+		caution(self)
+	elseif message_id == hash("status") then
+		local node = gui.get_node("status")
+		gui.set_enabled(node, true)
+		gui.set_text(node, message.text)
+		local col = data.hex2rgba("#f4e27b")
+		col.w = 1
+		gui.set_color(node, col)
+		gui.animate(node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_LINEAR, 0.25, 2, disablenode)
+	end
+end
+

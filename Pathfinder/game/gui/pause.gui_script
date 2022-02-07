@@ -1,0 +1,93 @@
+local data = require "main.data"
+
+function init(self)
+	self.node = gui.get_node("container")
+	gui.set_enabled(self.node, false)
+	self.handpos = 1
+	self.arrowpos = {
+		gui.get_position(gui.get_node("1")),
+		gui.get_position(gui.get_node("2")),
+		gui.get_position(gui.get_node("3")),
+	}
+
+	data.setstring("paused")
+	data.setstring("continue")
+	data.setstring("restart")
+	data.setstring("quit")
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PAUSE then
+		local pos = vmath.vector3(self.arrowpos[self.handpos].x, self.arrowpos[self.handpos].y, 0)
+		gui.set_position(gui.get_node("arrow"), pos)
+		if data.touch then
+			gui.set_enabled(gui.get_node("arrow"), false)
+		end
+	end
+end
+
+local function close(self)
+	gui.set_enabled(self.node, false)
+	data.state = data.STATE_PLAYING
+	sound.set_group_gain("master", 1)
+	msg.post("main:/handler", "set_time_step", {factor = 1, mode = 0})
+end
+
+local function restart(self)
+	msg.post("/level", "reset")
+	close(self)
+end
+
+local function quit(self)
+	sound.set_group_gain("master", 1)
+	msg.post("main:/handler", "set_time_step", {factor = 1, mode = 0})
+	msg.post("/common/player", "quit")
+end
+
+local function input(self, action_id, action)
+	if action_id == hash("up") and action.pressed then
+		self.handpos = self.handpos - 1
+		if self.handpos < 1 then self.handpos = 3 end
+	elseif action_id == hash("down") and action.pressed then
+		self.handpos = self.handpos + 1
+		if self.handpos > 3 then self.handpos = 1 end
+	elseif action_id == hash("action") and action.pressed then
+		if self.handpos == 1 then
+			close(self)
+		elseif self.handpos == 2 then
+			restart(self)
+		elseif self.handpos == 3 then
+			quit(self)
+		end
+	elseif action_id == hash("tap") and action.pressed then
+		if gui.pick_node(gui.get_node("continue-bg"), action.x, action.y) then
+			close(self)
+		elseif gui.pick_node(gui.get_node("restart-bg"), action.x, action.y) then
+			restart(self)
+		elseif gui.pick_node(gui.get_node("quit-bg"), action.x, action.y) then
+			quit(self)
+		end
+	elseif (action_id == hash("exit") or action_id == hash("start")) and action.pressed then
+		close(self)
+	else
+		if gui.pick_node(gui.get_node("continue-bg"), action.x, action.y) then
+			self.handpos = 1
+		elseif gui.pick_node(gui.get_node("restart-bg"), action.x, action.y) then
+			self.handpos = 2
+		elseif gui.pick_node(gui.get_node("quit-bg"), action.x, action.y) then
+			self.handpos = 3
+		end
+	end
+end
+	
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		gui.set_enabled(self.node, true)
+		self.handpos = 1
+		data.state = data.STATE_PAUSE
+		msg.post("main:/handler", "set_time_step", {factor = 0, mode = 0})
+		sound.set_group_gain("master", 0)
+	elseif message_id == hash("input") then
+		input(self, message.action_id, message.action)
+	end
+end

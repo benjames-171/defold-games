@@ -1,0 +1,77 @@
+local data = require "main.data"
+
+go.property("move", vmath.vector3())
+
+function init(self)
+	if data.weap == "arrow" then
+		if self.move.x ~= 0 and self.move.y ~= 0 then
+			sprite.play_flipbook("#sprite", "arrow-d")
+		elseif self.move.x == 0 then
+			sprite.play_flipbook("#sprite", "arrow-v")
+		else
+			sprite.play_flipbook("#sprite", "arrow-h")
+		end
+	else
+		sprite.play_flipbook("#sprite", data.weap)
+	end
+
+	if self.move.x < 0 then sprite.set_hflip("#sprite", true)
+	else sprite.set_hflip("#sprite", false)
+	end
+
+	if self.move.y < 0 then sprite.set_vflip("#sprite", true)
+	else sprite.set_vflip("#sprite", false)
+	end
+end
+	
+
+local function move(self)
+	local pos = go.get_position()
+	pos.z = 1
+	go.set_position(pos + (self.move * data.shotspd))
+end
+
+local function explode(self)
+	self.move = vmath.vector3()
+	msg.post("#co", "disable")
+	sound.play("main:/sound#explode")
+	sprite.play_flipbook("#sprite", "explode")
+end
+
+local function pick(self)
+	local pos = data.world2tile(go.get_position())
+	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+
+	if t == 7 then
+		explode(self)
+		tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, math.random(20,23))
+	elseif t == 8 then
+		explode(self)
+		tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 18)
+	elseif t == 51 or t == 83 or t == 115 or t == 147 then
+		explode(self)
+		tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 0)
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		pick(self)
+		if data.onscreen(go.get_position(), 4) then move(self)
+		else go.delete()
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") and vmath.length(self.move) > 0 then
+		if message.other_group == hash("world") then
+			explode(self)
+		else
+			go.delete()
+		end
+	elseif message_id == hash("animation_done") then
+		go.delete()
+	end
+end
+

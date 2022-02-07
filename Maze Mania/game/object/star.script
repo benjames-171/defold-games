@@ -1,0 +1,35 @@
+data = require "main.data"
+
+local SPEED = 0.3
+
+local function move(self)
+	local pos = go.get_position() + (self.move * data.TILE_SIZE)
+	local p = data.world2tile(pos)
+	local t = tilemap.get_tile("/level#screen", "world", p.x, p.y)
+
+	if t >= 41 then
+		if self.move == vmath.vector3(1,0,0) then self.move = vmath.vector3(0,-1,0)
+		elseif self.move == vmath.vector3(0,-1,0) then self.move = vmath.vector3(-1,0,0)
+		elseif self.move == vmath.vector3(-1,0,0) then self.move = vmath.vector3(0,1,0)
+		else self.move = vmath.vector3(1,0,0)
+		end
+		pos = go.get_position() + (self.move * data.TILE_SIZE)
+	end
+
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, pos, go.EASING_LINEAR, SPEED, 0, move)
+end
+
+function init(self)
+	self.move = vmath.vector3(1,0,0)
+	self.rot = 0
+	move(self)
+end
+
+function update(self, dt)
+	self.rot = self.rot - (dt*4)
+	go.set_rotation(vmath.quat_rotation_z(self.rot))
+end
+
+function on_message(self, message_id, message, sender)
+end
+

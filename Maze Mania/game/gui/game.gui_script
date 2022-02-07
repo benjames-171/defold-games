@@ -1,0 +1,12 @@
+local data = require "main.data"
+
+function update(self, dt)
+	gui.set_text(gui.get_node("coins"), data.coins)
+	gui.set_text(gui.get_node("keys"), data.keys)
+	gui.set_text(gui.get_node("level"), data.level)
+	gui.set_text(gui.get_node("time"), math.floor(data.time))
+end
+
+function on_message(self, message_id, message, sender)
+end
+

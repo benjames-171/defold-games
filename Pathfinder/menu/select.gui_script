@@ -1,0 +1,131 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+
+	data.setstring("select")
+
+	self.handpos = 1
+	self.arrowpos = {}
+
+	for n = 1, 9 do
+		local node = gui.get_node("button"..tostring(n))
+		self.arrowpos[n] = gui.get_position(node)
+
+		if data.world == 2 then
+			node = gui.get_node("bg"..tostring(n))
+			gui.play_flipbook(node, "button-yellow")
+		elseif data.world == 2 then
+			node = gui.get_node("bg"..tostring(n))
+			gui.play_flipbook(node, "button-red")
+		end
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_SELECT then
+		local pos = vmath.vector3(self.arrowpos[self.handpos].x, self.arrowpos[self.handpos].y, 0)
+		gui.set_position(gui.get_node("arrow"), pos)
+		if data.touch then
+			gui.set_enabled(gui.get_node("arrow"), false)
+		end
+	end
+end
+
+local function show(self)
+	ui.show(self.node)
+	data.state = data.STATE_SELECT
+	self.handpos = 1
+	
+	for n = 1, 9 do
+		local node = gui.get_node("bg"..tostring(n))
+		if data.world == 1 then
+			gui.play_flipbook(node, "button-green")
+		elseif data.world == 2 then
+			gui.play_flipbook(node, "button-yellow")
+		else
+			gui.play_flipbook(node, "button-red")
+		end
+
+		local s = data.getstarrating(data.world, n)
+		local anim = "star"..tostring(s)
+		node = gui.get_node("star"..tostring(n))
+		gui.play_flipbook(node, anim)
+	end
+
+	for n = 1, data.savedata[data.world] do
+		local node = gui.get_node("button"..tostring(n))
+		gui.set_color(node, vmath.vector4(1,1,1,1))
+	end
+	
+	for n = data.savedata[data.world] + 1, 9 do
+		local node = gui.get_node("button"..tostring(n))
+		gui.set_color(node, vmath.vector4(1,1,1,0.5))
+	end
+end
+
+local function startgame(self)
+	sound.stop("main:/sound#music-menu")
+	data.playmusic("music-game")
+	msg.post("main:/handler", "show_game")
+	data.level = self.handpos
+	data.stars = 4
+	data.state = data.STATE_PLAYING
+end	
+
+local function trycell(self, n)
+	if n >= 1 and n <= data.savedata[data.world] then
+		self.handpos = n
+		return true
+	else
+		return false
+	end
+end
+
+local function input(self, action_id, action)
+	if action_id == hash("exit") and action.pressed then
+		ui.hide(self.node)
+		msg.post("#world", "show", {})
+	elseif (action_id == hash("action") or action_id == hash("start")) and action.pressed then
+		startgame(self)
+	elseif action_id == hash("left") and action.pressed then
+		trycell(self, self.handpos - 1)
+	elseif action_id == hash("right") and action.pressed then
+		trycell(self, self.handpos + 1)
+	elseif action_id == hash("up") and action.pressed then
+		trycell(self, self.handpos - 3)
+	elseif action_id == hash("down") and action.pressed then
+		trycell(self, self.handpos + 3)
+	elseif action_id == hash("tap") and action.pressed then
+		if gui.pick_node(gui.get_node("back"), action.x, action.y) then
+			ui.hide(self.node)
+			msg.post("#world", "show", {})
+		else
+			for n = 1, 9 do
+				local node = gui.get_node("bg"..tostring(n))
+				if gui.pick_node(node, action.x, action.y) then
+					if trycell(self, n) then
+						startgame(self)
+					end
+				end
+			end
+		end
+	else
+		for n = 1, 9 do
+			local node = gui.get_node("bg"..tostring(n))
+			if gui.pick_node(node, action.x, action.y) then
+				trycell(self, n)
+			end
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	elseif message_id == hash("input") then
+		input(self, message.action_id, message.action)
+	end
+end

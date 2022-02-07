@@ -1,0 +1,25 @@
+local SPEED = 2
+
+local function complete(self)
+	go.delete()
+end
+
+function init(self)
+	go.set_scale(vmath.vector3(0.2,0.2,1))
+	go.animate(".", "scale", go.PLAYBACK_ONCE_FORWARD, vmath.vector3(1,1,1), go.EASING_LINEAR, 0.2)
+	local pos = go.get_position()
+
+	pos.y = pos.y - 300
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, pos.y, go.EASING_INSINE, SPEED, 0, complete)
+
+	local anim = "item"..tostring(math.random(1,5))
+	sprite.play_flipbook("#sprite", anim)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		msg.post("effect", "smash", {pos = go.get_position()})
+		go.delete()
+	end
+end
+

@@ -1,0 +1,32 @@
+local data = require "main.data"
+
+function init(self)
+	self.node = gui.get_node("container")
+	gui.set_enabled(self.node, false)
+end
+
+local function close(self)
+	gui.set_enabled(self.node, false)
+	sound.pause("main:/sound", false)
+	data.state = data.STATE_PLAYING
+end
+
+local function input(self, action_id, action)
+	if action_id == hash("right") and action.pressed then
+		close(self)
+	elseif action_id == hash("left") and action.pressed then
+		msg.post("/player", "quit")
+	elseif action_id == hash("exit") and action.pressed then
+		close(self)
+	end
+end
+	
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		gui.set_enabled(self.node, true)
+		data.state = data.STATE_PAUSE
+		sound.pause("main:/sound", true)
+	elseif message_id == hash("input") then
+		input(self, message.action_id, message.action)
+	end
+end

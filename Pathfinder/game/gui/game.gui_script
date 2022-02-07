@@ -1,0 +1,36 @@
+local data = require "main.data"
+
+local function tutorial(self)
+	local node = gui.get_node("tutorial")
+	local cont = gui.get_node("container")
+	gui.set_enabled(cont, true)
+	gui.set_color(cont, vmath.vector4(1,1,1,1))
+	gui.animate(cont, "color.w", 0, gui.EASING_LINEAR, 0.3, 2)
+	
+	if data.world == 1 then
+		if data.level == 1 then
+			data.setnodestring(node, "fireball")
+		elseif data.level == 2 then
+			data.setnodestring(node, "crate")
+		elseif data.level == 3 then
+			data.setnodestring(node, "reflector")
+		else
+			gui.set_enabled(cont, false)
+		end
+	elseif data.world == 2 then
+		if data.level == 1 then
+			data.setnodestring(node, "teleporter")
+		else
+			gui.set_enabled(cont, false)
+		end
+	else
+		gui.set_enabled(cont, false)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("newlevel") then
+		tutorial(self)
+	end
+end
+

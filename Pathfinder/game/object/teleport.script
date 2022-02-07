@@ -1,0 +1,20 @@
+function init(self)
+	self.other_id = nil
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("start") then
+		if self.other_id ~= nil then
+			msg.post(self.other_id, "teleport", {dest = message.dest})
+		end
+		particlefx.play("#pfx")
+		data.playsound("teleport")
+	elseif message_id == hash("trigger_response") then
+		if message.enter then
+			self.other_id = message.other_id
+		else
+			self.other_id = nil
+		end
+	end
+end
+

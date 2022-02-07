@@ -1,0 +1,172 @@
+data = require "main.data"
+
+local SPEED = 120
+local SHOT_FREQ = 0.2
+local SHOT_SPEED = 240
+local POWERUP_TIME = 15
+local INVUL = 50
+local INPUT_LOCK = 70
+
+function init(self)
+	self.move = vmath.vector3()
+	self.correction = vmath.vector3()
+	self.invul = INVUL
+	self.lock = 20
+	self.anim = ""
+	self.time = 0
+	self.multi = 0
+	self.fastfire = 0
+	msg.post(".", "acquire_input_focus")
+	sound.play("main:/sound#music-game")
+end
+
+local function quit2menu(self)
+	sound.stop("main:/sound")
+	msg.post("main:/handler", "show_menu")
+end
+
+local function anim(self)
+	local anim = "player"
+
+	if self.move.x ~= 0 then
+		anim = "move"
+	end
+
+	if anim ~= self.anim then
+		sprite.play_flipbook("#sprite", anim)
+		self.anim = anim
+	end
+end
+
+local function move(self, dt)
+	local pos = go.get_position() + (self.move * dt)
+	if pos.x < 56 then pos.x = 56
+	elseif pos.x > 200 then pos.x = 200
+	end
+	go.set_position(pos)
+	self.move = vmath.vector3()
+end
+
+local function flash(self)
+	if self.invul > 0 then
+		self.invul = self.invul - 1
+		if self.invul % 10 < 6 then
+			msg.post("#sprite", "enable")
+		else
+			msg.post("#sprite", "disable")
+		end
+	end
+end
+
+local function shoot(self, dt)
+	self.time = self.time + dt
+	if self.multi > 0 then self.multi = self.multi - dt end
+	if self.fastfire > 0 then self.fastfire = self.fastfire - dt end
+	if self.time > SHOT_FREQ then
+		self.time = 0
+		if self.fastfire > 0 then
+			self.time = SHOT_FREQ / 3
+		end
+		local pos = go.get_position() + vmath.vector3(0, 9, 0)
+		factory.create("#shot-factory", pos, nil, {move = vmath.vector3(0, SHOT_SPEED, 0)})
+		if self.multi > 0 then
+			factory.create("#shot-factory", pos, nil, {move = vmath.vector3(-SHOT_SPEED/3, SHOT_SPEED, 0)})
+			factory.create("#shot-factory", pos, nil, {move = vmath.vector3(SHOT_SPEED/3, SHOT_SPEED, 0)})
+		end
+		sound.play("main:/sound#shot")
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		anim(self)
+		flash(self)
+		shoot(self, dt)
+		move(self, dt)
+
+		if data.hp <= 0 then
+			self.lock = INPUT_LOCK
+			if data.score > data.hiscore then
+				data.hiscore = data.score
+			end
+			msg.post("/view#gameover", "show")
+			msg.post("/fireball", "gameover")
+			go.set_position(vmath.vector3(-100,0,0))
+		end
+	end
+
+	if self.lock > 0 then self.lock = self.lock - 1 end
+	self.correction = vmath.vector3()
+end
+
+local function collision(self, message)
+	if message.distance > 0 then
+		local proj = vmath.project(self.correction, message.normal * message.distance)
+		if proj < 1 then
+			local comp = (message.distance - message.distance * proj) * message.normal
+			comp.y = 0
+			go.set_position(go.get_position() + comp)
+			self.correction = self.correction + comp
+		end
+	end
+end
+
+local function token(self, type)
+	if type == 1 then
+		data.hp = data.hp + 1
+		if data.hp > 5 then data.hp = 5
+		end
+	elseif type == 2 then
+		self.multi = POWERUP_TIME
+	elseif type == 3 then
+		factory.create("#power-factory", nil, nil, {move = vmath.vector3(-1,0,0)}, vmath.vector3(1,9,1))
+		factory.create("#power-factory", nil, nil, {move = vmath.vector3(1,0,0)}, vmath.vector3(1,9,1))
+		sound.play("main:/sound#power")
+	elseif type == 4 then
+		data.score = data.score + 500
+	elseif type == 5 then
+		self.fastfire = POWERUP_TIME
+	end
+
+	sound.play("main:/sound#pickup")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		collision(self, message)
+	elseif message_id == hash("token") then
+		token(self, message.type)
+	elseif message_id == hash("quit") then
+		quit2menu(self)
+	end
+end
+
+local function input_playing(self, action_id, action)
+	if action_id == hash("left") then
+		self.move.x = -SPEED
+	elseif action_id == hash("right") then
+		self.move.x = SPEED
+	elseif action_id == hash("exit") and action.pressed then
+		msg.post("view#pause", "show")
+	elseif action_id == hash("debug") and action.pressed and not html5 then
+		data.hp = 0
+	end
+end
+
+local function input_gameover(self, action_id, action)
+	if (action_id == hash("left") or action_id == hash("exit"))  and action.pressed then
+		quit2menu(self)
+	end
+end
+
+function on_input(self, action_id, action)
+	if self.lock > 0 then return
+	end	
+	if data.state == data.STATE_PLAYING then
+		input_playing(self, action_id, action)
+	elseif data.state == data.STATE_PAUSE then
+		msg.post("view#pause", "input", {action_id = action_id, action = action})
+	elseif data.state == data.STATE_GAMEOVER then
+		input_gameover(self, action_id, action)
+	end
+end

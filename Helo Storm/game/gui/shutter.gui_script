@@ -1,0 +1,40 @@
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+	data.state = data.STATE_PLAYING
+end
+
+local function slideout(self)
+	gui.animate(gui.get_node("top"), gui.PROP_POSITION, vmath.vector3(512, 576, 0), gui.EASING_INOUTQUAD, 0.5, 0.5, disablenode)
+	gui.animate(gui.get_node("bottom"), gui.PROP_POSITION, vmath.vector3(512, 0, 0), gui.EASING_INOUTQUAD, 0.5, 0.5, disablenode)
+end
+
+local function complete(self)
+	data.level = data.level + 1
+	if data.level > 4 then
+		data.level = 1
+		data.complete = data.complete + 1
+	end
+	msg.post("/level", "reset")
+	data.state = data.STATE_CLEAR
+	slideout(self)
+end
+
+local function slidein(self)
+	local node = gui.get_node("top")
+	gui.set_enabled(node, true)
+	gui.animate(node, gui.PROP_POSITION, vmath.vector3(512, 286, 0), gui.EASING_INOUTQUAD, 0.5, 2)
+
+	local node = gui.get_node("bottom")
+	gui.set_enabled(node, true)
+	gui.animate(node, gui.PROP_POSITION, vmath.vector3(512, 290, 0), gui.EASING_INOUTQUAD, 0.5, 2, complete)
+end
+
+function init(self)
+	slideout(self)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("endlevel") then
+		slidein(self)
+	end
+end
