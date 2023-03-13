@@ -1,0 +1,38 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		ui.show(self.node)
+		data.state = data.STATE_COMPLETE
+		local text = string.format("%d\n%d/%d\n%s\n%s\n%d/3\n%d/3", data.kills, data.eggs, data.eggstot, data.deaths, data.ms2str(data.time), data.secrets, data.discs)
+		gui.set_text(gui.get_node("right"), text)
+
+		if data.eggs >= 400 then
+			text = 'RANK: A'
+		elseif data.eggs >= 300 then
+			text = 'RANK: B'
+		else
+			text = 'RANK: C'
+		end
+
+		if data.deaths == 0 then
+			text = text..'+'
+		end
+
+		if data.secrets >= 3 then
+			text = text..'+'
+		end
+		gui.set_text(gui.get_node("rank"), text)
+
+		if data.discs >= 3 then
+			data.save.cheat = true
+			data.savegamefile()
+		end
+	end
+end

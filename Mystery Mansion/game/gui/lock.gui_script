@@ -1,0 +1,89 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.code = {4792, 5396, 7082, 1403}
+	self.curr = {0,0,0,0}
+	self.cursor = 1
+	self.num = 1
+	self.pos = vmath.vector3()
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+local function show(self, message)
+	ui.show(self.node)
+	data.state = data.STATE_LOCK
+	self.num = message.num
+	self.pos = message.pos
+	self.curr = {0,0,0,0}
+	self.cursor = 1
+end
+
+local function close(self)
+	ui.hide(self.node)
+	data.state = data.STATE_PLAYING
+end
+
+local function checkcombo(self)
+	local sum =	self.curr[1] * 1000 +
+		self.curr[2] * 100 +
+		self.curr[3] * 10 +
+		self.curr[4]
+
+	if sum == self.code[self.num] then
+		msg.post("player", "openbox", {pos = self.pos})
+		sound.play("main:/sound#chime")
+		close(self)
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_LOCK then
+		local pos = vmath.vector3(-54,-34,0)
+		pos.x = pos.x + (self.cursor - 1) * 36
+		gui.set_position(gui.get_node("cursor"), pos)
+		for n = 1, 4 do
+			gui.play_flipbook(gui.get_node(tostring(n)), tostring(self.curr[n]))
+		end
+		checkcombo(self)
+	end
+end
+
+local function changecode(self, diff)
+	self.curr[self.cursor] = self.curr[self.cursor] + diff
+	if self.curr[self.cursor] < 0 then
+		self.curr[self.cursor] = 9
+	elseif self.curr[self.cursor] > 9 then
+		self.curr[self.cursor] = 0
+	end
+	sound.play("main:/sound#click")
+end
+
+local function input(self, action_id, action)
+	if action_id == hash("left") and action.pressed then
+		self.cursor = self.cursor - 1
+		if self.cursor < 1 then
+			self.cursor = 4
+		end
+	elseif action_id == hash("right") and action.pressed then
+		self.cursor = self.cursor + 1
+		if self.cursor > 4 then
+			self.cursor = 1
+		end
+	elseif action_id == hash("down") and action.pressed then
+		changecode(self, -1)
+	elseif (action_id == hash("action") or action_id == hash("up")) and action.pressed then
+		changecode(self, 1)
+	elseif action_id == hash("exit") and action.pressed then
+		close(self)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self, message)
+	elseif message_id == hash("input") then
+		input(self, message.action_id, message.action)
+	end
+end

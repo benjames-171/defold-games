@@ -1,0 +1,24 @@
+local data = require "main.data"
+
+go.property("pos", vmath.vector3())
+
+function init(self)
+	self.target = vmath.vector3()
+	msg.post("#camera", "acquire_camera_focus")
+end
+
+function update(self, dt)
+	local w = data.CANV_W - 8
+	local h = data.CANV_H - 16
+	local x = math.floor((data.playerpos.x - 4) / w) * w
+	local y = math.floor((data.playerpos.y - 4) / h) * h
+	local pos = vmath.vector3(x, y, 0)
+
+	if pos ~= self.target then
+		self.target = pos
+		go.animate("#", "pos", go.PLAYBACK_ONCE_FORWARD, self.target, go.EASING_LINEAR, 0.2)
+	end
+	
+	go.set_position(self.pos)
+	data.scrollpos = self.pos
+end

@@ -1,0 +1,63 @@
+local data = require "main.data"
+
+function init(self)
+	self.scanner = {}
+	self.nodeid = 1
+end
+
+function update(self, dt)
+	local text = string.format("P1  %06d", data.score)
+	gui.set_text(gui.get_node("score"), text)
+	text = string.format("HI  %06d", data.save.hiscore)
+	gui.set_text(gui.get_node("hiscore"), text)
+	text = string.format("%d", data.level)
+	gui.set_text(gui.get_node("level"), text)
+
+	for n = 1, 4 do
+		local node = gui.get_node(string.format("l%d", n))
+		gui.set_enabled(node, data.lives >= n)
+	end
+
+	for n = 1, 8 do
+		local node = gui.get_node(string.format("s%d", n))
+		gui.set_enabled(node, data.bombs >= n)
+	end
+end
+
+local function world2scanner(pos)
+	pos.x = (pos.x - data.scroll.x + (data.CANV_W * 3.5)) / 2
+	pos.y = 502 + (pos.y * 0.75) 
+
+	return pos
+end
+
+local function resetscanner(self, message)
+	for k, v in pairs(self.scanner) do
+		gui.delete_node(gui.get_node(v))
+	end
+	self.scanner = {}
+	self.nodeid = 1
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("addpoint") then
+		local node = gui.clone(gui.get_node("point"))
+		local id = tostring(self.nodeid)
+		gui.set_id(node, id)
+		msg.post(sender, "scan", {nodeid = id})
+		gui.play_flipbook(gui.get_node(tostring(self.nodeid)), message.anim)
+		table.insert(self.scanner, tostring(self.nodeid))
+		self.nodeid = self.nodeid + 1
+	elseif message_id == hash("setpoint") then
+		gui.set_position(gui.get_node(message.nodeid), world2scanner(message.pos))
+	elseif message_id == hash("removepoint") then
+		for k, v in pairs(self.scanner) do
+			if v == message.nodeid then
+				table.remove(self.scanner, k)
+			end
+		end
+		gui.delete_node(gui.get_node(message.nodeid))
+	elseif message_id == hash("resetscanner") then
+		resetscanner(self, message)
+	end
+end

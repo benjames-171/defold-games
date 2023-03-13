@@ -1,0 +1,54 @@
+local data = require "main.data"
+local obj = require "game.object.obj"
+
+go.property("free", false)
+
+function init(self)
+	self.origin = go.get_position()
+	self.pos = go.get_position()
+	self.speed = math.random(15,25)
+	if not self.free then
+		msg.post("#co", "disable")
+	end
+end
+
+local function move(self, dt)
+	if self.free then
+		if self.pos.x > data.playerpos.x then
+			self.pos.x = self.pos.x - self.speed * dt
+		else
+			self.pos.x = self.pos.x + self.speed * dt
+		end
+
+		if self.pos.y > data.playerpos.y then
+			self.pos.y = self.pos.y - 3 * dt
+		else
+			self.pos.y = self.pos.y + 3 * dt
+		end
+		
+		local w = vmath.vector3()
+		go.set_position(self.pos + vmath.vector3(math.random(-1,1), math.random(-1,1), 0))
+	else
+		go.set_position(self.origin + vmath.vector3(math.random(-1,1), math.random(-1,1), 0))
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		move(self, dt)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("free") then
+		self.free = true
+		self.pos.x = self.pos.x + math.random(-16,16)
+		self.pos.y = self.pos.y - 4
+		msg.post("#co", "enable")
+	elseif message_id == hash("collision_response") then
+		data.score = data.score + 50
+		msg.post("common/effect", "exp-tiny", {pos = go.get_position()})
+		obj.remove(go.get_id())
+	end
+end
+

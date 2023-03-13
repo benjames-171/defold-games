@@ -1,0 +1,41 @@
+local obj = require "game.object.obj"
+
+go.property("move", 1)
+
+local function complete(self)
+	particlefx.stop("#pfx")
+	obj.remove(go.get_id())
+end
+
+local function drop(self)
+	local pos = go.get_position()
+	local y = pos.y - 20
+
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, y, go.EASING_OUTSINE, 1)
+end
+
+function init(self)
+	local pos = go.get_position()
+	local x = pos.x + 256 * self.move
+	local y = pos.y + 16
+	
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, x, go.EASING_INSINE, 2, 0, complete)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, y, go.EASING_OUTSINE, 0.5, 0, drop)
+
+	particlefx.play("#pfx")
+
+	if self.move < 0 then
+		sprite.set_hflip("#sprite", true)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		complete(self)
+
+		if message.other_group == hash("solid") or message.other_group == hash("enemy") then
+			msg.post(message.other_id, "hit", {power = 100})
+		end
+	end
+end
+

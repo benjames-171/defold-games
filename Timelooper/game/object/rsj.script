@@ -1,0 +1,30 @@
+go.property("horz", false)
+
+function init(self)
+	self.pos = go.get_position()
+	self.move = vmath.vector3()
+	local pos = go.get_position()
+	local delay = math.random(0,20) / 10
+	if self.horz then
+		go.animate(".", "position.x", go.PLAYBACK_LOOP_PINGPONG, pos.x + 24, go.EASING_INOUTSINE, 2, delay)
+	else
+		go.animate(".", "position.y", go.PLAYBACK_LOOP_PINGPONG, pos.y + 24, go.EASING_INOUTSINE, 2, delay)
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		self.move = go.get_position() - self.pos
+		self.pos = go.get_position()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.other_group == hash("player") then
+			if message.normal.y < 0 then
+				msg.post("/common/player", "move", {move = self.move})
+			end
+		end
+	end
+end

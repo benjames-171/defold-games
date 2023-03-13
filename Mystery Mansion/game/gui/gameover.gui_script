@@ -1,0 +1,66 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+	self.handpos = 1
+	self.arrowpos = {
+		gui.get_position(gui.get_node("1")),
+		gui.get_position(gui.get_node("2")),
+	}
+end
+
+function update(self, dt)
+	if data.state == data.STATE_GAMEOVER then
+		local pos = vmath.vector3(self.arrowpos[self.handpos].x - 48, self.arrowpos[self.handpos].y + 4, 0)
+		gui.set_position(gui.get_node("arrow"), pos)
+	end
+end
+
+local function input(self, action_id, action)
+	if action_id == hash("up") and action.pressed then
+		self.handpos = self.handpos - 1
+		if self.handpos < 1 then self.handpos = 2 end
+	elseif action_id == hash("down") and action.pressed then
+		self.handpos = self.handpos + 1
+		if self.handpos > 2 then self.handpos = 1 end
+	elseif action_id == hash("action") and action.pressed then
+		if self.handpos == 1 then
+			msg.post("player", "continue")
+			msg.post("monster", "reset")
+			ui.hide(self.node)
+		elseif self.handpos == 2 then
+			msg.post("main:/handler", "set_time_step", {factor = 1, mode = 0})
+			msg.post("player", "quit")
+		end
+	end
+end
+
+local function show(self)
+	ui.show(self.node)
+	data.state = data.STATE_GAMEOVER
+
+	gui.set_alpha(gui.get_node("scared"), 0)
+	gui.set_alpha(gui.get_node("todeath"), 0)
+	gui.set_alpha(gui.get_node("title"), 0)
+	gui.set_alpha(gui.get_node("1"), 0)
+	gui.set_alpha(gui.get_node("2"), 0)
+	gui.set_alpha(gui.get_node("arrow"), 0)
+
+	gui.animate(gui.get_node("scared"), "color.w", 1, gui.EASING_LINEAR, 1, 1)
+	gui.animate(gui.get_node("todeath"), "color.w", 1, gui.EASING_LINEAR, 1, 2.5)
+	gui.animate(gui.get_node("title"), "color.w", 1, gui.EASING_LINEAR, 1, 4)
+	gui.animate(gui.get_node("1"), "color.w", 1, gui.EASING_LINEAR, 1, 4.2)
+	gui.animate(gui.get_node("2"), "color.w", 1, gui.EASING_LINEAR, 1, 4.2)
+	gui.animate(gui.get_node("arrow"), "color.w", 1, gui.EASING_LINEAR, 1, 4.2)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	elseif message_id == hash("input") then
+		input(self, message.action_id, message.action)
+	end
+end
+

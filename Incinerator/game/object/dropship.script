@@ -1,0 +1,34 @@
+go.property("alpha", 0)
+
+function init(self)
+	msg.post("#sprite", "disable")
+end
+
+local function smoke(self)
+	local pos = vmath.vector3(math.random(232,280), math.random(448,468), 0)
+	factory.create("#smoke-factory", pos, nil, {alpha = self.alpha})
+end
+
+local function complete(self)
+	timer.cancel(self.timer)
+	msg.post("view#complete", "show")
+end
+
+local function takeoff(self)
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, vmath.vector3(300,600,0), go.EASING_INOUTSINE, 5, 1, complete)
+end
+
+local function start(self)
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, vmath.vector3(256,470,0), go.EASING_INOUTSINE, 2, 0, takeoff)
+	go.animate("#", "alpha", go.PLAYBACK_ONCE_PINGPONG, 1, go.EASING_LINEAR, 5)
+	self.timer = timer.delay(0.025, true, smoke)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("start") then
+		sound.play("main:/sound#dropship")
+		msg.post("#sprite", "enable")
+		start(self)
+	end
+end
+

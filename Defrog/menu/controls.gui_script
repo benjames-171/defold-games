@@ -1,0 +1,23 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+local function input(self, action_id, action)
+	if (action_id == hash("action") or action_id == hash("exit")) and action.pressed then
+		ui.hide(self.node)
+		msg.post("#menu", "show", {})
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		ui.show(self.node)
+		data.state = data.STATE_CONTROLS
+	elseif message_id == hash("input") then
+		input(self, message.action_id, message.action)
+	end
+end

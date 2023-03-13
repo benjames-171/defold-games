@@ -1,7 +1,0 @@
-local data = require "main.data"
-
-function init(self)
-	self.loaded = 0
-	self.reload = false
-	msg.post(".", "acquire_input_focus")
-end

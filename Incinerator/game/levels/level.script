@@ -1,0 +1,103 @@
+local data = require "main.data"
+
+local function tile(self, x, y, offset)
+	local p = {
+		0,0,0,0,77,
+		0,0,0,1,55,
+		0,0,1,0,79,
+		0,0,1,1,53,
+		0,1,0,0,54,
+		0,1,0,1,102,
+		0,1,1,0,51,
+		0,1,1,1,52,
+		1,0,0,0,104,
+		1,0,0,1,103,
+		1,0,1,0,105,
+		1,0,1,1,78,
+		1,1,0,0,101,
+		1,1,0,1,102,
+		1,1,1,0,76,
+		1,1,1,1,77
+	}
+
+	local n = tilemap.get_tile("#tilemap", "world", x, y+1)
+	local e = tilemap.get_tile("#tilemap", "world", x+1, y)
+	local s = tilemap.get_tile("#tilemap", "world", x, y-1)
+	local w = tilemap.get_tile("#tilemap", "world", x-1, y)
+
+	if n >= 26 and n <= 125 then n = 1 else n = 0 end
+	if e >= 26 and e <= 125 then e = 1 else e = 0 end
+	if s >= 26 and s <= 125 then s = 1 else s = 0 end
+	if w >= 26 and w <= 125 then w = 1 else w = 0 end
+
+	local c = 1
+	while p[c] ~= n or p[c+1] ~= e or p[c+2] ~= s or p[c+3] ~= w do
+		c = c + 5
+	end
+
+	local tile = p[c+4]
+	tilemap.set_tile("#tilemap", "world", x, y, tile + offset)
+end
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	for y = sy+1, h+sy-2 do
+		for x = sx+1, w+sx-2 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			local f = tilemap.get_tile("#tilemap", "floor", x, y)
+			local pos = data.tile2world(vmath.vector3(x, y, 0.5))
+
+			if f == 226 then
+				local tile = 0
+				if math.random(1, 4) == 1 then
+					tile = math.random(226, 233)
+				end
+				tilemap.set_tile("#tilemap", "floor", x, y, tile)
+			end
+
+			if t == 1 then
+				pos.z = 0.9
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				msg.post("/player", "position", {pos = pos})
+			elseif t == 3 then
+				data.eggstot = data.eggstot + 1
+			elseif t == 9 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#laser-factory", pos)
+			elseif t == 10 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#laser-factory", pos, nil, {rot = 90})
+			elseif t == 26 then
+				tile(self, x, y, 0)
+			elseif t == 27 then
+				tile(self, x, y, 5)
+			elseif t == 28 then
+				tile(self, x, y, 10)
+			elseif t == 98 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#fan-factory", pos)
+			elseif t == 125 then
+				factory.create("#anim-factory", pos, nil, {anim = 1})
+			elseif t == 209 then
+				tilemap.set_tile("#tilemap", "world", x, y, 134)
+				factory.create("#edoor-factory", pos)
+			elseif t == 214 then
+				tilemap.set_tile("#tilemap", "world", x, y, 134)
+				factory.create("#edoor-factory", pos, nil, {lock = 1})
+			elseif t == 219 then
+				tilemap.set_tile("#tilemap", "world", x, y, 134)
+				factory.create("#edoor-factory", pos, nil, {lock = 2})
+			elseif t == 239 then
+				tilemap.set_tile("#tilemap", "world", x, y, 134)
+				factory.create("#edoor-factory", pos, nil, {lock = 3})
+			elseif t == 234 then
+				factory.create("#spawner-factory", pos + vmath.vector3(4,-4,0))
+			end
+		end
+	end
+end
+
+function init(self)
+	parse(self)
+end

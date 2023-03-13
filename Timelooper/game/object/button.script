@@ -1,0 +1,27 @@
+local data = require "main.data"
+
+go.property("id", 0)
+
+function init(self)
+	local anim = "b"..tostring(self.id)
+	sprite.play_flipbook("#sprite", anim)
+end
+
+function update(self, dt)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		if message.enter then
+			data.trig[self.id] = data.trig[self.id] + 1
+			if data.trig[self.id] == 1 then
+				sound.play("main:/sound#switch")
+			end
+		else
+			data.trig[self.id] = data.trig[self.id] - 1
+			if data.trig[self.id] == 0 then
+				sound.play("main:/sound#switch")
+			end
+		end
+	end
+end

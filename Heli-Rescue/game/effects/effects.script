@@ -1,7 +1,0 @@
-function on_message(self, message_id, message, sender)
-	if message_id == hash("explosion") then
-		factory.create("#explosion", message.pos, nil, {f = message.f})
-	elseif message_id == hash("smoke") then
-		factory.create("#smoke", message.pos, nil, {})
-	end
-end

@@ -1,0 +1,9 @@
+local data = require "main.data"
+
+function update(self, dt)
+	local pos = data.scrollpos / 1.5
+	pos.x = pos.x % 256
+	pos.y = pos.y % 144
+	pos.z = 0.9
+	go.set_position(data.scrollpos - pos)
+end

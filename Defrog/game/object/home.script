@@ -1,0 +1,18 @@
+local data = require "main.data"
+
+go.property("num", 0)
+
+function init(self)
+	msg.post("#sprite", "disable")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		msg.post("#sprite", "enable")
+		sprite.play_flipbook("#sprite", "frog")
+		msg.post("#co", "disable")
+		msg.post("player", "home")
+		data.home[self.num] = true
+	end
+end
+

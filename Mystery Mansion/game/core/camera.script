@@ -1,0 +1,22 @@
+local data = require "main.data"
+
+function init(self)
+	msg.post("#camera", "acquire_camera_focus")
+end
+
+function update(self, dt)
+	local x = math.floor((data.playerpos.x - 8) / data.CANV_W) * data.CANV_W
+	local y = math.floor((data.playerpos.y - 8) / data.CANV_H) * data.CANV_H
+
+	local pos = vmath.vector3(x, y, 0)
+	data.scrollpos = pos
+	pos = pos - vmath.vector3(40, 3, 0)
+
+	if data.state == data.STATE_PLAYING then
+		local shake = math.random(-data.hp * 4, data.hp * 4)
+		pos.y = pos.y + shake
+	end
+	
+	go.set_position(pos)
+end
+

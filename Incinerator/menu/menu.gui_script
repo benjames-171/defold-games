@@ -1,0 +1,113 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.handpos = 1
+	self.arrowpos = {
+		gui.get_position(gui.get_node("1")),
+		gui.get_position(gui.get_node("2")),
+		gui.get_position(gui.get_node("3")),
+	}
+	msg.post(".", "acquire_input_focus")
+	self.node = gui.get_node("container")
+	gui.set_position(self.node, vmath.vector3(data.SCR_W/2, (data.SCR_H/2), 0))
+	sound.play("main:/sound#music-menu", {gain = 0.5})
+
+	for n = 1, 4 do
+		if data.save.ee[n] then
+			local node = gui.get_node("slot"..tostring(n))
+			local anim = "ee"..tostring(n)
+			gui.play_flipbook(node, anim)
+		end
+	end
+	
+	data.state = data.STATE_MENU
+end
+
+local function startgame(self)
+	sound.stop("main:/sound#music-menu")
+	msg.post("main:/handler", "show_game")
+	data.fuel = 1
+	data.kills = 0
+	data.eggs = 0
+	data.eggstot = 0
+	data.deaths = 0
+	data.time = 0
+	data.fire = 0
+	data.secrets = 0
+	data.discs = 0
+	data.key = {false, false, false}
+	data.state = data.STATE_PLAYING
+end	
+
+local function show(self)
+	ui.show(self.node)
+	data.state = data.STATE_MENU
+end
+
+function update(self, dt)
+	if data.state == data.STATE_MENU then
+		local pos = vmath.vector3(self.arrowpos[self.handpos].x - 4, self.arrowpos[self.handpos].y + 2, 0)
+		gui.set_position(gui.get_node("arrow"), pos)
+
+		for n = 1, 3 do
+			local col = 0
+			if n == self.handpos then
+				col = data.hex2rgba("#f3c41c")
+			else
+				col = data.hex2rgba("#d42c4f")
+			end
+			gui.set_color(gui.get_node(tostring(n)), col)
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	end
+end
+
+local function input(self, action_id, action)
+	if action_id == hash("up") and action.pressed then
+		self.handpos = self.handpos - 1
+		if self.handpos < 1 then
+			self.handpos = 3
+		end
+		sound.play("main:/sound#blip")
+	elseif action_id == hash("down") and action.pressed then
+		self.handpos = self.handpos + 1
+		if self.handpos > 3 then
+			self.handpos = 1
+		end
+		sound.play("main:/sound#blip")
+	elseif action_id == hash("action") and action.pressed then
+		ui.hide(self.node)
+		if self.handpos == 1 then
+			startgame(self)
+		elseif self.handpos == 2 then
+			msg.post("#controls", "show", {})
+		elseif self.handpos == 3 then
+			msg.post("#credits", "show", {})
+		end
+		sound.play("main:/sound#pickup3")
+	elseif action_id == hash("start") and action.pressed then
+		startgame(self)
+	elseif action_id == hash("exit") and action.pressed and not html5 then
+		msg.post("@system:", "exit", {code = 0})
+	end
+end
+
+function on_input(self, action_id, action)
+	if action.value < 0.2 then return
+	end
+
+	if data.state == data.STATE_MENU then
+		input(self, action_id, action)
+	elseif data.state == data.STATE_CONTROLS then
+		msg.post("#controls", "input", {action_id = action_id, action = action})
+	elseif data.state == data.STATE_CREDITS then
+		msg.post("#credits", "input", {action_id = action_id, action = action})
+	end
+end
+

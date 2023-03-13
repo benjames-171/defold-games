@@ -1,0 +1,47 @@
+local item = require "game.core.item"
+
+go.property("lock", 0)
+go.property("num", 1)
+
+function init(self)
+	self.anim = "door"..tostring(self.num)
+	sprite.play_flipbook("#sprite", self.anim)
+end
+
+local function trigger(self, open)
+	local anim = self.anim
+	if open then
+		msg.post("#co", "disable")
+		sound.play("main:/sound#door-open")
+		anim = "door-open"
+	else
+		msg.post("#co", "enable")
+		sound.play("main:/sound#door-close")
+	end
+	sprite.play_flipbook("#sprite", anim)
+end
+
+local function tryunlock(self)
+	local slot = item.check(self.lock)
+	if slot > 0 then
+		local text = "Unlocked with the "..item.getitemtext(self.lock)
+		msg.post("view#game", "dialog", {text = text})
+		item.use(slot)
+		self.lock = 0
+	else
+		msg.post("view#game", "dialog", {text = "It's locked"})
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		if self.lock > 0 and message.enter then
+			tryunlock(self)
+		end
+		
+		if self.lock == 0 then
+			trigger(self, message.enter)
+		end
+	end
+end
+

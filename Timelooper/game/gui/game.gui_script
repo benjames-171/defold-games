@@ -1,0 +1,45 @@
+local data = require "main.data"
+
+local function ticker(self)
+	local len = string.len(self.text)
+	if self.tick < len then
+		self.tick = self.tick + 1
+		gui.set_text(gui.get_node("text"), string.sub(self.text, 1, self.tick))
+		if self.tick % 3 == 0 then
+			sound.play("main:/sound#tick")
+		end
+	end
+end
+
+function init(self)
+	self.tick = 0
+	self.text = ""
+	self.timer = nil
+	timer.delay(0.02, true, ticker)
+end
+
+function update(self, dt)
+	local text = string.format("%02d/%02d", data.gems, data.gemstot)
+	gui.set_text(gui.get_node("gems"), text)
+	text = "AREA "..tostring(data.level)
+	gui.set_text(gui.get_node("level"), text)
+end
+	
+
+local function cleartick(self)
+	self.tick = 0
+	self.text = ""
+	self.timer = nil
+	gui.set_text(gui.get_node("text"), "")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("tick") then
+		self.tick = 0
+		self.text = message.text
+		if self.timer ~= nil then
+			timer.cancel(self.timer)
+		end
+		self.timer = timer.delay(6, false, cleartick)
+	end
+end

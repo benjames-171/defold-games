@@ -1,0 +1,16 @@
+local data = require "main.data"
+
+go.property("bonus", 250)
+
+local TIME = 2
+
+function init(self)
+	sprite.play_flipbook("#sprite", tostring(self.bonus))
+	data.sound("bonus")
+	timer.delay(TIME, false, function() go.delete() end)
+	data.score = data.score + self.bonus
+
+	local pos = go.get_position()
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, pos.y + 16, go.EASING_LINEAR, TIME)
+end
+

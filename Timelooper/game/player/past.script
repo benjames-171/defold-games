@@ -1,0 +1,40 @@
+local data = require "main.data"
+
+function init(self)
+	self.anim = 0
+	self.head = 1
+	self.last = vmath.vector3()
+	go.set_position(data.his[self.head])
+	particlefx.play("#pfx")
+	sound.play("main:/sound#tele")
+end
+
+function update(self, dt)
+	if data.state ~= data.STATE_PAUSE then
+		self.head = self.head + 1
+
+		if data.his[self.head] == nil then
+			go.delete()
+			return
+		end
+
+		local pos = vmath.vector3(data.his[self.head])
+		if pos.z ~= self.anim then
+			sprite.play_flipbook("#sprite", tostring(pos.z + 2))
+			self.anim = pos.z
+		end
+		pos.z = 0
+		go.set_position(pos)
+
+		if pos.x < self.last.x then
+			sprite.set_hflip("#sprite", true)
+		elseif pos.x > self.last.x then
+			sprite.set_hflip("#sprite", false)
+		end
+		self.last = pos
+	end
+end
+
+function on_message(self, message_id, message, sender)
+end
+

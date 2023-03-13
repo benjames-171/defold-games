@@ -1,0 +1,114 @@
+local data = require "main.data"
+
+local SPEED = 5
+
+go.property("num", 0)
+go.property("man", true)
+
+local function idle(self)
+	self.hold = nil
+	self.inair = false
+	self.dir = self.num % 2
+
+	if self.dir == 0 then
+		self.dir = -1
+	end
+
+	local pos = go.get_position()
+	go.animate(".", "position.y", go.PLAYBACK_LOOP_PINGPONG, pos.y + 4, go.EASING_LINEAR, 4, math.random(0,40)/10)
+end
+	
+function init(self)
+	self.height = 0
+	self.nodeid = ""
+	msg.post("view#game", "addpoint", {anim = "pink"})
+	idle(self)
+end
+
+local function move(self, dt)
+	local pos = go.get_position()
+	if self.hold == nil then
+		pos.x = pos.x + (self.dir * dt * SPEED)
+	end
+	pos = data.poswrap(pos)
+	go.set_position(pos)
+end
+
+local function explode(self, force)
+	if data.onscreen(go.get_position(), 4) or force then
+		particlefx.play("#exp")
+		data.sound("exp-2")
+		msg.post("view#game","removepoint", {nodeid = self.nodeid})
+		go.delete()
+		data.men = data.men - 1
+		if self.hold ~= nil then
+			msg.post(self.hold, "release")
+		end
+		if data.men <= 0 then
+			msg.post("level", "transformall")
+			msg.post("view#script", "shake")
+		end
+	end
+end
+
+local function landed(self)
+	if not self.inair then
+		idle(self)
+	elseif self.height < 80 or data.state ~= data.STATE_PLAYING then
+		factory.create("#bonus-factory")
+		msg.post("#co-trig", "enable")
+		msg.post("#co", "enable")
+		idle(self)
+	else
+		explode(self, true)
+	end
+end
+
+local function fall(self)
+	self.hold = nil
+	local pos = go.get_position()
+	self.height = pos.y
+	y = math.random(8, 16)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, y, go.EASING_INSINE, (pos.y - y) / 25, 0, landed)
+	msg.post("#co", "enable")
+end
+
+function update(self, dt)
+	move(self, dt)
+	sprite.set_hflip("#sprite", self.dir < 0)
+	msg.post("view#game", "setpoint", {nodeid = self.nodeid, pos = go.get_position()})
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.other_group == hash("laser") then
+			explode(self)
+		end
+	elseif message_id == hash("scan") then
+		self.nodeid = message.nodeid
+	elseif message_id == hash("hold") then
+		go.cancel_animations(".", "position.y")
+		self.hold = sender
+		msg.post("#co-trig", "disable")
+		msg.post("#co", "disable")
+	elseif message_id == hash("position") then
+		go.set_position(message.pos)
+	elseif message_id == hash("explode") then
+		explode(self, true)
+	elseif message_id == hash("release") then
+		fall(self)
+	elseif message_id == hash("dropoff") then
+		self.inair = false
+		local pos = go.get_position()
+		go.animate(".", "position.y", go.PLAYBACK_LOOP_PINGPONG, pos.y + 4, go.EASING_LINEAR, 4, math.random(0,40)/10)
+		factory.create("#bonus-factory", nil, nil, {bonus = 500})
+	elseif message_id == hash("inair") then
+		self.inair = true
+	elseif message_id == hash("rescue") then
+		if self.inair and self.hold == nil then
+			go.cancel_animations(".", "position.y")
+			factory.create("#bonus-factory", nil, nil, {bonus = 500})
+		end
+	end
+end
+

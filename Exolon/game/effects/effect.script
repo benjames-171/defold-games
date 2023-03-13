@@ -1,0 +1,15 @@
+function on_message(self, message_id, message, sender)
+	if message_id == hash("exp") then
+		go.set_position(message.pos)
+		particlefx.play("#exp")
+		sound.play("main:/sound#exp")
+	elseif message_id == hash("exp-small") then
+		go.set_position(message.pos)
+		particlefx.play("#exp-small")
+		sound.play("main:/sound#exp3")
+	elseif message_id == hash("exp-tiny") then
+		go.set_position(message.pos)
+		particlefx.play("#exp-tiny")
+		sound.play("main:/sound#exp4")
+	end
+end

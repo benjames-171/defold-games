@@ -1,0 +1,7 @@
+local data = require "main.data"
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") and message.enter then
+		data.spawnpos = go.get_position()
+	end
+end

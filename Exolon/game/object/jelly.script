@@ -1,0 +1,29 @@
+local data = require "main.data"
+local obj = require "game.object.obj"
+
+local function complete(self)
+	obj.remove(go.get_id())
+end
+
+local function flyaway(self)
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, -8, go.EASING_INSINE, 1, 0, complete)
+end
+
+local function loop(self)
+	local pos = go.get_position()
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_PINGPONG, pos.x - 100, go.EASING_INOUTSINE, 2, 0, flyaway)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_PINGPONG, pos.y + 100, go.EASING_INOUTSINE, 2, 0.5)
+end
+
+function init(self)
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, 200, go.EASING_OUTSINE, 0.5, 0, loop)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		msg.post("common/effect", "exp-small", {pos = go.get_position()})
+		data.score = data.score + 100
+		complete(self)
+	end
+end
+

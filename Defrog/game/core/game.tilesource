@@ -1,0 +1,570 @@
+image: "/assets/png/tiles.png"
+tile_width: 16
+tile_height: 16
+tile_margin: 0
+tile_spacing: 0
+collision: "/assets/png/tile-coll.png"
+material_tag: "tile"
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 4
+  collision_group: "enemy"
+}
+convex_hulls {
+  index: 4
+  count: 4
+  collision_group: "enemy"
+}
+convex_hulls {
+  index: 8
+  count: 4
+  collision_group: "enemy"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 4
+  collision_group: "enemy"
+}
+convex_hulls {
+  index: 16
+  count: 4
+  collision_group: "enemy"
+}
+convex_hulls {
+  index: 20
+  count: 4
+  collision_group: "enemy"
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+collision_groups: "enemy"
+animations {
+  id: "0"
+  start_tile: 8
+  end_tile: 8
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "0b"
+  start_tile: 9
+  end_tile: 9
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "1"
+  start_tile: 10
+  end_tile: 10
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "2"
+  start_tile: 11
+  end_tile: 11
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "200"
+  start_tile: 15
+  end_tile: 15
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "3"
+  start_tile: 12
+  end_tile: 12
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "4"
+  start_tile: 13
+  end_tile: 14
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "arrow"
+  start_tile: 3
+  end_tile: 3
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "blue"
+  start_tile: 29
+  end_tile: 29
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "croc1"
+  start_tile: 22
+  end_tile: 22
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "croc2"
+  start_tile: 23
+  end_tile: 23
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "croc3"
+  start_tile: 24
+  end_tile: 25
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 1
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "crochead"
+  start_tile: 21
+  end_tile: 21
+  playback: PLAYBACK_NONE
+  fps: 1
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "dead"
+  start_tile: 42
+  end_tile: 45
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "dialog"
+  start_tile: 6
+  end_tile: 6
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "dialog-green"
+  start_tile: 7
+  end_tile: 7
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "fly"
+  start_tile: 5
+  end_tile: 5
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "frog"
+  start_tile: 4
+  end_tile: 4
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "hop"
+  start_tile: 1
+  end_tile: 2
+  playback: PLAYBACK_ONCE_BACKWARD
+  fps: 6
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "log1"
+  start_tile: 16
+  end_tile: 16
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "log1"
+  start_tile: 16
+  end_tile: 16
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "log2"
+  start_tile: 17
+  end_tile: 17
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "log3"
+  start_tile: 18
+  end_tile: 18
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "otter"
+  start_tile: 31
+  end_tile: 32
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "player"
+  start_tile: 1
+  end_tile: 1
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "snake1"
+  start_tile: 36
+  end_tile: 38
+  playback: PLAYBACK_LOOP_PINGPONG
+  fps: 6
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "snake2"
+  start_tile: 39
+  end_tile: 41
+  playback: PLAYBACK_LOOP_PINGPONG
+  fps: 6
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "splash"
+  start_tile: 46
+  end_tile: 49
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 6
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "turtle"
+  start_tile: 53
+  end_tile: 53
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "turtle-dive"
+  start_tile: 53
+  end_tile: 56
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 2
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "turtle-rise"
+  start_tile: 53
+  end_tile: 55
+  playback: PLAYBACK_ONCE_BACKWARD
+  fps: 2
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+extrude_borders: 1
+inner_padding: 0
+sprite_trim_mode: SPRITE_TRIM_MODE_OFF

@@ -1,0 +1,813 @@
+image: "/assets/png/tiles.png"
+tile_width: 8
+tile_height: 8
+tile_margin: 0
+tile_spacing: 0
+collision: "/assets/png/col.png"
+material_tag: "tile"
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 0
+  count: 3
+  collision_group: "hazard"
+}
+convex_hulls {
+  index: 3
+  count: 3
+  collision_group: "hazard"
+}
+convex_hulls {
+  index: 6
+  count: 3
+  collision_group: "hazard"
+}
+convex_hulls {
+  index: 9
+  count: 3
+  collision_group: "hazard"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: "world"
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 4
+  collision_group: "world"
+}
+convex_hulls {
+  index: 16
+  count: 4
+  collision_group: "world"
+}
+convex_hulls {
+  index: 20
+  count: 4
+  collision_group: "world"
+}
+convex_hulls {
+  index: 24
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 24
+  count: 4
+  collision_group: "world"
+}
+convex_hulls {
+  index: 28
+  count: 4
+  collision_group: "world"
+}
+convex_hulls {
+  index: 32
+  count: 4
+  collision_group: "world"
+}
+convex_hulls {
+  index: 36
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 36
+  count: 4
+  collision_group: "world"
+}
+convex_hulls {
+  index: 40
+  count: 4
+  collision_group: "world"
+}
+convex_hulls {
+  index: 44
+  count: 4
+  collision_group: "world"
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+convex_hulls {
+  index: 48
+  count: 0
+  collision_group: ""
+}
+collision_groups: "hazard"
+collision_groups: "world"
+animations {
+  id: "1"
+  start_tile: 13
+  end_tile: 15
+  playback: PLAYBACK_LOOP_PINGPONG
+  fps: 20
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "2"
+  start_tile: 14
+  end_tile: 14
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "3"
+  start_tile: 16
+  end_tile: 18
+  playback: PLAYBACK_LOOP_PINGPONG
+  fps: 20
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "4"
+  start_tile: 17
+  end_tile: 17
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "arrow"
+  start_tile: 1
+  end_tile: 2
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 2
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "dialog"
+  start_tile: 6
+  end_tile: 6
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "gem"
+  start_tile: 4
+  end_tile: 4
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "player"
+  start_tile: 2
+  end_tile: 2
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "white"
+  start_tile: 133
+  end_tile: 133
+  playback: PLAYBACK_NONE
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+extrude_borders: 2
+inner_padding: 0
+sprite_trim_mode: SPRITE_TRIM_MODE_OFF

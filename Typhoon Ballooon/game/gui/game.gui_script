@@ -1,0 +1,5 @@
+local data = require "main.data"
+
+function update(self, dt)
+	gui.set_rotation(gui.get_node("arrow"), vmath.quat_rotation_z(data.wind))
+end

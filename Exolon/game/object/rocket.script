@@ -1,0 +1,19 @@
+local obj = require "game.object.obj"
+
+local function complete(self)
+	obj.remove(go.get_id())
+end
+
+function init(self)
+	local pos = go.get_position()
+	pos.x = pos.x - 256
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, pos.x, go.EASING_LINEAR, 2, 0, complete)
+end
+
+function on_message(self, message_id, message,sender)
+	if message_id == hash("collision_response") then
+		msg.post("common/effect", "exp-small", {pos = go.get_position()})
+		complete(self)
+	end
+end
+

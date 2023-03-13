@@ -1,0 +1,58 @@
+local data = require "main.data"
+local ui = require "main.ui"
+local item = require "game.core.item"
+
+function init(self)
+	self.pos = vmath.vector3()
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+local function close(self)
+	ui.hide(self.node)
+	data.state = data.STATE_PLAYING
+end
+
+local function activate(self)
+	for n = 1, 4 do
+		local slot = item.check(162 + n)
+		item.use(slot)
+	end
+	msg.post("player", "dropitem", {pos = self.pos, item = 13})
+	sound.play("main:/sound#chime2")
+	close(self)
+end
+
+local function check(self)
+	local t = 0
+	for n = 1, 4 do
+		local node = gui.get_node(tostring(n))
+		if item.check(162 + n) > 0 then
+			gui.set_enabled(node, true)
+			t = t + 1
+		else
+			gui.set_enabled(node, false)
+		end
+	end
+
+	if t >= 4 then
+		timer.delay(1, false, activate)
+	end
+end
+
+local function input(self, action_id, action)
+	if (action_id == hash("exit") or action_id == hash("action")) and action.pressed then
+		close(self)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		ui.show(self.node)
+		data.state = data.STATE_SLAB
+		self.pos = message.pos
+		check(self)
+	elseif message_id == hash("input") then
+		input(self, message.action_id, message.action)
+	end
+end

@@ -1,0 +1,30 @@
+local data = require "main.data"
+local obj = require "game.object.obj"
+
+function init(self)
+	self.hp = 30
+	particlefx.play("#pfx")
+end
+
+function final(self)
+	particlefx.stop("#pfx")
+end
+
+local function destroy(self)
+	obj.remove(go.get_id())
+end
+
+local function hit(self, power)
+	self.hp = self.hp - power
+	if self.hp <= 0 then
+		msg.post("common/effect", "exp", {pos = go.get_position()})
+		destroy(self)
+		data.score = data.score + 500
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("hit") then
+		hit(self, message.power)
+	end
+end

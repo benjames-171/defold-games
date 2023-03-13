@@ -1,0 +1,52 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /main/custom.renderc
+
+[display]
+width = 448
+height = 512
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[script]
+shared_state = 1
+
+[html5]
+splash_image = /assets/png/splash.png
+cssfile = /builtins/manifests/web/dark_theme.css
+scale_mode = fit
+show_console_banner = 0
+show_made_with_defold = 0
+show_fullscreen_button = 0
+
+[project]
+version = v1.0
+title = Defrog
+dependencies#0 = https://github.com/subsoap/defos/archive/master.zip
+
+[spine]
+max_count = 0
+
+[model]
+max_count = 0
+
+[mesh]
+max_count = 0
+
+[label]
+max_count = 0
+
+[input]
+game_binding = /main/game.input_bindingc
+
+[sprite]
+subpixels = 0
+
+[physics]
+debug = 0
+
+[native_extension]
+app_manifest = /generated.appmanifest
+

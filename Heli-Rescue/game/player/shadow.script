@@ -1,9 +1,0 @@
-local data = require ("main.data")
-
-function update(self, dt)
-	local p = data.playerpos
-	local offset = vmath.vector3(24,-32, 0)
-	go.set_position(p + offset)
-	go.set_rotation(vmath.quat_rotation_z(data.playerrot))
-	msg.post("#sprite", "play_animation", {id = hash(string.format("%d", data.heli))})	
-end

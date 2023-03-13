@@ -1,0 +1,28 @@
+local data = require "main.data"
+local obj = require "game.object.obj"
+
+local function complete(self)
+	obj.remove(go.get_id())
+end
+
+local function flyaway(self)
+	msg.post("#ex", "enable")
+	sprite.play_flipbook("#sprite", "missile2")
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, -16, go.EASING_LINEAR, 2)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, math.random(120,180), go.EASING_INOUTQUAD, 2.5, 0, complete)
+end
+	
+function init(self)
+	msg.post("#ex", "disable")
+	go.set_position(vmath.vector3(266, data.playerpos.y + 32, 0))
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, math.random(120,180), go.EASING_LINEAR, 2)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, data.playerpos.y, go.EASING_INOUTQUAD, 2, 0, flyaway)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		msg.post("common/effect", "exp-small", {pos = go.get_position()})
+		complete(self)
+	end
+end
+

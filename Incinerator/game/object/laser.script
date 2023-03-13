@@ -1,0 +1,34 @@
+local data = require "main.data"
+
+go.property("rot", 0)
+
+local function switch(self)
+	local id = ""
+	self.on = not self.on
+	if self.on then
+		id = "enable"
+	else
+		id = "disable"
+	end
+	msg.post("#co", id)
+	msg.post("#sprite", id)
+end
+
+function init(self)
+	self.on = false
+	go.set(".", "euler.z", self.rot)
+	if self.rot == 0 then
+		self.on = true
+	end
+	timer.delay(1, true, switch)
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		go.set("#sprite", "tint.w", math.random(25, 100) / 100)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+end
+

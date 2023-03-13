@@ -1,0 +1,7 @@
+function init(self)
+	particlefx.play("#pfx")
+end
+
+function final(self)
+	particlefx.stop("#pfx")
+end

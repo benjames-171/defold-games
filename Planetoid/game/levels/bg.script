@@ -1,0 +1,12 @@
+local data = require "main.data"
+
+go.property("offset", 0)
+go.property("mult", 1)
+
+function update(self, dt)
+	local pos = vmath.vector3(data.scroll * self.mult)
+	pos.x = data.scroll.x - (pos.x % data.CANV_W)
+	pos.y = self.offset
+	pos.z = -0.9
+	go.set_position(pos)
+end

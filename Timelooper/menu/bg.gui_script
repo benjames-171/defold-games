@@ -1,0 +1,4 @@
+function init(self)
+	gui.animate(gui.get_node("hand-long"), "rotation.z", -360, gui.EASING_LINEAR, 1, 0, nil, gui.PLAYBACK_LOOP_FORWARD)
+	gui.animate(gui.get_node("hand-short"), "rotation.z", -360, gui.EASING_LINEAR, 12, 0, nil, gui.PLAYBACK_LOOP_FORWARD)
+end

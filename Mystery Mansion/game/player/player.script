@@ -1,0 +1,273 @@
+local data = require "main.data"
+local item = require "game.core.item"
+
+local SPEED = 30
+local INVUL = 150
+local INPUT_LOCK = 70
+
+function init(self)
+	self.move = vmath.vector3()
+	self.dir = vmath.vector3(1,0,0)
+	self.correction = vmath.vector3()
+	self.anim = ""
+	self.alert = ""
+	self.invul = INVUL
+	item.clearall()
+	sound.play("main:/sound#ambience")
+	sound.play("main:/sound#fear", {gain = 0})
+	msg.post(".", "acquire_input_focus")
+end
+
+local function getinput()
+	msg.post(".", "acquire_input_focus")
+end
+
+local function quit2menu(self)
+	msg.post("main:/sound", "stop_sound")
+	msg.post("main:/handler", "show_menu")
+end
+
+local function move(self, dt)
+	local pos = go.get_position() + (self.move * SPEED * dt)
+	go.set_position(pos)
+	data.playerpos = pos
+
+	if self.move.x ~= 0 or self.move.y ~= 0 then
+		self.dir = self.move
+	end
+
+	if pos.x > 1280 then
+		msg.post("view#complete", "show")
+		go.animate("#sprite", "tint.w", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_LINEAR, 1)
+	end
+end
+
+local function anim(self)
+	local anim = "player"
+
+	if data.state ~= data.STATE_PLAYING then
+		-- do nothing
+	elseif self.move.x ~= 0 or self.move.y ~= 0 then
+		anim = "walk"
+	end
+
+	if anim ~= self.anim then
+		sprite.play_flipbook("#sprite", anim)
+		self.anim = anim
+	end
+end
+
+local function pick(self)
+	local pos = data.world2tile(go.get_position())
+	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+
+end
+
+local function flash(self)
+	if self.invul > 0 then
+		self.invul = self.invul - 1
+		if self.invul % 10 < 6 then
+			msg.post("#sprite", "enable")
+		else
+			msg.post("#sprite", "disable")
+		end
+	end
+end
+
+local function gettileinfront(self)
+	local pos = go.get_position()
+	pos.y = pos.y - 4
+	local dir = vmath.vector3(self.dir)
+	dir = vmath.normalize(dir)
+	pos = pos + dir * 8
+	pos = data.world2tile(pos)
+
+	return pos
+end
+
+local function alert(self)
+	local pos = gettileinfront(self)
+	local alert = ""
+
+	local t = tilemap.get_tile("/level#tilemap", "item", pos.x, pos.y)
+	if t == 0 then
+		t = tilemap.get_tile("/level#tilemap", "object", pos.x, pos.y)
+		alert =  "!"
+	else
+		alert = "!b"
+	end
+
+	local item = item.getitemtext(t)
+	if item ~= nil then
+		msg.post("#alert", "enable")
+
+		if alert ~= self.alert then
+			sprite.play_flipbook("#alert", alert)
+			self.alert = alert
+		end
+	else
+		msg.post("#alert", "disable")
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		move(self, dt)
+		pick(self)
+		alert(self)
+		flash(self)
+
+		data.time = data.time + dt
+	end
+
+	anim(self)
+		
+	self.move = vmath.vector3()
+	self.correction = vmath.vector3()
+end
+
+local function openbox(self, pos)
+	local t = tilemap.get_tile("/level#tilemap", "object", pos.x, pos.y)
+	tilemap.set_tile("/level#tilemap", "object", pos.x, pos.y, t + 4)
+	tilemap.set_tile("/level#tilemap", "item", pos.x, pos.y, t + 8)
+end
+
+local function dropitem(self, pos, item)
+	tilemap.set_tile("/level#tilemap", "item", pos.x, pos.y, item)
+end
+
+local function collision(self, message)
+	if message.distance > 0 then
+		local proj = vmath.project(self.correction, message.normal * message.distance)
+		if proj < 1 then
+			local comp = (message.distance - message.distance * proj) * message.normal
+			go.set_position(go.get_position() + comp)
+			self.correction = self.correction + comp
+		end
+	end
+end
+
+local function doaction(self)
+	local pos = gettileinfront(self)
+
+	local t = tilemap.get_tile("/level#tilemap", "item", pos.x, pos.y)
+	local obj = tilemap.get_tile("/level#tilemap", "object", pos.x, pos.y)
+
+	if t >= 169 then
+		local text = item.getitemtext(t)
+		if text ~= nil then
+			msg.post("view#game", "dialog", {text = text})
+			sound.play("main:/sound#action")
+		end
+	elseif t >= 144 and t <= 147 then
+		msg.post("view#game", "journal", {num = t-143})
+		sound.play("main:/sound#action")
+	elseif t ~= 0 then
+		local f = item.store(t)
+		if f then
+			tilemap.set_tile("/level#tilemap", "item", pos.x, pos.y, 0)
+			local item = item.getitemtext(t)
+			local text = "Picked up the "..item
+			msg.post("view#game", "dialog", {text = text})
+			sound.play("main:/sound#pickup")
+		else
+			msg.post("view#game", "dialog", {text = "My pockets are full"})
+			sound.play("main:/sound#action")
+		end
+	elseif obj == 39 then
+		msg.post("view#slab", "show", {pos = pos})
+	elseif obj >= 155 and obj <= 158 then
+		msg.post("view#lock", "show", {num = obj-154, pos = pos})
+	else
+		local text = item.getitemtext(obj)
+		if text ~= nil then
+			msg.post("view#game", "dialog", {text = text})
+			sound.play("main:/sound#action")
+		end
+	end
+end
+
+local function input_playing(self, action_id, action)
+	if action_id == hash("left") then
+		self.move.x = -1
+		sprite.set_hflip("#sprite", true)
+	elseif action_id == hash("right") then
+		self.move.x = 1
+		sprite.set_hflip("#sprite", false)
+	elseif action_id == hash("up") then
+		self.move.y = 1
+	elseif action_id == hash("down") then
+		self.move.y = -1
+	elseif action_id == hash("action") and action.pressed then
+		doaction(self)
+	elseif action_id == hash("exit") and action.pressed then
+		msg.post("view#pause", "show")
+	elseif action_id == hash("debug") and action.pressed and sys.get_engine_info().is_debug then
+		--msg.post("view#gameover", "show")
+	end
+end
+
+local function input_dialog(self, action_id, action)
+	if (action_id == hash("exit") or action_id == hash("action")) and action.pressed then
+		msg.post("view#game", "dialog-close")
+	end
+end
+
+local function input_journal(self, action_id, action)
+	if (action_id == hash("exit") or action_id == hash("action")) and action.pressed then
+		msg.post("view#game", "journal-close")
+	end
+end
+
+local function input_complete(self, action_id, action)
+	if action_id == hash("exit") and action.pressed then
+		quit2menu(self)
+	end
+end
+
+function on_input(self, action_id, action)
+	if action.value < 0.2 then return
+	end	
+	
+	if data.state == data.STATE_PLAYING then
+		input_playing(self, action_id, action)
+	elseif data.state == data.STATE_PAUSE then
+		msg.post("view#pause", "input", {action_id = action_id, action = action})
+	elseif data.state == data.STATE_DIALOG then
+		input_dialog(self, action_id, action)
+	elseif data.state == data.STATE_JOURNAL then
+		input_journal(self, action_id, action)
+	elseif data.state == data.STATE_SLAB then
+		msg.post("view#slab", "input", {action_id = action_id, action = action})
+	elseif data.state == data.STATE_LOCK then
+		msg.post("view#lock", "input", {action_id = action_id, action = action})
+	elseif data.state == data.STATE_GAMEOVER then
+		msg.post("view#gameover", "input", {action_id = action_id, action = action})
+	elseif data.state == data.STATE_COMPLETE then
+		input_complete(self, action_id, action)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("position") then
+		go.set_position(message.pos)
+		data.origin = message.pos
+	elseif message_id == hash("contact_point_response") then
+		collision(self, message)
+	elseif message_id == hash("openbox") then
+		openbox(self, message.pos)
+	elseif message_id == hash("dropitem") then
+		dropitem(self, message.pos, message.item)
+	elseif message_id == hash("continue") then
+		go.set_position(data.origin)
+		msg.post("view#shutter", "fadein")
+		data.state = data.STATE_PLAYING
+		data.continues = data.continues + 1
+		data.hp = 0
+	elseif message_id == hash("pauseinput") then
+		msg.post(".", "release_input_focus")
+		timer.delay(message.delay, false, getinput)
+	elseif message_id == hash("quit") then
+		quit2menu(self)
+	end
+end

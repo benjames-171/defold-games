@@ -1,0 +1,18 @@
+local function spawn(self)
+	if data.state == data.STATE_PLAYING then
+		if data.onscreen(go.get_position(), 0) then
+			factory.create("#enemy-factory")
+			sound.play("main:/sound#spawn")
+			self.limit = self.limit - 1
+			if self.limit <= 0 then
+				go.delete()
+			end
+		end
+	end
+end
+
+function init(self)
+	self.limit = math.random(2,5)
+	timer.delay(math.random(20, 40) / 10, true, spawn)
+end
+

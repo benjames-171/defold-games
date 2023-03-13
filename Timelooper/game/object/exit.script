@@ -1,0 +1,18 @@
+local data = require "main.data"
+
+function init(self)
+	self.open = false
+	msg.post("#co-field", "disable")
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		if data.gems == data.gemstot and not self.open then
+			particlefx.play("#pfx")
+			self.open = true
+			msg.post("#co-field", "enable")
+			msg.post("/common/view#game", "tick", {text = "EXIT OPEN!"})
+			sound.play("main:/sound#chime")
+		end
+	end
+end

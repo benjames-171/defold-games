@@ -1,0 +1,37 @@
+local data = require "main.data"
+local obj = require "game.object.obj"
+
+local function shoot(self)
+	local pos = go.get_position()
+	
+	if self.count < 4 and pos.x - data.playerpos.x > 48 then
+		local pos = go.get_position() + vmath.vector3(-12, 8, -0.1)
+		if self.count % 2 == 1 then
+			pos.y = pos.y - 4
+		end
+		local f = factory.create("#rocket-factory", pos)
+		obj.add(f)
+		sound.play("main:/sound#shot2")
+	end
+
+	self.count = self.count + 1
+
+	if self.count > 9 then
+		self.count = 0
+	end
+end
+
+function init(self)
+	self.count = 8
+	timer.delay(0.5, true, shoot)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") and message.enter then
+		msg.post("#co", "disable")
+		msg.post("/common/player", "bonus", {bonus = 2500})
+	end	
+end
+
+
+

@@ -1,0 +1,25 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		ui.show(self.node)
+		data.state = data.STATE_MAP
+
+		local node = gui.get_node("border")
+		local pos = (data.scrollpos / 8) - vmath.vector3(32,32,0)
+		pos.x = math.floor(pos.x)
+		pos.y = math.floor(pos.y)
+		gui.set_position(node, pos)
+		gui.set_color(node, vmath.vector4(1,1,1,1))
+		gui.animate(node, "color.w", 0, gui.EASING_LINEAR, 0.5, 0, nil, gui.PLAYBACK_LOOP_FORWARD)
+	elseif message_id == hash("hide") then
+		ui.hide(self.node)
+	end
+end
+

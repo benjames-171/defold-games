@@ -1,0 +1,50 @@
+local function generate(self)
+	local w = 64
+	local h = 64
+	local buff = buffer.create(w * h, {{name = hash("rgba"), type = buffer.VALUE_TYPE_UINT8, count = 4}})
+	local stream = buffer.get_stream(buff, hash("rgba"))
+
+	for y = 1, h do
+		for x = 1, w do
+			local index = ((y-1) * w * 4) + ((x-1) * 4) 
+			local t = tilemap.get_tile("/level#tilemap", "world", x, y)
+
+			if (t >= 51 and t <= 125) then
+				stream[index + 1] = 0xde
+				stream[index + 2] = 0xe6
+				stream[index + 3] = 0xfe
+			elseif (t >= 126 and t <= 200) then
+				stream[index + 1] = 0x66
+				stream[index + 2] = 0x70
+				stream[index + 3] = 0x91
+			elseif t == 3 then
+				stream[index + 1] = 0xd4
+				stream[index + 2] = 0x2c
+				stream[index + 3] = 0x4f
+			else
+				stream[index + 1] = 0x16
+				stream[index + 2] = 0x0b
+				stream[index + 3] = 0x27
+			end
+			stream[index + 4] = 0xff
+		end
+	end
+
+	local resource_path = go.get("#sprite", "texture0")
+	local header = {width = w, height = h, type = resource.TEXTURE_TYPE_2D, format = resource.TEXTURE_FORMAT_RGBA, num_mip_maps = 1}
+	resource.set_texture(resource_path, header, buff)
+end
+
+function init(self)
+	generate(self)
+	msg.post("#sprite", "disable")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("refresh") then
+		generate(self)
+	end
+end
+
+
+

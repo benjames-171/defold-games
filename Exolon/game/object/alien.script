@@ -1,0 +1,17 @@
+local data = require "main.data"
+local obj = require "game.object.obj"
+
+function init(self)
+	local pos = vmath.vector3(266, data.playerpos.y + math.random(-8, 32), 0.5)
+	go.set_position(pos)
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, -10, go.EASING_INSINE, 2)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		msg.post("common/effect", "exp-small", {pos = go.get_position()})
+		data.score = data.score + 100
+		obj.remove(go.get_id())
+	end
+end
+

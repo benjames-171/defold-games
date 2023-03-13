@@ -1,0 +1,18 @@
+function init(self)
+	msg.post("#arrow", "disable")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		if message.enter then
+			msg.post("#arrow", "enable")
+			msg.post("common/player", "tele", {id = go.get_id()})
+		else
+			msg.post("#arrow", "disable")
+			msg.post("common/player", "tele", {id = nil})
+		end
+	elseif message_id == hash("activate") then
+		particlefx.play("#pfx")
+	end
+end
+

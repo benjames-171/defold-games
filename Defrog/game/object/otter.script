@@ -1,0 +1,26 @@
+local data = require "main.data"
+
+go.property("move", 0)
+
+function init(self)
+	particlefx.play("#pfx")
+end
+
+local function move(self, dt)
+	local pos = go.get_position()
+	pos.x = pos.x + (self.move * data.speed * dt)
+
+	if pos.x < data.MIN_X then
+		pos.x = pos.x + data.WORLD_W
+	elseif pos.x > data.MAX_X then
+		pos.x = pos.x - data.WORLD_W
+	end
+
+	go.set_position(pos)
+end
+
+function update(self, dt)
+	if data.state ~= data.STATE_PAUSE then
+		move(self, dt)
+	end
+end

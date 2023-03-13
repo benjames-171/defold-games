@@ -1,0 +1,12 @@
+go.property("alpha", 0)
+
+function init(self)
+	go.set("#sprite", "tint.w", self.alpha)
+	sprite.play_flipbook("#sprite", "smoke")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("animation_done") then
+		go.delete()
+	end
+end

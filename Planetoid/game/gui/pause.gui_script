@@ -1,0 +1,60 @@
+local data = require "main.data"
+
+function init(self)
+	self.node = gui.get_node("container")
+	gui.set_enabled(self.node, false)
+	self.handpos = 1
+	self.arrowpos = {
+		gui.get_position(gui.get_node("1")),
+		gui.get_position(gui.get_node("2")),
+	}
+	gui.set_position(self.node, vmath.vector3(data.SCR_W/2, (data.SCR_H/2), 0))
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PAUSE then
+		local pos = vmath.vector3(self.arrowpos[self.handpos].x - 28, self.arrowpos[self.handpos].y - 3, 0)
+		gui.set_position(gui.get_node("arrow"), pos)
+	end
+end
+
+local function close(self)
+	gui.set_enabled(self.node, false)
+	data.state = data.STATE_PLAYING
+	msg.post("main:/handler", "set_time_step", {factor = 1, mode = 0})
+end
+
+local function input(self, action_id, action)
+	if action_id == hash("up") and action.pressed then
+		self.handpos = self.handpos - 1
+		if self.handpos < 1 then self.handpos = 2 end
+		data.sound("blip")
+	elseif action_id == hash("down") and action.pressed then
+		self.handpos = self.handpos + 1
+		if self.handpos > 2 then self.handpos = 1 end
+		data.sound("blip")
+	elseif action_id == hash("action") and action.pressed then
+		if self.handpos == 1 then
+			close(self)
+			data.sound("shot2")
+		elseif self.handpos == 2 then
+			msg.post("main:/handler", "set_time_step", {factor = 1, mode = 0})
+			msg.post("player", "quit")
+			data.sound("shot2")
+		end
+	elseif (action_id == hash("exit") or action_id == hash("start")) and action.pressed then
+		data.sound("shot2")
+		close(self)
+	end
+end
+	
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		gui.set_enabled(self.node, true)
+		data.state = data.STATE_PAUSE
+		msg.post("main:/handler", "set_time_step", {factor = 0, mode = 0})
+		data.sound("shot")
+	elseif message_id == hash("input") then
+		input(self, message.action_id, message.action)
+	end
+end

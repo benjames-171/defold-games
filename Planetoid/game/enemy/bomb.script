@@ -1,0 +1,25 @@
+local RANGE = 32
+
+go.property("man", false)
+
+local function complete(self)
+	go.delete()
+end
+
+function init(self)
+	timer.delay(5, false, complete)
+	local pos = go.get_position()
+	repeat
+		pos.x = pos.x + math.random(-RANGE, RANGE)
+		pos.y = pos.y + math.random(-RANGE, RANGE)
+	until vmath.length(pos) ~= 0
+	vmath.normalize(pos)
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, pos, go.EASING_LINEAR, 5)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		complete(self)
+	end
+end
+

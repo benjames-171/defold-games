@@ -1,0 +1,91 @@
+local data = require "main.data"
+local enemy = require "game.enemy.enemy"
+
+local SPEED = 80
+
+go.property("num", 0)
+
+local function shoot(self)
+	if data.onscreen(go.get_position(), 0) then
+		factory.create("#shot-factory")
+	end
+	timer.delay(math.random(200, 300) / 100, false, shoot)
+end
+
+function init(self)
+	self.chase = false
+	self.nodeid = ""
+	self.dir = self.num % 2
+	if self.dir == 0 then
+		self.dir = -1
+	end
+	msg.post("view#game", "addpoint", {anim = "purple"})
+	timer.delay(math.random(50, 150) / 100, false, shoot)
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, math.random(60, 100), go.EASING_LINEAR, 1)
+	self.obj = factory.create("#b-factory", vmath.vector3(0,0,0))
+	go.set_parent(self.obj, msg.url())
+end
+
+local function move(self, dt)
+	local pos = go.get_position()
+	pos.x = pos.x + (self.dir * SPEED * dt)
+	pos = data.poswrap(pos)
+	go.set_position(pos)
+end
+
+local ERR = 48
+
+local function chase(self)
+	if not data.onscreen(go.get_position(), 0) or data.state ~= data.STATE_PLAYING then
+		self.chase = false
+		return
+	end
+
+	local r = vmath.vector3()
+	local pos = vmath.vector3()
+
+	repeat
+		r = vmath.vector3(math.random(-ERR, ERR), math.random(-ERR, ERR), 0)
+		pos = data.playerpos + r
+	until data.onscreen(pos, -8)
+
+	local len = vmath.length(pos - go.get_position())
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, pos, go.EASING_LINEAR, len / 75, 0, chase)
+end
+
+function update(self, dt)
+	if not self.chase then
+		move(self, dt)
+		if data.onscreen(go.get_position(), 0) then
+			self.chase = true
+			chase(self)
+			if data.state == data.STATE_PLAYING then
+				data.sound("mutant")
+			end
+		end
+	end
+	if data.state ~= data.STATE_PAUSE then
+		local noise = vmath.vector3(math.random(-1,1), math.random(-1,1), 0)
+		go.set_position(noise, self.obj)
+	end
+	msg.post("view#game", "setpoint", {nodeid = self.nodeid, pos = go.get_position()})
+end
+
+local function explode(self)
+	if data.onscreen(go.get_position(), 8) then
+		particlefx.play("#exp")
+		data.sound("exp-3")
+		msg.post("view#game","removepoint", {nodeid = self.nodeid})
+		data.score = data.score + 150
+		enemy.remove(go.get_id())
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") and (message.other_group == hash("laser") or message.other_group == hash("smart")) then
+		explode(self)
+	elseif message_id == hash("scan") then
+		self.nodeid = message.nodeid
+	end
+end
+

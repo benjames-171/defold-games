@@ -1,0 +1,14 @@
+function popdown(self)
+	local pos = go.get_position()
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, pos.y - 30, go.EASING_OUTBOUNCE, 0.5, 0.5, popup)
+end
+
+function popup(self)
+	local pos = go.get_position()
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, pos.y + 30, go.EASING_OUTBOUNCE, 0.5, 3, popdown)
+end
+
+function init(self)
+	timer.delay(1, false, popup)
+end
+

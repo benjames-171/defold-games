@@ -1,0 +1,56 @@
+go.property("lock", 0)
+
+function init(self)
+	self.locked = false
+	self.spriteopen = "edoor-open"
+	self.spriteclose = "edoor-close"
+
+	if self.lock > 0 then
+		self.locked = true
+		local anim = "edoor"..tostring(self.lock)
+		sprite.play_flipbook("#sprite", anim)
+		self.spriteopen = self.spriteopen..tostring(self.lock)
+		self.spriteclose = self.spriteclose..tostring(self.lock)
+	end
+end
+
+local function opendoor(self)
+	if self.locked then
+		if data.key[self.lock] then
+			data.key[self.lock] = false
+			self.locked = false
+			local col = {"RED", "YELLOW", "BLUE"}
+			local text = string.format("USED %s KEY", col[self.lock])
+			msg.post("view#game", "status", {text = text})
+			sound.play("main:/sound#unlock")
+		else
+			msg.post("view#game", "status", {text = "LOCKED"})
+			sound.play("main:/sound#no")
+			return
+		end
+	end
+	
+	sprite.play_flipbook("#sprite", self.spriteopen)
+	msg.post("#co1", "disable")
+	sound.play("main:/sound#edoor")
+end
+
+local function closedoor(self)
+	if not self.locked then
+		sprite.play_flipbook("#sprite", self.spriteclose)
+		msg.post("#co1", "enable")
+		sound.play("main:/sound#edoor")
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		if message.enter then
+			opendoor(self)
+		else
+			closedoor(self)
+		end
+	end
+end
+
+

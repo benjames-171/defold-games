@@ -1,0 +1,24 @@
+local data = require "main.data"
+
+go.property("move", 0)
+
+local function complete(self)
+	go.delete()
+end
+
+function init(self)
+	if data.dir < 0 then
+		sprite.set_hflip("#sprite", true)
+	end
+	go.set_scale(vmath.vector3(0.3, 1, 1))
+	go.animate(".", "scale.x", go.PLAYBACK_ONCE_FORWARD, 3, go.EASING_LINEAR, 0.3, 0, complete)
+	local pos = go.get_position()
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, pos.x + (140 * data.dir) + self.move, go.EASING_LINEAR, 0.3)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		msg.post("#co", "disable")
+	end
+end
+

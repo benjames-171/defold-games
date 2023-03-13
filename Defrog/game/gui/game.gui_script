@@ -1,0 +1,27 @@
+local data = require "main.data"
+
+function update(self, dt)
+	local text = string.format("%05d", data.score)
+	gui.set_text(gui.get_node("score"), text)
+	text = string.format("%05d", data.save.hiscore)
+	gui.set_text(gui.get_node("hiscore"), text)
+	gui.set_text(gui.get_node("level"), tostring(data.level))
+
+	for n = 1, 3 do
+		local node = gui.get_node(tostring(n))
+		gui.set_enabled(node, data.lives >= n)
+	end
+	gui.set_scale(gui.get_node("time"), vmath.vector3(data.time/30, 1,1))
+
+	text = ""
+	for n = 1, 7 do
+		if data.home[n] then text = text.."1 "
+		else text = text.."0 "
+		end
+	end
+	gui.set_text(gui.get_node("debug"), text)
+end
+
+function on_message(self, message_id, message, sender)
+end
+

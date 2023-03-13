@@ -1,0 +1,13 @@
+function on_message(self, message_id, message, sender)
+	if message_id == hash("flame") then
+		local pos = vmath.vector3(message.pos)
+		pos.z = 0.5
+		factory.create("#flame-factory", pos)
+	elseif message_id == hash("exp") then
+		go.set_position(message.pos)
+		sprite.play_flipbook("#sprite", "exp")
+	elseif message_id == hash("smoke") then
+		go.set_position(message.pos)
+		sprite.play_flipbook("#sprite", "smoke")
+	end
+end

@@ -1,0 +1,19 @@
+local data = require "main.data"
+
+local function complete(self)
+	go.delete()
+	data.fire = data.fire - 1
+	if data.fire == 0 then
+		sound.stop("main:/sound#fire")
+	end
+end
+
+function init(self)
+	if data.fire == 0 then
+		sound.play("main:/sound#fire", {gain = 0.5})
+	end
+	data.fire = data.fire + 1
+	local d = math.random(30,50) / 10
+	timer.delay(d, false, complete)
+end
+

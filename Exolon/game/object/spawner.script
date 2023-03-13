@@ -1,0 +1,17 @@
+local data = require "main.data"
+local obj = require "game.object.obj"
+
+go.property("id", 0)
+
+local function spawn(self)
+	if data.playerpos.x < 180 and data.state == data.STATE_PLAYING then
+		local pos = vmath.vector3(266, data.playerpos.y, 0)
+		local f = factory.create(self.fac, pos)
+		obj.add(f)
+	end
+end
+
+function init(self)
+	self.fac = "#"..tostring(self.id)
+	timer.delay(math.random(150,250)/100, true, spawn)
+end

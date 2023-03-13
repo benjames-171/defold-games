@@ -1,0 +1,28 @@
+local data = require "main.data"
+
+go.property("id", 0)
+
+function init(self)
+	self.open = 0
+	local anim = "d"..tostring(self.id)
+	sprite.play_flipbook("#sprite", anim)
+end
+
+function update(self, dt)
+	if data.trig[self.id] ~= self.open then
+		if data.trig[self.id] == 0 then
+			go.animate(".", "euler.z", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_INOUTSINE, 0.3)
+		else
+			local pos = go.get_position()
+			if pos.x < data.playerpos.x then
+				go.animate(".", "euler.z", go.PLAYBACK_ONCE_FORWARD, -90, go.EASING_INOUTSINE, 0.3)
+			else
+				go.animate(".", "euler.z", go.PLAYBACK_ONCE_FORWARD, 90, go.EASING_INOUTSINE, 0.3)
+			end
+		end
+		sound.play("main:/sound#door")
+		self.open = data.trig[self.id]
+	end
+end
+
+

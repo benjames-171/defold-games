@@ -1,0 +1,16 @@
+local data = require "main.data"
+
+local function move(self)
+	local r = math.random(0,359)
+	go.animate(".", "euler.z", go.PLAYBACK_ONCE_FORWARD, r, go.EASING_INOUTQUAD, math.random(10,15), 0, move)
+end
+
+function init(self)
+	particlefx.play("#pfx")
+	move(self)
+end
+
+function update(self, dt)
+	go.set_position(data.scrollpos + vmath.vector3(128,72, 0))
+end
+

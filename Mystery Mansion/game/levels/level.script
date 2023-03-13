@@ -1,0 +1,38 @@
+local data = require "main.data"
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	data.bounds = vmath.vector4(
+		(sx - 1) * data.TILE_SIZE,
+		(sy - 1) * data.TILE_SIZE,
+		((sx + w - 1) * data.TILE_SIZE) - data.CANV_W,
+		((sy + h - 1) * data.TILE_SIZE) - data.CANV_H)
+	
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "object", x, y)
+			if t == 1 then
+				tilemap.set_tile("#tilemap", "object", x, y, 0)
+				msg.post("/player", "position", {pos = data.tile2world(vmath.vector3(x, y, 0.5))})
+			elseif t == 14 then
+				tilemap.set_tile("#tilemap", "object", x, y, 0)
+				local lock = tilemap.get_tile("#tilemap", "data", x, y)
+				factory.create("#door-factory", data.tile2world(vmath.vector3(x, y, 0.1)), nil, {lock = lock, num = 1})
+			elseif t == 42 then
+				tilemap.set_tile("#tilemap", "object", x, y, 0)
+				local lock = tilemap.get_tile("#tilemap", "data", x, y)
+				factory.create("#door-factory", data.tile2world(vmath.vector3(x, y, 0.1)), nil, {lock = lock, num = 2})
+			elseif t == 15 then
+				tilemap.set_tile("#tilemap", "object", x, y, 0)
+				factory.create("#door-factory", data.tile2world(vmath.vector3(x, y, 0.1)))
+			end
+
+			tilemap.set_tile("#tilemap", "data", x, y, 0)
+		end
+	end
+end
+
+function init(self)
+	parse(self)
+end

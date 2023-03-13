@@ -1,0 +1,101 @@
+local data = require "main.data"
+
+local function parse(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	data.total = 0
+	data.bounds = vmath.vector4(
+		6 + sx * data.TILE_SIZE,
+		6 + sy * data.TILE_SIZE,
+		((sx + w - 2) * data.TILE_SIZE) - data.CANV_W - 6,
+		((sy + h - 2) * data.TILE_SIZE) - data.CANV_H - 6)
+	
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			if t == 1 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				msg.post("player", "position", {pos = data.tile2world(vmath.vector3(x, y, 0.5))})
+			elseif t == 3 then
+				tilemap.set_tile("#tilemap", "world", x, y, 0)
+				factory.create("#checkpoint-factory", data.tile2world(vmath.vector3(x, y, 0)))
+			elseif t == 19 then 
+				data.total = data.total + 1
+			end
+		end
+	end
+end
+
+local function settile(x,y,t)
+	if tilemap.get_tile("#tilemap", "world", x, y) == 0 then
+		tilemap.set_tile("#tilemap", "world", x, y, t)
+	end
+end
+
+local function spike(self, x,y,n,s,e,w)
+	if n == 0 then settile(x, y+1, 6) end
+	if s == 0 then settile(x, y-1, 7) end
+	if e == 0 then settile(x+1, y, 5) end
+	if w == 0 then settile(x-1, y, 4) end
+end
+
+local function tile(self, x, y)
+	local p = {
+		0,0,0,0, 26,
+		0,0,0,1, 35,
+		0,0,1,0, 18,
+		0,0,1,1, 17,
+		0,1,0,0, 33,
+		0,1,0,1, 34,
+		0,1,1,0, 15,
+		0,1,1,1, 16,
+		1,0,0,0, 32,
+		1,0,0,1, 31,
+		1,0,1,0, 25,
+		1,0,1,1, 24,
+		1,1,0,0, 29,
+		1,1,0,1, 30,
+		1,1,1,0, 22,
+		1,1,1,1, 23}
+
+	local n = tilemap.get_tile("#tilemap", "world", x, y+1)
+	local e = tilemap.get_tile("#tilemap", "world", x+1, y)
+	local s = tilemap.get_tile("#tilemap", "world", x, y-1)
+	local w = tilemap.get_tile("#tilemap", "world", x-1, y)
+
+	if n >= 22 then n = 1 else n = 0 end
+	if e >= 22 then e = 1 else e = 0 end
+	if s >= 22 then s = 1 else s = 0 end
+	if w >= 22 then w = 1 else w = 0 end
+
+	local c = 1
+	while p[c] ~= n or p[c+1] ~= e or p[c+2] ~= s or p[c+3] ~= w do
+		c = c + 5
+	end
+
+	local tile = p[c+4] + 7
+	local old = tilemap.get_tile("#tilemap", "world", x, y + 1)
+
+	tilemap.set_tile("#tilemap", "world", x, y, tile)
+
+	if math.random(1,4) == 1 and old ~= 12 then
+		spike(self, x,y,n,s,e,w)
+	end
+end
+
+local function decorate(self)
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	for y = sy+1, sy+h-2 do
+		for x = sx+1, sx+w-2 do
+			local t = tilemap.get_tile("#tilemap", "world", x, y)
+			if t >= 22 then tile(self, x, y, 0)
+			end
+		end
+	end
+end
+
+function init(self)
+	parse(self)
+	decorate(self)
+end

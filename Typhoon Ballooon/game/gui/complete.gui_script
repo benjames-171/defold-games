@@ -1,0 +1,31 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+local function rank(self)
+	local text = string.format("%s\n%d/%d\n%d", data.ms2str(data.time), data.stars, data.total, data.retries)
+	gui.set_text(gui.get_node("right"), text)
+
+	text = "RANK : "
+	if data.retries == 0 and data.time < 360 and data.stars == data.total then
+		text = text.."A"
+	elseif data.retries < 5 and data.time < 480 and data.stars > data.total * 0.8 then
+		text = text.."B"
+	else
+		text = text.."C"
+	end
+
+	gui.set_text(gui.get_node("rank"), text)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		rank(self)
+		ui.show(self.node)
+		data.state = data.STATE_COMPLETE
+	end
+end

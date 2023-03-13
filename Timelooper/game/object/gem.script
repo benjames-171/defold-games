@@ -1,0 +1,12 @@
+function init(self)
+	local pos = go.get_position()
+	go.animate(".", "position.x", go.PLAYBACK_LOOP_PINGPONG, pos.x + 2, go.EASING_INOUTSINE, 2.7, math.random(1,10)/10)
+	go.animate(".", "position.y", go.PLAYBACK_LOOP_PINGPONG, pos.y + 4, go.EASING_INOUTSINE, 1, math.random(1,10)/10)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		go.delete()
+	end
+end
+

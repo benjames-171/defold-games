@@ -1,0 +1,126 @@
+local data = require "main.data"
+local item = require "game.core.item"
+local room = require "game.core.room"
+
+local function shimmer(self)
+	gui.animate(gui.get_node("vig"), "color.w", math.random(65,100)/100, gui.EASING_LINEAR, 1)
+end
+
+function init(self)
+	self.time = 0
+	self.heart = 1
+	timer.delay(1, true, shimmer)
+end
+
+local function inv(self)
+	for n = 1, 5 do
+		i = item.get(n)
+		local node = gui.get_node(tostring(n))
+		local anim = "inv"..tostring(i)
+		gui.play_flipbook(node, anim)
+	end
+end
+
+local function roomtext(self)
+	if data.state == data.STATE_LOCK then
+		gui.set_text(gui.get_node("room"), "Enter Combination")
+	elseif data.state == data.STATE_SLAB then
+		gui.set_text(gui.get_node("room"), "???")
+	elseif data.state == data.STATE_GAMEOVER or data.state == data.STATE_COMPLETE then
+		gui.set_text(gui.get_node("room"), "")
+	else
+		local x = math.floor((data.playerpos.x - 8) / data.CANV_W)
+		local y = math.floor((data.playerpos.y - 8) / data.CANV_H)
+		local id = x + (y * 100)
+		local text = room.getname(id)
+
+		if text ~= nil then
+			gui.set_text(gui.get_node("room"), text)
+		else
+			gui.set_text(gui.get_node("room"), "")
+		end
+
+		--gui.set_text(gui.get_node("debug"), tostring(id))
+	end
+end
+
+local function fear(self, dt)
+	if data.fear then
+		data.hp = data.hp + 0.001
+		data.fear = false
+	else
+		data.hp = data.hp - 0.001
+	end
+
+	if data.hp > 1 then
+		data.hp = 1
+		msg.post("view#gameover", "show")
+		msg.post("player", "pauseinput", {delay = 5})
+	elseif data.hp < 0 then
+		data.hp = 0
+	end
+
+	gui.set_scale(gui.get_node("fear"), vmath.vector3(1, data.hp, 1))
+	sound.set_gain("main:/sound#fear", data.hp)
+
+	local alpha = math.random(data.hp * 75, data.hp * 100)
+	local node = gui.get_node("tunnel")
+	gui.set_alpha(node, alpha / 100)
+	local scale = vmath.vector3(math.random(0, 1), math.random(0, 1), 1)
+	if scale.x == 0 then scale.x = -1 end
+	if scale.y == 0 then scale.y = -1 end
+	gui.set_scale(node, scale * 4)
+
+	self.time = self.time + dt
+
+	if self.time > 1.1 - data.hp and data.state == data.STATE_PLAYING then
+		self.time = 0
+		self.heart = 3-self.heart
+		gui.play_flipbook(gui.get_node("heart"), "heart"..tostring(self.heart))
+
+		sound.play("main:/sound#heart", {gain = data.hp})
+	end
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING or data.state == data.STATE_GAMEOVER then
+		fear(self, dt)
+	end
+	inv(self)
+	roomtext(self)
+end
+
+local function complete(self, node)
+	gui.set_enabled(node, false)
+end
+
+local function dialog(self, message)
+	gui.set_text(gui.get_node("dialog-text"), message.text)
+	local node = gui.get_node("dialog-box")
+	gui.set_enabled(node, true)
+	gui.animate(node, "position.y", 128, gui.EASING_OUTSINE, 0.1)
+	data.state = data.STATE_DIALOG
+end
+
+local function journal(self, message)
+	gui.set_text(gui.get_node("journal"), item.getjournaltext(message.num))
+	local node = gui.get_node("journal-bg")
+	gui.set_enabled(node, true)
+	gui.animate(node, "color.w", 1, gui.EASING_LINEAR, 0.3)
+	data.state = data.STATE_JOURNAL
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("dialog") then
+		dialog(self, message)
+	elseif message_id == hash("journal") then
+		journal(self, message)
+	elseif message_id == hash("dialog-close") then
+		gui.animate(gui.get_node("dialog-box"), "position.y", 0, gui.EASING_INSINE, 0.1, 0, complete)
+		data.state = data.STATE_PLAYING
+	elseif message_id == hash("journal-close") then
+		gui.animate(gui.get_node("journal-bg"), "color.w", 0, gui.EASING_INSINE, 0.15, 0, complete)
+		data.state = data.STATE_PLAYING
+	end
+end
+

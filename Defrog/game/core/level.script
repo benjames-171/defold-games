@@ -1,0 +1,79 @@
+local data = require "main.data"
+
+local function parse(self)
+	local home = 1
+	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+
+	data.bounds = vmath.vector4(
+		(sx - 1) * data.TILE_SIZE,
+		(sy - 1) * data.TILE_SIZE,
+		((sx + w - 1) * data.TILE_SIZE) - data.CANV_W,
+		((sy + h - 1) * data.TILE_SIZE) - data.CANV_H)
+	
+	for y = sy, h+sy-1 do
+		for x = sx, w+sx-1 do
+			local t = tilemap.get_tile("#tilemap", "control", x, y)
+			local pos = data.tile2world(vmath.vector3(x, y, 0))
+			tilemap.set_tile("#tilemap", "control", x, y, 0)
+
+			if t == 5 then
+				factory.create("#fly-factory", pos)
+			elseif t == 8 then
+				factory.create("#lorry-factory", pos, nil, {move = -10, anim = 0})
+			elseif t == 10 then
+				factory.create("#car-factory", pos, nil, {move = -20, anim = 1})
+			elseif t == 11 then
+				factory.create("#car-factory", pos, nil, {move = -30, anim = 2})
+			elseif t == 12 then
+				factory.create("#car-factory", pos, nil, {move = 12, anim = 3})
+			elseif t == 13 then
+				factory.create("#car-factory", pos, nil, {move = 10, anim = 4})
+			elseif t == 16 then
+				pos.z = -0.5
+				factory.create("#log-s-factory", pos, nil, {move = 8, anim = -1})
+			elseif t == 17 then
+				pos.z = -0.5
+				factory.create("#log-m-factory", pos, nil, {move = 12, anim = -1})
+			elseif t == 18 then
+				pos.z = -0.5
+				factory.create("#log-l-factory", pos, nil, {move = 20, anim = -1})
+			elseif t == 21 and data.level > 2 then
+				factory.create("#crochead-factory", pos)
+			elseif t == 53 then
+				pos.z = -0.5
+				factory.create("#turtle-3-factory", pos, nil, {move = -10})
+			elseif t == 54 then
+				pos.z = -0.5
+				factory.create("#turtle-2-factory", pos, nil, {move = -14})
+			elseif t == 55 then
+				pos.z = -0.5
+				factory.create("#turtle-3-factory", pos, nil, {move = -10, dive = true})
+			elseif t == 56 then
+				pos.z = -0.5
+				factory.create("#turtle-2-factory", pos, nil, {move = -14, dive = true})
+			elseif t == 24 then
+				pos.z = -0.5
+				if data.level > 1 then
+					factory.create("#croc-factory", pos, nil, {move = 8, anim = -1})
+				else
+					factory.create("#log-s-factory", pos, nil, {move = 8, anim = -1})
+				end
+			elseif t == 31 and data.level > 2 then
+				factory.create("#otter-factory", pos, nil, {move = 20, anim = -1})
+			elseif t == 33 then
+				factory.create("#home-factory", pos + vmath.vector3(8, 0, 0), nil, {num = home})
+				home = home + 1
+			elseif t == 39 and data.level > 1 then
+				factory.create("#snake-factory", pos, nil, {move = 8})
+			end
+		end
+	end
+end
+
+function init(self)
+	for n = 1, 7 do
+		data.home[n] = false
+	end
+	data.speed = 0.7 + (data.level / 4)
+	parse(self)
+end

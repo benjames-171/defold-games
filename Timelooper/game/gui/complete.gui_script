@@ -1,0 +1,25 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		ui.show(self.node)
+		data.state = data.STATE_COMPLETE
+
+		local text = string.format("%s\n%d\n", data.ms2str(data.time), data.deaths)
+		local rank = "C"
+		if data.time < 360 then rank = "A"
+		elseif data.time < 600 then rank = "B"
+		end
+		if data.deaths == 0 then rank = rank.."++"
+		elseif data.deaths < 5 then rank = rank.."+"
+		end
+		text = text .. rank
+		gui.set_text(gui.get_node("right"), text)
+	end
+end

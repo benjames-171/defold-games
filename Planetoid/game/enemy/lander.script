@@ -1,0 +1,114 @@
+local data = require "main.data"
+local enemy = require "game.enemy.enemy"
+
+local SPEED = 40
+
+go.property("num", 0)
+
+local function sine(self)
+	go.animate(".", "position.y", go.PLAYBACK_LOOP_PINGPONG, 20, go.EASING_LINEAR, 4)
+end
+
+local function patrol(self)
+	self.active = true
+	self.grab = false
+	self.target = nil
+	self.dir = self.num % 2
+	if self.dir == 0 then
+		self.dir = -1
+	end
+	msg.post("#sprite", "enable")
+	msg.post("#co", "enable")
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, 60, go.EASING_LINEAR, math.random(10, 30) / 10, 0, sine)
+end
+
+local function transform(self)
+	if self.target ~= nil then
+		msg.post(self.target, "explode")
+	end
+
+	enemy.remove(go.get_id())
+	msg.post("view#game","removepoint", {nodeid = self.nodeid})
+
+	local o = factory.create("#mutant-factory")
+	enemy.add(o)
+end
+
+local function pickup(self)
+	self.grab = true
+	msg.post(self.target, "inair")
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, data.WORLD_H, go.EASING_LINEAR, 16, 0, transform)
+	data.sound("capture")
+end
+
+local function descend(self)
+	self.dir = 0
+	local pos = go.get_position()
+	local target = go.get_position(self.target)
+	local time = (pos.y - target.y) / 50
+
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, target + vmath.vector3(0, 10, 0), go.EASING_LINEAR, time, 0, pickup)
+end
+
+function init(self)
+	self.active = false
+	self.nodeid = ""
+	msg.post("view#game", "addpoint", {anim = "green"})
+	if data.onscreen(go.get_position(), 0) then
+		particlefx.play("#warp")
+	end
+	msg.post("#sprite", "disable")
+	msg.post("#co", "disable")
+	timer.delay(0.5, false, patrol)
+end
+
+local function move(self, dt)
+	local pos = go.get_position()
+	pos.x = pos.x + (self.dir * SPEED * dt)
+	pos = data.poswrap(pos)
+	go.set_position(pos)
+end
+
+function update(self, dt)
+	if self.active then
+		move(self, dt)
+	end
+	
+	if self.grab then
+		msg.post(self.target, "position", {pos = go.get_position() + vmath.vector3(0,-10,0)})
+	end
+	
+	msg.post("view#game", "setpoint", {nodeid = self.nodeid, pos = go.get_position()})
+end
+
+local function explode(self)
+	if data.onscreen(go.get_position(), 8) then
+		particlefx.play("#exp")
+		data.sound("exp-low")
+		msg.post("view#game","removepoint", {nodeid = self.nodeid})
+		data.score = data.score + 150
+		enemy.remove(go.get_id())
+		if self.target ~= nil then
+			msg.post(self.target, "release")
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") and (message.other_group == hash("laser") or message.other_group == hash("smart")) then
+		explode(self)
+	elseif message_id == hash("trigger_response") and message.enter and self.target == nil and self.active then
+		if math.random(1, 8) == 1 then
+			self.target = message.other_id
+			msg.post(self.target, "hold")
+			descend(self)
+		end
+	elseif message_id == hash("scan") then
+		self.nodeid = message.nodeid
+	elseif message_id == hash("release") then
+		patrol(self)
+	elseif message_id == hash("transform") then
+		transform(self)
+	end
+end
+

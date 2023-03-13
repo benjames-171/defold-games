@@ -1,0 +1,19 @@
+image: "/assets/png/laser.png"
+tile_width: 62
+tile_height: 1
+tile_margin: 0
+tile_spacing: 0
+collision: ""
+material_tag: "tile"
+animations {
+  id: "anim"
+  start_tile: 1
+  end_tile: 7
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+extrude_borders: 1
+inner_padding: 0
+sprite_trim_mode: SPRITE_TRIM_MODE_OFF

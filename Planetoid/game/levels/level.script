@@ -1,0 +1,149 @@
+local data = require "main.data"
+local enemy = require "game.enemy.enemy"
+
+local function spawnmen(self)
+	for n = 1, data.MAX_MEN do
+		local pos = vmath.vector3(math.random(data.mid - data.WORLD_W / 2, data.mid + data.WORLD_W / 2), math.random(8, 16), 0)
+		factory.create("#man-factory", pos, nil, {num = n})
+	end
+end
+
+local function spawnlanders(self)
+	if data.wave > 0 and data.state == data.STATE_PLAYING then
+		for n = 1, 12 do
+			local pos = vmath.vector3(math.random(data.mid - data.WORLD_W / 2, data.mid + data.WORLD_W / 2), math.random(64, data.WORLD_H-16), 0)
+			local o = factory.create("#lander-factory", pos, nil, {num = n})
+			enemy.add(o)
+		end
+		data.wave = data.wave - 1
+		data.sound("warpin")
+	end
+end
+
+local function spawnbombers(self)
+	for n = 1, 3 + self.max do
+		local pos = vmath.vector3(math.random(data.mid - data.WORLD_W / 2, data.mid + data.WORLD_W / 2), math.random(64, data.WORLD_H-16), 0)
+		local o = factory.create("#bomber-factory", pos, nil, {num = n})
+		enemy.add(o)
+	end
+end
+
+local function spawnpods(self)
+	for n = 1, self.max do
+		local pos = vmath.vector3(math.random(data.mid - data.WORLD_W / 2, data.mid + data.WORLD_W / 2), math.random(30, 100), 0)
+		local o = factory.create("#pod-factory", pos, nil, {num = n})
+		enemy.add(o)
+	end
+end
+
+local function spawnbaiter(self)
+	if data.state == data.STATE_PLAYING then
+		local pos = vmath.vector3(math.random(data.mid - data.WORLD_W / 2, data.mid + data.WORLD_W / 2), 60, 0)
+		local o = factory.create("#baiter-factory", pos)
+		enemy.add(o)
+		data.sound("warpin")
+	end
+end
+
+local function spawnspinners(self)
+	for n = 1, 1 + self.max do
+		local pos = vmath.vector3(math.random(data.mid - data.WORLD_W / 2, data.mid + data.WORLD_W / 2), math.random(64, data.WORLD_H-16), 0)
+		local o = factory.create("#spinner-factory", pos, nil, {num = n})
+		enemy.add(o)
+	end
+end
+
+local function spawnufos(self)
+	for n = 1, self.max do
+		local pos = vmath.vector3(math.random(data.mid - data.WORLD_W / 2, data.mid + data.WORLD_W / 2), math.random(64, data.WORLD_H-16), 0)
+		local o = factory.create("#ufo-factory", pos, nil, {num = n})
+		enemy.add(o)
+	end
+end
+
+local function spawndynamos(self)
+	for n = 1, self.max do
+		local pos = vmath.vector3(math.random(data.mid - data.WORLD_W / 2, data.mid + data.WORLD_W / 2), math.random(64, data.WORLD_H-16), 0)
+		local o = factory.create("#dynamo-factory", pos, nil, {num = n})
+		enemy.add(o)
+	end
+end
+
+local function spawnguppys(self)
+	for n = 1, self.max do
+		local pos = vmath.vector3(math.random(data.mid - data.WORLD_W / 2, data.mid + data.WORLD_W / 2), math.random(64, data.WORLD_H-16), 0)
+		local o = factory.create("#guppy-factory", pos, nil, {num = n})
+		enemy.add(o)
+	end
+end
+
+local function spawn(self)
+	data.wave = 3 + self.max
+	spawnmen(self)
+
+	if data.level > 1 then
+		spawnbombers(self)
+		spawnpods(self)
+	end
+
+	if data.level > 2 then
+		spawnspinners(self)
+	end
+	if data.level > 3 then
+		spawnufos(self)
+	end
+	if data.level > 4 then
+		spawndynamos(self)
+	end	
+	if data.level > 5 then
+		spawnguppys(self)
+	end	
+	
+	timer.delay(2, false, spawnlanders)
+	timer.delay(19, true, spawnlanders)
+	timer.delay(43, true, spawnbaiter)
+end
+
+function init(self)
+	enemy.data = {}
+	data.men = data.MAX_MEN
+	self.max = math.floor(data.level / 2)
+	spawn(self)
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		local total = enemy.total()
+		if total == 0 and data.wave == 0 then
+			msg.post("view#clear", "show", {total = data.men})
+			msg.post("player", "pauseinput", {delay = 2})
+		end
+	end
+end
+
+local function deleteobj(self, url)
+	go.delete(url)
+end
+
+local function transformall(self)
+	data.wave = 0
+	enemy.transformall()
+	data.sound("mutieland")
+	go.animate("bg-fore", "position.y", go.PLAYBACK_ONCE_FORWARD, -84, go.EASING_INSINE, 0.5, 0.5, deleteobj)
+	go.animate("bg-back", "position.y", go.PLAYBACK_ONCE_FORWARD, -44, go.EASING_INSINE, 0.7, 0.7, deleteobj)
+	msg.post("view#shutter", "mutate", {col = "#ffd100"})
+	timer.delay(0.5, false, function() msg.post("view#shutter", "mutate", {col = "#94216a"}) end)
+	timer.delay(1.0, false, function() msg.post("view#shutter", "mutate", {col = "#ffd100"}) end)
+	timer.delay(1.5, false, function() msg.post("view#shutter", "mutate", {col = "#94216a"}) end)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("spawn") then
+		spawn(self)
+	elseif message_id == hash("transformall") then
+		transformall(self)
+	end
+end
+
+
+

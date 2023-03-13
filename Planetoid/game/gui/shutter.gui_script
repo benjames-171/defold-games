@@ -1,0 +1,24 @@
+
+local data = require "main.data"
+
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	self.node = gui.get_node("screen")
+	gui.animate(self.node, "color.w", 0, gui.EASING_LINEAR, 0.2, 0.1, disablenode)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("smart") then
+		gui.set_enabled(self.node, true)
+		gui.set_color(self.node, data.hex2rgba("#fafdff"))
+		gui.animate(self.node, "color.w", 0, gui.EASING_LINEAR, 0.1, 0, disablenode)
+	elseif message_id == hash("mutate") then
+		gui.set_enabled(self.node, true)
+		gui.set_color(self.node, data.hex2rgba(message.col))
+		gui.set_alpha(self.node, 0.4)
+		gui.animate(self.node, "color.w", 0, gui.EASING_LINEAR, 0.5, 0, disablenode)
+	end
+end

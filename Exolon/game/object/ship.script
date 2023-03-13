@@ -1,0 +1,4 @@
+function init(self)
+	local pos = go.get_position()
+	go.animate(".", "position.y", go.PLAYBACK_LOOP_PINGPONG, pos.y + 8, go.EASING_INOUTQUAD, 3)
+end

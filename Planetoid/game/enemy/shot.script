@@ -1,0 +1,25 @@
+local data = require "main.data"
+
+go.property("man", false)
+
+local ERR = 24
+local RANGE = 256
+
+local function complete(self)
+	go.delete()
+end
+
+function init(self)
+	data.sound("shot2")
+	local r = vmath.vector3(math.random(-ERR, ERR), math.random(-ERR, ERR), 0)
+	local pos = (data.playerpos + r) - go.get_position()
+	pos = vmath.normalize(pos)
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, go.get_position() + (pos * RANGE), go.EASING_LINEAR, 3, 0, complete)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		complete(self)
+	end
+end
+

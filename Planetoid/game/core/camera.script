@@ -1,0 +1,55 @@
+local data = require "main.data"
+
+local SPEED = 0.5
+local OFFSET = 60
+local PAN = 150
+
+go.property("shake", 0)
+
+function init(self)
+	msg.post("#camera", "acquire_camera_focus")
+	msg.post("#co-smart", "disable")
+	self.target = vmath.vector3()
+	self.pos = go.get_world_position()
+	self.pan = OFFSET
+end
+
+local function pan(self, dt)
+	if data.dir > 0 and self.pan < OFFSET then
+		self.pan = self.pan + (PAN * dt)
+	elseif data.dir < 0 and self.pan > -OFFSET then
+		self.pan = self.pan - (PAN * dt)
+	end
+end
+
+local function move(self)
+	local v = vmath.vector3((self.target.x - self.pos.x) * SPEED, (self.target.y - self.pos.y) * SPEED, 0)
+	self.pos = self.pos + v
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		self.target = vmath.vector3(data.playerpos.x - (data.CANV_W / 2) + self.pan, 0, 0)
+		pan(self, dt)
+		move(self)
+		local s = math.random(-self.shake, self.shake)
+		go.set_position(self.pos + vmath.vector3(s, 0, 0))
+		data.scroll = self.pos
+		data.mid = data.scroll.x + (data.CANV_W / 2)
+	end
+end
+
+local function smartoff(self)
+	msg.post("#co-smart", "disable")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("smart") then
+		msg.post("#co-smart", "enable")
+		msg.post("#shutter", "smart")
+		timer.delay(0.1, false, smartoff)
+	elseif message_id == hash("shake") then
+		self.shake = 16
+		go.animate("#", "shake", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_LINEAR, 1)
+	end
+end

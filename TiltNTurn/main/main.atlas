@@ -1,6 +1,0 @@
-images {
-  image: "/assets/png/pixel.png"
-}
-margin: 0
-extrude_borders: 2
-inner_padding: 0

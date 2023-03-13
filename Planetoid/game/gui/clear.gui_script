@@ -1,0 +1,48 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.man = 1
+	self.total = 0
+	self.node = gui.get_node("container")
+	ui.init(self.node)
+end
+
+local function man(self)
+	gui.set_enabled(gui.get_node("man"..tostring(self.man)), true)
+	data.sound("blip")
+	self.man = self.man + 1
+
+	data.score = data.score + (data.level * 100)
+
+	if self.man > self.total then
+		timer.cancel(self.timer)
+	end
+end
+
+local function show(self)
+	ui.show(self.node)
+	data.state = data.STATE_CLEAR
+
+	for n = 1, data.MAX_MEN do
+		local node = gui.get_node("man"..tostring(n))
+		gui.set_enabled(node, false)
+	end
+
+	if self.total > 0 then
+		self.man = 1
+		self.timer = timer.delay(0.2, true, man)
+	end
+
+	local text = string.format("ATTACK WAVE %d\nCOMPLETED\n\nBONUS X %d", data.level, data.level * 100)
+	gui.set_text(gui.get_node("text"), text)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		self.total = message.total
+		show(self)
+	elseif message_id == hash("hide") then
+		ui.hide(self.node)
+	end
+end

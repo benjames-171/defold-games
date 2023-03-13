@@ -1,0 +1,63 @@
+local data = require "main.data"
+local enemy = require "game.enemy.enemy"
+
+local SPEED = 40
+
+go.property("num", 0)
+
+local function shoot(self)
+	if data.onscreen(go.get_position(), 0) then
+		factory.create("#shot-factory")
+		factory.create("#shot-factory")
+		factory.create("#shot-factory")
+	end
+	timer.delay(math.random(100, 200) / 100, false, shoot)
+end
+
+function init(self)
+	self.nodeid = ""
+	self.dir = self.num % 2
+	if self.dir == 0 then
+		self.dir = -1
+		sprite.set_hflip("#sprite", true)
+	end
+
+	local pos = go.get_position()
+	pos.y = math.random(40, 100)
+	go.set_position(pos)
+	go.animate(".", "position.y", go.PLAYBACK_LOOP_PINGPONG, pos.y + 20, go.EASING_LINEAR, math.random(500, 800) / 100)
+
+	msg.post("view#game", "addpoint", {anim = "pink-light"})
+	timer.delay(math.random(50, 150) / 100, false, shoot)
+end
+
+local function move(self, dt)
+	local pos = go.get_position()
+	pos.x = pos.x + (self.dir * SPEED * dt)
+	pos = data.poswrap(pos)
+	go.set_position(pos)
+end
+
+function update(self, dt)
+	move(self, dt)
+	msg.post("view#game", "setpoint", {nodeid = self.nodeid, pos = go.get_position()})
+end
+
+local function explode(self)
+	if data.onscreen(go.get_position(), 8) then
+		particlefx.play("#exp")
+		data.sound("exp-3")
+		msg.post("view#game","removepoint", {nodeid = self.nodeid})
+		data.score = data.score + 350
+		enemy.remove(go.get_id())
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") and (message.other_group == hash("laser") or message.other_group == hash("smart")) then
+		explode(self)
+	elseif message_id == hash("scan") then
+		self.nodeid = message.nodeid
+	end
+end
+

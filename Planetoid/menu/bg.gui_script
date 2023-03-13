@@ -1,0 +1,3 @@
+function init(self)
+	gui.play_particlefx(gui.get_node("pfx"))
+end

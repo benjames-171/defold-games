@@ -1,0 +1,44 @@
+local data = require "main.data"
+local lock = require "main.lock"
+
+local function domaincheck()
+	local v = true
+
+	lock.add_domain("v6p9d9t4.ssl.hwcdn.net")
+	lock.add_domain("game.itch")
+	
+	if not lock.verify_domain() then v = false end
+
+	return v
+end
+
+function init(self)
+	if domaincheck() then msg.post(".", "acquire_input_focus") end
+	msg.post("handler#menu", "load")
+	msg.post("@render:", "clear_color", {color = data.hex2rgba("#16171a")})
+	math.randomseed(os.time())
+	for n = 1, 5 do
+		local r = math.random()
+	end
+	if not html5 then
+		data.fullscreen()
+	end
+end
+
+function on_message(self, message_id, message,sender)
+	if message_id == hash("show_game") then
+		msg.post("handler#menu", "unload")
+		msg.post("handler#game", "load")
+	elseif message_id == hash("show_menu") then
+		msg.post("handler#game", "unload")
+		msg.post("handler#menu", "load")
+	elseif message_id == hash("proxy_loaded") then
+		msg.post(sender, "enable")
+	end
+end	
+
+function on_input(self, action_id, action)
+	if action_id == hash("fullscreen") and action.pressed then
+		data.fullscreen(self)
+	end
+end

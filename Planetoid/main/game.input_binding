@@ -1,0 +1,112 @@
+key_trigger {
+  input: KEY_SPACE
+  action: "action"
+}
+key_trigger {
+  input: KEY_UP
+  action: "up"
+}
+key_trigger {
+  input: KEY_DOWN
+  action: "down"
+}
+key_trigger {
+  input: KEY_LEFT
+  action: "left"
+}
+key_trigger {
+  input: KEY_RIGHT
+  action: "right"
+}
+key_trigger {
+  input: KEY_X
+  action: "action"
+}
+key_trigger {
+  input: KEY_ENTER
+  action: "action"
+}
+key_trigger {
+  input: KEY_END
+  action: "debug"
+}
+key_trigger {
+  input: KEY_F11
+  action: "fullscreen"
+}
+key_trigger {
+  input: KEY_ESC
+  action: "exit"
+}
+key_trigger {
+  input: KEY_Z
+  action: "hyperspace"
+}
+key_trigger {
+  input: KEY_C
+  action: "smart"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_LEFT
+  action: "left"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_RIGHT
+  action: "right"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_UP
+  action: "up"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_DOWN
+  action: "down"
+}
+gamepad_trigger {
+  input: GAMEPAD_LPAD_UP
+  action: "up"
+}
+gamepad_trigger {
+  input: GAMEPAD_LPAD_DOWN
+  action: "down"
+}
+gamepad_trigger {
+  input: GAMEPAD_LPAD_LEFT
+  action: "left"
+}
+gamepad_trigger {
+  input: GAMEPAD_LPAD_RIGHT
+  action: "right"
+}
+gamepad_trigger {
+  input: GAMEPAD_RPAD_DOWN
+  action: "action"
+}
+gamepad_trigger {
+  input: GAMEPAD_RPAD_LEFT
+  action: "hyperspace"
+}
+gamepad_trigger {
+  input: GAMEPAD_RPAD_RIGHT
+  action: "smart"
+}
+gamepad_trigger {
+  input: GAMEPAD_START
+  action: "start"
+}
+gamepad_trigger {
+  input: GAMEPAD_LTRIGGER
+  action: "left"
+}
+gamepad_trigger {
+  input: GAMEPAD_RTRIGGER
+  action: "right"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSHOULDER
+  action: "left"
+}
+gamepad_trigger {
+  input: GAMEPAD_RSHOULDER
+  action: "right"
+}

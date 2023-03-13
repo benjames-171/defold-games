@@ -1,0 +1,55 @@
+local data = require "main.data"
+
+go.property("move", 0)
+go.property("num", 2)
+go.property("dive", false)
+
+local function rise(self)
+	msg.post("#co", "enable")
+	for n=1, self.num do
+		sprite.play_flipbook("#sprite"..tostring(n), "turtle-rise")
+	end
+end
+
+local function submerge(self)
+	msg.post("#co", "disable")
+	timer.delay(1, false, rise)
+end
+
+local function dive(self)
+	for n=1, self.num do
+		sprite.play_flipbook("#sprite"..tostring(n), "turtle-dive")
+	end
+	timer.delay(1.5, false, submerge)
+end
+
+function init(self)
+	if self.dive then
+		timer.delay(4 + self.num, true, dive)
+	end
+end
+
+local function move(self, dt)
+	local pos = go.get_position()
+	pos.x = pos.x + (self.move * data.speed * dt)
+
+	if pos.x < data.MIN_X then
+		pos.x = pos.x + data.WORLD_W
+	elseif pos.x > data.MAX_X then
+		pos.x = pos.x - data.WORLD_W
+	end
+
+	go.set_position(pos)
+end
+
+function update(self, dt)
+	if data.state ~= data.STATE_PAUSE then
+		move(self, dt)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") and message.own_group == hash("log") then
+		msg.post(message.other_id, "move", {move = self.move})
+	end
+end

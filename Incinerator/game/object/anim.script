@@ -1,0 +1,6 @@
+go.property("anim", 0)
+
+function init(self)
+	local anim = "anim"..tostring(self.anim)
+	sprite.play_flipbook("#sprite", anim)
+end

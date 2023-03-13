@@ -1,0 +1,69 @@
+local data = require "main.data"
+local enemy = require "game.enemy.enemy"
+
+local SPEED = 40
+
+go.property("num", 0)
+
+local function sine(self)
+	go.animate(".", "position.y", go.PLAYBACK_LOOP_PINGPONG, data.WORLD_H, go.EASING_LINEAR, 6)
+end
+
+local function dropbomb(self)
+	if data.onscreen(go.get_position(), 0) then
+		local pos = go.get_position()
+		pos.z = pos.z - 0.1
+		factory.create("#bomb-factory", pos)
+	end
+end
+
+function init(self)
+	self.nodeid = ""
+	self.lastpos = vmath.vector3()
+	self.dir = self.num % 2
+	if self.dir == 0 then
+		self.dir = -1
+	end
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, 30, go.EASING_LINEAR, math.random(10,30)/10, 0, sine)
+	msg.post("view#game", "addpoint", {anim = "ryb"})
+	timer.delay(2, true, dropbomb)
+end
+
+local function move(self, dt)
+	local pos = go.get_position()
+	pos.x = pos.x + (self.dir * SPEED * dt)
+	pos = data.poswrap(pos)
+	go.set_position(pos)
+end
+
+local function anim(self)
+	local pos = go.get_position() - self.lastpos
+	sprite.set_hflip("#sprite", pos.x < 0)
+	sprite.set_vflip("#sprite", pos.y > 0)
+	self.lastpos = go.get_position()
+end
+
+function update(self, dt)
+	move(self, dt)
+	anim(self)
+	msg.post("view#game", "setpoint", {nodeid = self.nodeid, pos = go.get_position()})
+end
+
+local function explode(self)
+	if data.onscreen(go.get_position(), 8) then
+		particlefx.play("#exp")
+		data.sound("exp-4")
+		msg.post("view#game","removepoint", {nodeid = self.nodeid})
+		data.score = data.score + 250
+		enemy.remove(go.get_id())
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") and (message.other_group == hash("laser") or message.other_group == hash("smart")) then
+		explode(self)
+	elseif message_id == hash("scan") then
+		self.nodeid = message.nodeid
+	end
+end
+

@@ -1,0 +1,318 @@
+data = require "main.data"
+
+local SPEED = 25
+local INVUL = 2
+
+local function enableinput()
+	msg.post(".", "acquire_input_focus")
+end
+
+local function pauseinput()
+	msg.post(".", "release_input_focus")
+	timer.delay(0.5, false, enableinput)
+end
+
+function reset(self)
+	data.hp = 1
+	self.invul = INVUL
+	go.set_position(self.origin)
+	self.dir = vmath.vector3(0,-1,0)
+	msg.post("#sprite", "enable")
+	msg.post("#co", "enable")
+	if data.deaths > 0 then
+		sound.play("main:/sound#reset")
+	end
+end
+
+function init(self)
+	self.origin = vmath.vector3()
+	self.move = vmath.vector3()
+	self.correction = vmath.vector3()
+	self.anim = vmath.vector3()
+	self.onground = 0
+	self.anim = ""
+	self.fire = true
+	self.firing = false
+	pauseinput()
+	sound.play("main:/sound#flame", {gain = 0.1})
+	sound.play("main:/sound#music-game", {gain = 0.5})
+	reset(self)
+end
+
+local function quit2menu(self)
+	msg.post("main:/sound", "stop_sound")
+	msg.post("main:/handler", "show_menu")
+end
+
+local function move(self, dt)
+	go.set_position(go.get_position() + (self.move * dt * SPEED))
+	data.playerpos = go.get_position()
+	if self.move ~= vmath.vector3(0,0,0) then
+		self.dir = self.move
+	end
+end
+
+local function dead(self)
+	data.deaths = data.deaths + 1
+	msg.post("#sprite", "disable")
+	msg.post("#co", "disable")
+	msg.post("/effect", "smoke", {pos = go.get_position()})
+	sound.play("main:/sound#dead")
+	timer.delay(1.5, false, reset)
+end
+
+local function hit(self, d)
+	if self.invul <= 0 then
+		data.hp = data.hp - d
+		sound.play("main:/sound#hit")
+		if data.hp <= 0 then
+			data.hp = 0
+			dead(self)
+		else
+			self.invul = INVUL
+		end
+	end
+end
+
+local function ending(self)
+	msg.post("#sprite", "disable")
+end
+
+local function pick(self)
+	local pos = data.world2tile(go.get_position())
+	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+
+	if t == 11 then
+		sound.play("main:/sound#pickup")
+		msg.post("view#game", "status", {text = "TANKS REFILLED"})
+		data.fuel = 1
+	elseif t == 12 then
+		sound.play("main:/sound#pickup2")
+		msg.post("view#game", "status", {text = "HEALTH RESTORED"})
+		data.hp = 1
+	elseif t >= 13 and t <= 15 then
+		if not data.key[t-12] then
+			sound.play("main:/sound#pickup3")
+			data.key[t-12] = true
+			msg.post("view#game", "status", {text = "GOT THE KEY"})
+		else
+			return
+		end
+	elseif t == 16 then
+		sound.play("main:/sound#pickup")
+		msg.post("view#game", "status", {text = "GOT THE DISC"})
+		data.discs = data.discs + 1
+	elseif t == 17 then
+		sound.play("main:/sound#pickup")
+		msg.post("view#game", "status", {text = "YOU FOUND CASEY"})
+		data.save.ee[1] = true
+		data.savegamefile()
+	elseif t == 18 then
+		sound.play("main:/sound#pickup")
+		msg.post("view#game", "status", {text = "FOUND CAT COLLAR"})
+		data.save.ee[2] = true
+		data.savegamefile()
+	elseif t == 19 then
+		sound.play("main:/sound#pickup")
+		msg.post("view#game", "status", {text = "FOUND THE PUP"})
+		data.save.ee[3] = true
+		data.savegamefile()
+	elseif t == 20 then
+		sound.play("main:/sound#pickup")
+		msg.post("view#game", "status", {text = "FOUND THE HELMET"})
+		data.save.ee[4] = true
+		data.savegamefile()
+	elseif t == 29 then
+		sound.play("main:/sound#pickup2")
+		msg.post("view#game", "status", {text = "FOUND A SECRET!"})
+		data.secrets = data.secrets + 1
+	elseif t == 30 then
+		sound.play("main:/sound#pickup2")
+		msg.post("view#game", "status", {text = "CHECKPOINT"})
+		self.origin = data.tile2world(pos)
+	elseif t == 137 then
+		data.state = data.STATE_ENDING
+		sprite.play_flipbook("#sprite", "us")
+		timer.delay(3, false, ending)
+		msg.post("/dropship", "start")
+	else
+		return
+	end
+	tilemap.set_tile("/level#tilemap", "world", pos.x, pos.y, 0)
+end
+
+local function flash(self, dt)
+	if self.invul > 0 then
+		self.invul = self.invul - dt
+		if (self.invul * 80) % 10 < 6 then
+			msg.post("#sprite", "disable")
+		else
+			msg.post("#sprite", "enable")
+		end
+	end
+end
+
+local function clear(self)
+	msg.post("/view#clear", "show")
+end
+
+local function anim(self)
+	local anim = ""
+	if self.dir.x > 0 then
+		anim = "r"
+	elseif self.dir.x < 0 then
+		anim = "l"
+	elseif self.dir.y > 0 then
+		anim = "u"
+	elseif self.dir.y < 0 then
+		anim = "d"
+	end
+
+	if vmath.length(self.move) == 0 then
+		anim = anim.."s"
+	end
+
+	if anim ~= self.anim then
+		sprite.play_flipbook("#sprite", anim)
+		self.anim = anim
+	end
+end
+
+local function audio(self)
+	if self.firing and data.fuel > 0 then
+		sound.set_gain("main:/sound#flame", 1)
+	else
+		sound.set_gain("main:/sound#flame", 0)
+	end
+	self.firing = false
+end
+
+function update(self, dt)
+	if data.state == data.STATE_PLAYING then
+		move(self, dt)
+		flash(self, dt)
+		pick(self)
+		anim(self)
+		audio(self)
+
+		data.time = data.time + dt
+	end
+
+	self.move = vmath.vector3()
+	self.correction = vmath.vector3()
+end
+
+local function enablefire(self)
+	self.fire = true
+end
+
+local function fire(self)
+	self.firing = true
+	if self.fire and data.fuel > 0 then
+		local pos = go.get_position()
+		factory.create("#fire-factory", pos, nil, {move = self.dir})
+		self.fire = false
+		timer.delay(0.03, false, enablefire)
+		if not data.save.cheat then
+			data.fuel = data.fuel - 0.001
+			if data.fuel < 0 then
+				data.fuel = 0
+			end
+		end
+	end
+end
+
+local function collision(self, message)
+	if message.distance > 0 then
+		local proj = vmath.project(self.correction, message.normal * message.distance)
+		if proj < 1 then
+			local comp = (message.distance - message.distance * proj) * message.normal
+			go.set_position(go.get_position() + comp)
+			self.correction = self.correction + comp
+		end
+	end
+end
+
+local function checkaction(self)
+	local pos = data.world2tile(go.get_position())
+	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
+
+	if t == 150 then
+		msg.post("map", "refresh")
+		msg.post("view#map", "show")
+		sound.play("main:/sound#chirp")
+	end
+end
+
+local function input_playing(self, action_id, action)
+	if action_id == hash("left") then
+		self.move.x = -1
+	elseif action_id == hash("right") then
+		self.move.x = 1
+	elseif action_id == hash("down") then
+		self.move.y = -1
+	elseif action_id == hash("up") then
+		self.move.y = 1
+	elseif action_id == hash("action") then
+		if action.pressed then
+			checkaction(self)
+		else
+			fire(self)
+		end
+	elseif action_id == hash("exit") and action.pressed then
+		msg.post("view#pause", "show")
+	elseif action_id == hash("start") and action.pressed then
+		msg.post("view#pause", "show")
+	elseif action_id == hash("debug") and action.pressed then
+		--dead(self)
+		--msg.post("view#complete", "show")
+	end
+end
+
+local function input_map(self, action_id, action)
+	if action_id == hash("action") and action.pressed then
+		msg.post("view#map", "hide")
+		sound.play("main:/sound#chirp")
+		pauseinput()
+		data.state = data.STATE_PLAYING
+	end
+end
+
+local function input_complete(self, action_id, action)
+	if action_id == hash("exit") and action.pressed then
+		quit2menu(self)
+	end
+end
+
+function on_input(self, action_id, action)
+	if action.value < 0.2 then return
+	end	
+	
+	if data.state == data.STATE_PLAYING then
+		input_playing(self, action_id, action)
+	elseif data.state == data.STATE_PAUSE then
+		msg.post("view#pause", "input", {action_id = action_id, action = action})
+	elseif data.state == data.STATE_MAP then
+		input_map(self, action_id, action)
+	elseif data.state == data.STATE_COMPLETE then
+		input_complete(self, action_id, action)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("position") then
+		go.set_position(message.pos)
+		data.spawnpos = message.pos
+		self.origin = message.pos
+	elseif message_id == hash("contact_point_response") then
+		if message.other_group == hash("enemy") then
+			hit(self, 0.15)
+		else
+			collision(self, message)
+		end
+	elseif message_id == hash("pauseinput") then
+		pauseinput()
+	elseif message_id == hash("quit") then
+		quit2menu(self)
+	end
+end

@@ -1,0 +1,16 @@
+function init(self)
+	msg.post("#arrow", "disable")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		if message.enter then
+			msg.post("#arrow", "enable")
+			msg.post("common/player", "change", {flag = true})
+		else
+			msg.post("#arrow", "disable")
+			msg.post("common/player", "change", {flag = false})
+		end
+	end
+end
+

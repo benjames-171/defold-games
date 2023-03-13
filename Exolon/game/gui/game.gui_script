@@ -1,0 +1,31 @@
+local data = require "main.data"
+
+local function disablenode(self, node)
+	gui.set_enabled(node, false)
+end
+
+function init(self)
+	gui.set_enabled(gui.get_node("status"), false)
+end
+
+function update(self, dt)
+	local text = "BOMBS "..tostring(data.bombs)
+	gui.set_text(gui.get_node("bombs"), text)
+
+	text = string.format("%06d", data.score)
+	gui.set_text(gui.get_node("score"), text)
+
+	text = "ZONE "..tostring(data.screen + 1 + ((data.level - 1) * 25))
+	gui.set_text(gui.get_node("zone"), text)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("status") then
+		local node = gui.get_node("status")
+		gui.set_text(gui.get_node("status-text"), message.text)
+		gui.set_enabled(node, true)
+		gui.set_color(node, vmath.vector4(1,1,1,1))
+		gui.animate(node, "color.w", 0, gui.EASING_LINEAR, 0.2, 3, disablenode)
+	end
+end
+

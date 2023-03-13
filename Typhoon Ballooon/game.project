@@ -1,0 +1,60 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /render/custom.renderc
+
+[display]
+width = 1024
+height = 576
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[script]
+shared_state = 1
+
+[html5]
+splash_image = /assets/png/splash.png
+cssfile = /builtins/manifests/web/dark_theme.css
+scale_mode = fit
+show_console_banner = 0
+show_made_with_defold = 0
+show_fullscreen_button = 0
+
+[project]
+title = Typhoon Balloon
+version = v1.0i
+dependencies#0 = https://github.com/subsoap/defos/archive/master.zip
+
+[tilemap]
+max_count = 1
+
+[factory]
+max_count = 32
+
+[collectionfactory]
+max_count = 32
+
+[collection_proxy]
+max_count = 2
+
+[particle_fx]
+max_count = 8
+max_emitter_count = 8
+max_particle_count = 256
+
+[label]
+max_count = 8
+
+[model]
+max_count = 8
+
+[spine]
+max_count = 8
+
+[mesh]
+max_count = 8
+
+[sprite]
+max_count = 8
+

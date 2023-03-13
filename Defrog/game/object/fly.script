@@ -1,0 +1,48 @@
+local data = require "main.data"
+
+local function disable(self)
+	msg.post("#co", "disable")
+	msg.post("#sprite", "disable")
+end
+
+local function hide(self)
+	data.home[self.home] = false
+	disable(self)
+end
+
+local function show(self)
+	msg.post("#co", "enable")
+	msg.post("#sprite", "enable")
+	local pos = vmath.vector3(16, 216, -0.5)
+	self.home = data.gethome()
+	pos.x = pos.x + (self.home - 1) * 48
+	go.set_position(pos)
+	self.timer = timer.delay(3, false, hide)
+end
+
+function init(self)
+	self.home = 0
+	self.timer = nil
+	disable(self)
+	msg.post("#200", "disable")
+	timer.delay(8, true, show)
+end
+
+local function hide200(self)
+	msg.post("#200", "disable")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		disable(self)		
+		msg.post("#200", "enable")
+		local pos = go.get_position()
+		pos.z = 1
+		pos.y = pos.y - 4
+		go.set_position(pos)
+		pos.y = pos.y + 8
+		go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, pos.y, go.EASING_LINEAR, 1, 0, hide200)
+		data.score = data.score + 200
+		timer.cancel(self.timer)
+	end	
+end

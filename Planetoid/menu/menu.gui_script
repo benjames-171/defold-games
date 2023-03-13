@@ -1,0 +1,96 @@
+local data = require "main.data"
+local ui = require "main.ui"
+
+function init(self)
+	self.handpos = 1
+	self.menumax = 4
+	self.arrowpos = {
+		gui.get_position(gui.get_node("1")),
+		gui.get_position(gui.get_node("2")),
+		gui.get_position(gui.get_node("3")),
+		gui.get_position(gui.get_node("4")),
+	}
+	if html5 then
+		self.menumax = 3
+		gui.set_enabled(gui.get_node("4"), false)
+	end
+	msg.post(".", "acquire_input_focus")
+	self.node = gui.get_node("container")
+	gui.set_position(self.node, vmath.vector3(data.SCR_W/2, (data.SCR_H/2), 0))
+	gui.set_text(gui.get_node("v"), sys.get_config("project.version"))
+	local text = string.format("HI %06d", data.save.hiscore)
+	gui.set_text(gui.get_node("hiscore"), text)
+	data.state = data.STATE_MENU
+end
+
+local function startgame(self)
+	ui.hide(self.node)
+	data.level = 1
+	data.lives = 3
+	data.bombs = 3
+	data.score = 0
+	data.state = data.STATE_PLAYING
+	timer.delay(0.15, false, function() msg.post("main:/handler", "show_game") end)
+end	
+
+local function show(self)
+	ui.show(self.node)
+	data.state = data.STATE_MENU
+end
+
+function update(self, dt)
+	if data.state == data.STATE_MENU then
+		local pos = vmath.vector3(self.arrowpos[self.handpos].x - 28, self.arrowpos[self.handpos].y - 3, 0)
+		gui.set_position(gui.get_node("arrow"), pos)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show") then
+		show(self)
+	end
+end
+
+local function input(self, action_id, action)
+	if action_id == hash("up") and action.pressed then
+		self.handpos = self.handpos - 1
+		if self.handpos < 1 then
+			self.handpos = self.menumax
+		end
+		data.sound("blip")
+	elseif action_id == hash("down") and action.pressed then
+		self.handpos = self.handpos + 1
+		if self.handpos > self.menumax then
+			self.handpos = 1
+		end
+		data.sound("blip")
+	elseif action_id == hash("action") and action.pressed then
+		ui.hide(self.node)
+		data.sound("shot")
+		if self.handpos == 1 then
+			startgame(self)
+		elseif self.handpos == 2 then
+			msg.post("#controls", "show", {})
+		elseif self.handpos == 3 then
+			msg.post("#scoring", "show", {})
+		elseif self.handpos == 4 then
+			msg.post("@system:", "exit", {code = 0})
+		end
+	elseif action_id == hash("start") and action.pressed then
+		startgame(self)
+	end
+end
+
+function on_input(self, action_id, action)
+	if action.value < 0.2 then return
+	end
+
+	if data.state == data.STATE_MENU then
+		input(self, action_id, action)
+	elseif data.state == data.STATE_CONTROLS then
+		msg.post("#controls", "input", {action_id = action_id, action = action})
+	elseif data.state == data.STATE_SCORING then
+		msg.post("#scoring", "input", {action_id = action_id, action = action})
+	end
+end
+
