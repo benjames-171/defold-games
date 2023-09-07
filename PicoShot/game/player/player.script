@@ -81,7 +81,7 @@ function on_message(self, message_id, message, sender)
 		go.set_position(message.pos)
 	elseif message_id == hash("contact_point_response") then
 		if message.other_group == hash("enemy") or message.other_group == hash("fire") then
-			dead(self)
+			--dead(self)
 		end
 	elseif message_id == hash("item") then
 		if message.item < 10 then data.weap = message.item
