@@ -31,6 +31,10 @@ local function show(self)
 	data.state = data.STATE_MENU
 end
 
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
 local function hide(self)
 	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(data.SCR_W/2, (data.SCR_H/2) - data.GUI_DROP, 0), gui.EASING_INOUTQUAD, 0.25, 0, disablenode)
 	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.25)

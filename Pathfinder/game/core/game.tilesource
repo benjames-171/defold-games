@@ -1,10 +1,7 @@
 image: "/assets/png/tiles.png"
 tile_width: 16
 tile_height: 16
-tile_margin: 0
-tile_spacing: 0
 collision: "/assets/png/tiles.png"
-material_tag: "tile"
 convex_hulls {
   index: 0
   count: 4
@@ -992,71 +989,48 @@ animations {
   end_tile: 3
   playback: PLAYBACK_LOOP_FORWARD
   fps: 4
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "button"
   start_tile: 27
   end_tile: 27
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "button-green"
   start_tile: 25
   end_tile: 25
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "button-red"
   start_tile: 42
   end_tile: 42
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "button-yellow"
   start_tile: 41
   end_tile: 41
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "clearbg"
   start_tile: 28
   end_tile: 28
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "crate"
   start_tile: 13
   end_tile: 13
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "door"
   start_tile: 15
   end_tile: 15
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "exit"
@@ -1064,8 +1038,6 @@ animations {
   end_tile: 19
   playback: PLAYBACK_LOOP_FORWARD
   fps: 5
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "fireball"
@@ -1073,98 +1045,66 @@ animations {
   end_tile: 168
   playback: PLAYBACK_LOOP_FORWARD
   fps: 15
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "jump"
   start_tile: 159
   end_tile: 159
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "lift"
   start_tile: 24
   end_tile: 24
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "mirror4"
   start_tile: 4
   end_tile: 4
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "mirror5"
   start_tile: 5
   end_tile: 5
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "mirror6"
   start_tile: 6
   end_tile: 6
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "mirror7"
   start_tile: 7
   end_tile: 7
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "outline"
   start_tile: 26
   end_tile: 26
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "pausebg"
   start_tile: 14
   end_tile: 14
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "player"
   start_tile: 1
   end_tile: 1
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "pointer"
   start_tile: 55
   end_tile: 55
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "run"
@@ -1172,63 +1112,41 @@ animations {
   end_tile: 159
   playback: PLAYBACK_LOOP_FORWARD
   fps: 15
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "star0"
   start_tile: 179
   end_tile: 179
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "star1"
   start_tile: 180
   end_tile: 180
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "star2"
   start_tile: 181
   end_tile: 181
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "star3"
   start_tile: 182
   end_tile: 182
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "static"
   start_tile: 156
   end_tile: 156
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "teleport"
   start_tile: 56
   end_tile: 57
   playback: PLAYBACK_LOOP_FORWARD
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 extrude_borders: 1
-inner_padding: 0
-sprite_trim_mode: SPRITE_TRIM_MODE_OFF

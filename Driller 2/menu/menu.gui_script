@@ -34,6 +34,10 @@ local function show(self)
 	data.state = data.STATE_MENU
 end
 
+local function disablenode (self, node)
+	gui.set_enabled(node, false)
+end
+
 local function hide(self)
 	gui.animate(self.node, gui.PROP_POSITION, vmath.vector3(640, 300, 0), gui.EASING_INOUTQUAD, 0.25, 0, disablenode)
 	gui.animate(self.node, gui.PROP_COLOR, vmath.vector4(1,1,1,0), gui.EASING_INOUTQUAD, 0.25)
@@ -50,8 +54,8 @@ function update(self, dt)
 		if self.lock > 0 then self.lock = self.lock - 1 end
 	end
 
-	local str = ""
-	local tag = ""
+	local str
+	local tag
 	if data.mode == 1 then
 		str = "MODE: EASY"
 		tag = "REGENERATE WHEN DOCKED"

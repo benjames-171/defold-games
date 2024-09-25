@@ -13,7 +13,7 @@ local function belt(self, t, x, y)
 end
 
 local function parse(self)
-	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
 	local portal = 1
 	local frames = {
 		vmath.vector3(13,14,0),
@@ -127,7 +127,7 @@ local function parse(self)
 end
 
 local function decorate(self)
-	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
 
 	for y = sy, h+sy-1 do
 		for x = sx, w+sx-1 do
@@ -151,9 +151,9 @@ local function decorate(self)
 					end
 				end
 				if y > 1 then
-					local w = tilemap.get_tile("#tilemap", "world", x, y-1)
+					local w2 = tilemap.get_tile("#tilemap", "world", x, y-1)
 					t = tilemap.get_tile("#tilemap", "top", x, y-1)
-					if w == 0 and t == 0 then tilemap.set_tile("#tilemap", "top", x, y-1, math.random(253, 256)) end
+					if w2 == 0 and t == 0 then tilemap.set_tile("#tilemap", "top", x, y-1, math.random(253, 256)) end
 				end
 			end
 		end

@@ -16,6 +16,3 @@ images {
 images {
   image: "/assets/png/info.png"
 }
-margin: 0
-extrude_borders: 0
-inner_padding: 0

@@ -1,7 +1,7 @@
 local data = require "main.data"
 
 function init(self)
-	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
 
 	data.bounds = vmath.vector4(
 		(sx - 1) * data.TILE_SIZE,

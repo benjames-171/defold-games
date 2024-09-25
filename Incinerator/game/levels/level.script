@@ -35,12 +35,12 @@ local function tile(self, x, y, offset)
 		c = c + 5
 	end
 
-	local tile = p[c+4]
-	tilemap.set_tile("#tilemap", "world", x, y, tile + offset)
+	local t = p[c+4]
+	tilemap.set_tile("#tilemap", "world", x, y, t + offset)
 end
 
 local function parse(self)
-	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
 
 	for y = sy+1, h+sy-2 do
 		for x = sx+1, w+sx-2 do
@@ -49,11 +49,11 @@ local function parse(self)
 			local pos = data.tile2world(vmath.vector3(x, y, 0.5))
 
 			if f == 226 then
-				local tile = 0
+				local wt = 0
 				if math.random(1, 4) == 1 then
-					tile = math.random(226, 233)
+					wt = math.random(226, 233)
 				end
-				tilemap.set_tile("#tilemap", "floor", x, y, tile)
+				tilemap.set_tile("#tilemap", "floor", x, y, wt)
 			end
 
 			if t == 1 then

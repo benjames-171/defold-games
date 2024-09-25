@@ -1,108 +1,71 @@
 image: "/assets/png/obj.png"
 tile_width: 36
 tile_height: 62
-tile_margin: 0
-tile_spacing: 0
-collision: ""
-material_tag: "tile"
 animations {
   id: "1"
   start_tile: 1
   end_tile: 1
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "2"
   start_tile: 2
   end_tile: 2
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "3"
   start_tile: 11
   end_tile: 11
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "4"
   start_tile: 12
   end_tile: 12
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "5"
   start_tile: 15
   end_tile: 15
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "cannon"
   start_tile: 3
   end_tile: 3
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "changer"
   start_tile: 6
   end_tile: 6
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "globe"
   start_tile: 8
   end_tile: 8
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "launcher"
   start_tile: 9
   end_tile: 9
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "orb"
   start_tile: 10
   end_tile: 10
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "tank"
   start_tile: 14
   end_tile: 14
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "tele"
@@ -110,27 +73,17 @@ animations {
   end_tile: 5
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "trap"
   start_tile: 7
   end_tile: 7
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "turret"
   start_tile: 13
   end_tile: 13
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 extrude_borders: 1
-inner_padding: 0
-sprite_trim_mode: SPRITE_TRIM_MODE_OFF

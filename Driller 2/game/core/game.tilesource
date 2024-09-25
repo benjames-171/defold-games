@@ -1,10 +1,7 @@
 image: "/assets/png/tiles.png"
 tile_width: 16
 tile_height: 16
-tile_margin: 0
-tile_spacing: 0
 collision: "/assets/png/tiles.png"
-material_tag: "tile"
 convex_hulls {
   index: 0
   count: 10
@@ -1292,8 +1289,6 @@ animations {
   end_tile: 68
   playback: PLAYBACK_NONE
   fps: 0
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "clock"
@@ -1301,8 +1296,6 @@ animations {
   end_tile: 18
   playback: PLAYBACK_NONE
   fps: 0
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "heart"
@@ -1310,8 +1303,6 @@ animations {
   end_tile: 2
   playback: PLAYBACK_NONE
   fps: 0
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "hp"
@@ -1319,8 +1310,6 @@ animations {
   end_tile: 2
   playback: PLAYBACK_NONE
   fps: 0
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "oil"
@@ -1328,8 +1317,6 @@ animations {
   end_tile: 5
   playback: PLAYBACK_NONE
   fps: 0
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "pigtail"
@@ -1337,8 +1324,6 @@ animations {
   end_tile: 6
   playback: PLAYBACK_NONE
   fps: 0
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "player"
@@ -1346,8 +1331,6 @@ animations {
   end_tile: 1
   playback: PLAYBACK_NONE
   fps: 0
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "ruler"
@@ -1355,8 +1338,6 @@ animations {
   end_tile: 17
   playback: PLAYBACK_NONE
   fps: 0
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "speedup"
@@ -1364,8 +1345,6 @@ animations {
   end_tile: 52
   playback: PLAYBACK_NONE
   fps: 0
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "target"
@@ -1373,8 +1352,4 @@ animations {
   end_tile: 7
   playback: PLAYBACK_NONE
   fps: 0
-  flip_horizontal: 0
-  flip_vertical: 0
 }
-extrude_borders: 0
-inner_padding: 0

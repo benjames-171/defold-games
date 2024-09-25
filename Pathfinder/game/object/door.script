@@ -1,3 +1,5 @@
+local data = require "main.data"
+
 function init(self)
 	local pos = go.get_position() + vmath.vector3(0, -16, 0)
 	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, pos, go.EASING_INOUTQUAD, 0.5, 0.5)

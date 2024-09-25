@@ -14,7 +14,7 @@ end
 
 local function inv(self)
 	for n = 1, 5 do
-		i = item.get(n)
+		local i = item.get(n)
 		local node = gui.get_node(tostring(n))
 		local anim = "inv"..tostring(i)
 		gui.play_flipbook(node, anim)

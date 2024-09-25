@@ -1,10 +1,7 @@
 image: "/assets/png/tiles.png"
 tile_width: 16
 tile_height: 16
-tile_margin: 0
-tile_spacing: 0
 collision: "/assets/png/tiles.png"
-material_tag: "tile"
 convex_hulls {
   index: 0
   count: 16
@@ -510,90 +507,60 @@ animations {
   start_tile: 4
   end_tile: 4
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "bomb"
   start_tile: 13
   end_tile: 13
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "bomb_insert"
   start_tile: 3
   end_tile: 3
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "ghost1"
   start_tile: 14
   end_tile: 14
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "ghost2"
   start_tile: 15
   end_tile: 15
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "ghost3"
   start_tile: 16
   end_tile: 16
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "ghost4"
   start_tile: 17
   end_tile: 17
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "ghost5"
   start_tile: 18
   end_tile: 18
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "heart"
   start_tile: 20
   end_tile: 20
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "heart_empty"
   start_tile: 19
   end_tile: 19
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "jump"
@@ -601,26 +568,17 @@ animations {
   end_tile: 12
   playback: PLAYBACK_ONCE_BACKWARD
   fps: 15
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "mushroom"
   start_tile: 2
   end_tile: 2
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "player"
   start_tile: 11
   end_tile: 11
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 extrude_borders: 2
-inner_padding: 0

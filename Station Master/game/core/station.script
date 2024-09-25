@@ -13,7 +13,7 @@ function update(self, dt)
 end
 
 local function findtile(self, layer, num)
-	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
 
 	for y = sy, h+sy-1 do
 		for x = sx, w+sx-1 do

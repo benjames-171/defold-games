@@ -2,7 +2,7 @@ local data = require "main.data"
 
 local function parse(self)
 	local home = 1
-	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
 
 	data.bounds = vmath.vector4(
 		(sx - 1) * data.TILE_SIZE,

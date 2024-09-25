@@ -1,18 +1,11 @@
 image: "/assets/png/wizard.png"
 tile_width: 8
 tile_height: 8
-tile_margin: 0
-tile_spacing: 0
-collision: ""
-material_tag: "tile"
 animations {
   id: "dead"
   start_tile: 25
   end_tile: 36
-  playback: PLAYBACK_ONCE_FORWARD
   fps: 15
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "static-down"
@@ -20,8 +13,6 @@ animations {
   end_tile: 24
   playback: PLAYBACK_NONE
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "static-left"
@@ -29,8 +20,6 @@ animations {
   end_tile: 6
   playback: PLAYBACK_NONE
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "static-right"
@@ -38,8 +27,6 @@ animations {
   end_tile: 3
   playback: PLAYBACK_NONE
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "static-up"
@@ -47,8 +34,6 @@ animations {
   end_tile: 17
   playback: PLAYBACK_NONE
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "walk-down"
@@ -56,8 +41,6 @@ animations {
   end_tile: 12
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "walk-left"
@@ -65,8 +48,6 @@ animations {
   end_tile: 8
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "walk-right"
@@ -74,8 +55,6 @@ animations {
   end_tile: 4
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "walk-up"
@@ -83,9 +62,5 @@ animations {
   end_tile: 16
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 extrude_borders: 2
-inner_padding: 0
-sprite_trim_mode: SPRITE_TRIM_MODE_OFF

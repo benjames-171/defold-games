@@ -1,7 +1,7 @@
 local data = require "main.data"
 
 local function parse(self)
-	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
 	local frames = {
 		vmath.vector3(166,167,0),
 		vmath.vector3(170,173,0),

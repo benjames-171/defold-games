@@ -1,14 +1,6 @@
 local data = require "main.data"
 local ui = require "main.ui"
 
-local function letterup(self, node)
-	gui.animate(node, "position.y", 6, gui.EASING_INOUTQUAD, math.random(5,10)/20, 0, letterdown)
-end
-
-function letterdown(self, node)
-	gui.animate(node, "position.y", -6, gui.EASING_INOUTQUAD, math.random(5,10)/20, 0, letterup)
-end
-
 function init(self)
 	self.handpos = 1
 	self.arrowpos = {
@@ -26,7 +18,7 @@ function init(self)
 
 	for n = 1, 10 do
 		local node = gui.get_node("l"..tostring(n))
-		gui.animate(node, "position.y", -20, gui.EASING_INOUTQUAD, 0.5, 0, letterup)
+		gui.animate(node, "position.y", -10, gui.EASING_INOUTQUAD, 0.5, n/5, nil, gui.PLAYBACK_LOOP_PINGPONG)
 	end
 end
 

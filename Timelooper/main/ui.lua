@@ -2,8 +2,8 @@ local data = require "main.data"
 
 local M = {}
 
-M.GUI_DROP = 50
-M.FADE = 0.25
+M.GUI_DROP = 20
+M.FADE = 0.1
 
 local function disablenode (self, node)
 	gui.set_enabled(node, false)

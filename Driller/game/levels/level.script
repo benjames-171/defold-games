@@ -1,7 +1,7 @@
 local data = require ("main.data")
 
 function init(self)
-	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
 
 	data.pills = 0
 	data.eaten = 0

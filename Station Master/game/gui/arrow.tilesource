@@ -1,10 +1,6 @@
 image: "/assets/png/arrow.png"
 tile_width: 8
 tile_height: 4
-tile_margin: 0
-tile_spacing: 0
-collision: ""
-material_tag: "tile"
 collision_groups: "default"
 animations {
   id: "anim"
@@ -12,8 +8,4 @@ animations {
   end_tile: 2
   playback: PLAYBACK_LOOP_FORWARD
   fps: 2
-  flip_horizontal: 0
-  flip_vertical: 0
 }
-extrude_borders: 0
-inner_padding: 0

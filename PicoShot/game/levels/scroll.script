@@ -7,7 +7,7 @@ function init(self)
 	self.pos = go.get_position()
 
 	if self.tilemap then
-		sx, sy, w, h = tilemap.get_bounds("#tilemap")
+		local _, _, _, h = tilemap.get_bounds("#tilemap")
 		self.height = h * 8
 	else
 		self.height = 64

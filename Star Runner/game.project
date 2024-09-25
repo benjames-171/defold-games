@@ -6,6 +6,7 @@ render = /render/custom.renderc
 width = 1024
 height = 576
 vsync = 0
+update_frequency = 60
 
 [graphics]
 default_texture_min_filter = nearest

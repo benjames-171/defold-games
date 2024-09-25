@@ -1,7 +1,0 @@
-function on_message(self, message_id, message, sender)
-	if message_id == hash("open") then
-		sprite.play_flipbook("#sprite", "vortex")
-		sound.play("main:/sound#clear")
-	end	
-end
-

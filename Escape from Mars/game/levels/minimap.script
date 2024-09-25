@@ -1,5 +1,5 @@
 local function generate(self)
-	sx, sy, width, height = tilemap.get_bounds("/level#tilemap")
+	local sx, sy, width, height = tilemap.get_bounds("/level#tilemap")
 
 	local buff = buffer.create(width * height, {{name = hash("rgba"), type = buffer.VALUE_TYPE_UINT8, count = 4}})
 	local stream = buffer.get_stream(buff, hash("rgba"))
@@ -9,7 +9,6 @@ local function generate(self)
 			local index = ((y - sy) * width * 4) + ((x - sx) * 4) 
 			local t = tilemap.get_tile("/level#tilemap", "world", x, y)
 
-			local byte = 0
 			if t > 0 and t <= 128 then
 				stream[index + 1] = 0x1e
 				stream[index + 2] = 0x88

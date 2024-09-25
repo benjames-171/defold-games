@@ -1,4 +1,4 @@
-data = require "main.data"
+local data = require "main.data"
 
 local DRAG = 0.3
 local ACCEL = 0.5
@@ -6,11 +6,9 @@ local SPEED_MAX = 2
 local FALL_MAX = 4.0
 local GRAVITY = 0.2
 local JUMP = 3
-local BOUNCE = 0.2
 local TILT = 0.2
 local TILT_SPEED = 0.05
 local FIRE_COOLDOWN = 0.1
-local ONGROUND = 10
 local INVUL = 150
 local INPUT_LOCK = 120
 
@@ -153,12 +151,6 @@ local function flash(self)
 	end
 end
 
-local function clear(self)
-	go.animate("#sprite", "tint.w", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_INOUTQUAD, 1)
-	msg.post("iew#clear", "show")
-	self.lock = INPUT_LOCK
-end
-
 function update(self, dt)
 	if data.state == data.STATE_PLAYING then
 		move(self)
@@ -258,8 +250,6 @@ local function input_playing(self, action_id, action)
 	elseif action_id == hash("exit") and action.pressed then
 		msg.post("main:/sound", "stop_sound")
 		msg.post("main:/handler", "show_menu")
-	elseif action_id == hash("debug") and action.pressed then
-		--msg.post("/view#shutter", "endlevel")
 	end
 end
 

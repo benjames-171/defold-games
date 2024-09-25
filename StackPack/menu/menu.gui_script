@@ -1,14 +1,6 @@
 local data = require "main.data"
 local ui = require "main.ui"
 
-function logoin(self, node)
-	gui.animate(node, gui.PROP_SCALE, vmath.vector3(3.9,3.9,3.9), gui.EASING_INOUTQUAD, 0.8, 0, logoout)
-end
-
-function logoout(self, node)
-	gui.animate(node, gui.PROP_SCALE, vmath.vector3(4.1, 4.1, 4.1), gui.EASING_INOUTQUAD, 0.8, 0, logoin)
-end
-
 function init(self)
 	self.handpos = 1
 	self.rad = 0
@@ -22,7 +14,7 @@ function init(self)
 	gui.set_position(self.node, vmath.vector3(data.SCR_W/2, (data.SCR_H/2), 0))
 	if data.maxlevel > 1 then gui.set_text(gui.get_node("1"), string.format("CONTINUE (%d)", data.maxlevel)) end
 	sound.play("main:/sound#music-menu")
-	logoout(self, gui.get_node("logo"))
+	gui.animate(gui.get_node("logo"), gui.PROP_SCALE, vmath.vector3(4.2, 4.2, 4.2), gui.EASING_INOUTQUAD, 0.8, 0, nil, gui.PLAYBACK_LOOP_PINGPONG)
 	data.state = data.STATE_MENU
 end
 

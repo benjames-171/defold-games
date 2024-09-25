@@ -1,10 +1,4 @@
 image: "/assets/png/control.png"
 tile_width: 16
 tile_height: 16
-tile_margin: 0
-tile_spacing: 0
-collision: ""
-material_tag: "tile"
 extrude_borders: 2
-inner_padding: 0
-sprite_trim_mode: SPRITE_TRIM_MODE_OFF

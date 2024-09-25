@@ -29,13 +29,13 @@ function init(self)
 	reset(self)
 end
 
-function move(self)
+local function move(self)
 	local r = math.sin(self.radius) * 64
 	local pos = vmath.vector3(math.cos(self.rot) * r * 1.7, math.sin(self.rot) * r, 0)
 	go.set_position(self.origin + pos)
 end
 
-function switch(self)
+local function switch(self)
 	if self.open then
 		self.open = false
 		sprite.play_flipbook("#sprite", "boss1a")
@@ -67,9 +67,9 @@ function update(self, dt)
 			if self.spit > SPIT then
 				self.spitrot = self.spitrot + 0.5
 				self.spit = 0
-				local move = vmath.vector3(math.cos(self.spitrot), math.sin(self.spitrot), 0)
-				move = vmath.normalize(move)
-				factory.create("#bullet-factory", nil, nil, {move = move})
+				local m = vmath.vector3(math.cos(self.spitrot), math.sin(self.spitrot), 0)
+				m = vmath.normalize(m)
+				factory.create("#bullet-factory", nil, nil, {move = m})
 			end
 			if self.flash then
 				sprite.set_constant("#sprite", "tint", vmath.vector4(8,8,8,1))

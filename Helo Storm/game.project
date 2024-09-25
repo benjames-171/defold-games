@@ -14,8 +14,8 @@ default_texture_mag_filter = nearest
 shared_state = 1
 
 [project]
-dependencies = https://github.com/subsoap/defos/archive/master.zip
 title = Helo Storm
+dependencies#0 = https://github.com/subsoap/defos/archive/master.zip
 
 [html5]
 splash_image = /assets/png/splash.png

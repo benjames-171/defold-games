@@ -1,81 +1,53 @@
 image: "/assets/png/player.png"
 tile_width: 24
 tile_height: 32
-tile_margin: 0
-tile_spacing: 0
-collision: ""
-material_tag: "tile"
 animations {
   id: "dead"
   start_tile: 12
   end_tile: 12
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "dead-b"
   start_tile: 24
   end_tile: 24
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "duck"
   start_tile: 10
   end_tile: 10
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "duck-b"
   start_tile: 22
   end_tile: 22
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "jump"
   start_tile: 9
   end_tile: 9
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "jump-b"
   start_tile: 21
   end_tile: 21
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "static"
   start_tile: 11
   end_tile: 11
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "static-b"
   start_tile: 23
   end_tile: 23
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "walk"
@@ -83,8 +55,6 @@ animations {
   end_tile: 9
   playback: PLAYBACK_LOOP_FORWARD
   fps: 12
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "walk-b"
@@ -92,9 +62,5 @@ animations {
   end_tile: 21
   playback: PLAYBACK_LOOP_FORWARD
   fps: 12
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 extrude_borders: 1
-inner_padding: 0
-sprite_trim_mode: SPRITE_TRIM_MODE_OFF

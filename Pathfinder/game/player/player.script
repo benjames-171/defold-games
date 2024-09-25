@@ -1,4 +1,4 @@
-data = require "main.data"
+local data = require "main.data"
 
 local DRAG = 0.2
 local ACCEL = 0.6

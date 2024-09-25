@@ -1,7 +1,7 @@
 local data = require "main.data"
 local item = require "game.core.item"
 
-local function disable_node (self, node)
+local function disablenode (self, node)
 	gui.set_enabled(node, false)
 end
 
@@ -26,7 +26,7 @@ local function populate(self,slot)
 	local prop = item.getprop(itm)
 	local value = item.getvalue(itm)
 	local slt = item.getslot(itm)
-	local str = ""
+	local str
 
 	if prop == item.PROP_DAMAGE then
 		if slt == item.SLOT_LEFT then str = "MELEE"

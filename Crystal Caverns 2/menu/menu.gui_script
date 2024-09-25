@@ -1,7 +1,7 @@
 local data = require "main.data"
 
 local function fsmenutext(self)
-	local text = ""
+	local text
 	if defos.is_fullscreen() then
 		text = "WINDOWED"
 		defos.set_cursor_visible(false)

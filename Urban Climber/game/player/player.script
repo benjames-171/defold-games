@@ -1,4 +1,4 @@
-data = require "main.data"
+local data = require "main.data"
 
 function init(self)
 	self.snap = true

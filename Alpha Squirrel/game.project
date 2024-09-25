@@ -15,7 +15,7 @@ shared_state = 1
 
 [project]
 title = Alpha Squirrel
-dependencies = https://github.com/subsoap/defos/archive/master.zip
+dependencies#0 = https://github.com/subsoap/defos/archive/master.zip
 
 [html5]
 splash_image = /assets/png/splash.png

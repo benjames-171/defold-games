@@ -34,7 +34,7 @@ function update(self, dt)
 	gui.set_text(gui.get_node("score"), string.format("%05d", data.score))
 end
 
-local function disable_node (self, node)
+local function disablenode (self, node)
 	gui.set_enabled(node, false)
 end
 

@@ -1,28 +1,16 @@
 image: "/assets/png/pixel.png"
 tile_width: 1
 tile_height: 1
-tile_margin: 0
-tile_spacing: 0
-collision: ""
-material_tag: "tile"
 animations {
   id: "pink"
   start_tile: 10
   end_tile: 10
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "red"
   start_tile: 1
   end_tile: 1
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 extrude_borders: 1
-inner_padding: 0
-sprite_trim_mode: SPRITE_TRIM_MODE_OFF

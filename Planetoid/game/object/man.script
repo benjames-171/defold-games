@@ -68,7 +68,7 @@ local function fall(self)
 	self.hold = nil
 	local pos = go.get_position()
 	self.height = pos.y
-	y = math.random(8, 16)
+	local y = math.random(8, 16)
 	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, y, go.EASING_INSINE, (pos.y - y) / 25, 0, landed)
 	msg.post("#co", "enable")
 end

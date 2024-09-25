@@ -6,7 +6,7 @@ function init(self)
 	self.energy = 2
 	self.dest = go.get_position()
 	self.type = math.random(1,4)
-	anim = "enemy"..tostring(self.type)
+	local anim = "enemy"..tostring(self.type)
 	msg.post("#sprite", "play_animation", {id = hash(anim)})
 end
 
@@ -82,7 +82,7 @@ local function hit(self, power)
 end
 
 local function freeze(self)
-	anim = "frozen"..tostring(self.type)
+	local anim = "frozen"..tostring(self.type)
 	msg.post("#sprite", "play_animation", {id = hash(anim)})
 	self.frozen = true
 end

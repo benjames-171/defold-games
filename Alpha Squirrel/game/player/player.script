@@ -1,4 +1,4 @@
-data = require "main.data"
+local data = require "main.data"
 
 local DRAG = 0.1
 local ACCEL = 0.3
@@ -225,8 +225,6 @@ local function input_playing(self, action_id, action)
 	elseif action_id == hash("exit") and action.pressed then
 		msg.post("main:/sound", "stop_sound")
 		msg.post("main:/handler", "show_menu")
-	elseif action_id == hash("debug") and action.pressed then
-		--clear(self)
 	end
 end
 

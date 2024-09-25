@@ -1,3 +1,5 @@
+local data = require "main.data"
+
 local function complete(self)
 	go.delete()
 end

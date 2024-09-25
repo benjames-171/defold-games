@@ -1,7 +1,6 @@
-data = require "main.data"
+local data = require "main.data"
 
 local INVUL = 150
-local INPUT_LOCK = 70
 
 function init(self)
 	self.time = 0
@@ -138,12 +137,6 @@ local function flash(self)
 	end
 end
 
-local function clear(self)
-	go.animate("#sprite", "tint.w", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_INOUTQUAD, 1)
-	msg.post("/view#clear", "show")
-	self.lock = INPUT_LOCK
-end
-
 local function anim(self)
 	if self.move ~= vmath.vector3(0,0,0) and self.anim ~= self.move then
 		if self.move.x > 0 then sprite.play_flipbook("#sprite", "walk-right")
@@ -269,8 +262,8 @@ function on_message(self, message_id, message, sender)
 end
 
 local function shoot(self)
-	local move = vmath.normalize(self.dir)
-	factory.create("#shot-factory", nil, nil, {move = move * 1.5})
+	local m = vmath.normalize(self.dir)
+	factory.create("#shot-factory", nil, nil, {move = m * 1.5})
 	sound.play("main:/sound#fireball")
 	data.shot = 0
 end
@@ -288,11 +281,6 @@ local function input_playing(self, action_id, action)
 		shoot(self)
 	elseif action_id == hash("exit") and action.pressed then
 		msg.post("view#pause", "show")
-	elseif action_id == hash("debug") and action.pressed then
-		--data.items = data.totalitems
-		--data.secrets = data.totalsecrets
-		--data.deaths = 0
-		--msg.post("view#complete", "show")
 	end
 end
 

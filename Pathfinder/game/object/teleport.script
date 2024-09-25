@@ -1,3 +1,5 @@
+local data = require "main.data"
+
 function init(self)
 	self.other_id = nil
 end

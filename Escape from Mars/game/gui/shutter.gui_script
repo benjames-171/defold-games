@@ -1,5 +1,3 @@
-local data = require "main.data"
-
 local function opened (self, node)
 	gui.set_enabled(node, false)
 end
@@ -12,7 +10,7 @@ end
 
 local function hide(self)
 	gui.animate(gui.get_node("shutter_top"), gui.PROP_POSITION, vmath.vector4(0, 720, 0, 0), gui.EASING_INOUTQUAD, 1, 0.25, opened)
-	gui.animate(gui.get_node("shutter_bottom"), gui.PROP_POSITION, vmath.vector4(0, 0, 0, 0), gui.EASING_INOUTQUAD, 1, 0.25, opendd)
+	gui.animate(gui.get_node("shutter_bottom"), gui.PROP_POSITION, vmath.vector4(0, 0, 0, 0), gui.EASING_INOUTQUAD, 1, 0.25, opened)
 	sound.play("main:/sound#out")
 end
 

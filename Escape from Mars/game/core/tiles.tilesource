@@ -1,10 +1,7 @@
 image: "/assets/png/tiles.png"
 tile_width: 16
 tile_height: 16
-tile_margin: 0
-tile_spacing: 0
 collision: "/assets/png/tiles.png"
-material_tag: "tile"
 convex_hulls {
   index: 0
   count: 16
@@ -1291,27 +1288,17 @@ animations {
   start_tile: 19
   end_tile: 19
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "bullet"
   start_tile: 6
   end_tile: 6
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "cursor"
   start_tile: 32
   end_tile: 32
-  playback: PLAYBACK_ONCE_FORWARD
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "enemy1"
@@ -1319,8 +1306,6 @@ animations {
   end_tile: 194
   playback: PLAYBACK_LOOP_FORWARD
   fps: 2
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "enemy2"
@@ -1328,8 +1313,6 @@ animations {
   end_tile: 196
   playback: PLAYBACK_LOOP_FORWARD
   fps: 3
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "enemy3"
@@ -1337,8 +1320,6 @@ animations {
   end_tile: 198
   playback: PLAYBACK_LOOP_FORWARD
   fps: 2
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "enemy4"
@@ -1346,152 +1327,102 @@ animations {
   end_tile: 200
   playback: PLAYBACK_LOOP_FORWARD
   fps: 2
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item0"
   start_tile: 209
   end_tile: 209
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item1"
   start_tile: 210
   end_tile: 210
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item10"
   start_tile: 219
   end_tile: 219
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item11"
   start_tile: 220
   end_tile: 220
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item12"
   start_tile: 221
   end_tile: 221
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item13"
   start_tile: 222
   end_tile: 222
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item14"
   start_tile: 223
   end_tile: 223
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item15"
   start_tile: 224
   end_tile: 224
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item2"
   start_tile: 211
   end_tile: 211
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item3"
   start_tile: 212
   end_tile: 212
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item4"
   start_tile: 213
   end_tile: 213
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item5"
   start_tile: 214
   end_tile: 214
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item6"
   start_tile: 215
   end_tile: 215
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item7"
   start_tile: 216
   end_tile: 216
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item8"
   start_tile: 217
   end_tile: 217
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "item9"
   start_tile: 218
   end_tile: 218
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "player"
@@ -1499,17 +1430,11 @@ animations {
   end_tile: 16
   playback: PLAYBACK_LOOP_FORWARD
   fps: 2
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "sentry"
   start_tile: 5
   end_tile: 5
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 extrude_borders: 2
-inner_padding: 0

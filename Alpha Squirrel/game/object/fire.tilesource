@@ -1,19 +1,11 @@
 image: "/assets/png/fire.png"
 tile_width: 40
 tile_height: 40
-tile_margin: 0
-tile_spacing: 0
-collision: ""
-material_tag: "tile"
 animations {
   id: "anim"
   start_tile: 1
   end_tile: 8
   playback: PLAYBACK_LOOP_FORWARD
   fps: 15
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 extrude_borders: 2
-inner_padding: 0
-sprite_trim_mode: SPRITE_TRIM_MODE_OFF

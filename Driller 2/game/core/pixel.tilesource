@@ -1,27 +1,15 @@
 image: "/assets/png/pixel.png"
 tile_width: 4
 tile_height: 4
-tile_margin: 0
-tile_spacing: 0
-collision: ""
-material_tag: "tile"
 animations {
   id: "anim"
   start_tile: 1
   end_tile: 8
-  playback: PLAYBACK_ONCE_FORWARD
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "red"
   start_tile: 9
   end_tile: 9
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 extrude_borders: 2
-inner_padding: 0

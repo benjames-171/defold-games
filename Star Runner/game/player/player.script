@@ -249,7 +249,7 @@ local function input_playing(self, action_id, action)
 			self.dir.x = 1
 		end
 	elseif action_id == hash("action") and action.pressed then
-		jump(self, action)
+		jump(self)
 	elseif action_id == hash("map") and action.pressed then
 		msg.post("view#map", "show")
 	elseif action_id == hash("exit") and action.pressed then

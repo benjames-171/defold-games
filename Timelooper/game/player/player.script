@@ -1,4 +1,4 @@
-data = require "main.data"
+local data = require "main.data"
 
 local DRAG = 300
 local ACCEL = 18
@@ -9,7 +9,6 @@ local JUMP = 130
 local BOUNCE = 15
 local ONGROUND = 10
 local INVUL = 150
-local INPUT_LOCK = 70
 
 local function spawnpast(self)
 	if data.state == data.STATE_PLAYING then

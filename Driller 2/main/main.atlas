@@ -34,6 +34,4 @@ images {
 images {
   image: "/assets/png/bg_right.png"
 }
-margin: 0
 extrude_borders: 2
-inner_padding: 0

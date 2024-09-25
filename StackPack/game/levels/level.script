@@ -34,8 +34,8 @@ local function tile(self, x, y)
 		c = c + 5
 	end
 
-	local tile = p[c+4]
-	tilemap.set_tile("#tilemap", "world", x, y, tile)
+	local t = p[c+4]
+	tilemap.set_tile("#tilemap", "world", x, y, t)
 end
 
 local function parse(self)
@@ -46,7 +46,7 @@ local function parse(self)
 		vmath.vector3(166,169,0),
 	}
 	
-	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
 
 	for y = sy+1, h+sy-2 do
 		for x = sx+1, w+sx-2 do

@@ -1,28 +1,16 @@
 image: "/assets/png/pixels.png"
 tile_width: 1
 tile_height: 1
-tile_margin: 0
-tile_spacing: 0
-collision: ""
-material_tag: "tile"
 animations {
   id: "dust"
   start_tile: 5
   end_tile: 5
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "lift"
   start_tile: 8
   end_tile: 8
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 extrude_borders: 2
-inner_padding: 0
-sprite_trim_mode: SPRITE_TRIM_MODE_OFF

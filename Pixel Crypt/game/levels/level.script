@@ -3,7 +3,7 @@ local data = require "main.data"
 local anim = {}
 
 local function parse(self)
-	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
 
 	local total = 0
 
@@ -80,7 +80,7 @@ local function parse(self)
 end
 
 local function initanim(self)
-	sx, sy, w, h = tilemap.get_bounds("#tilemap")
+	local sx, sy, w, h = tilemap.get_bounds("#tilemap")
 	local frames = {
 		vmath.vector3(161,162,0),
 		vmath.vector3(163,164,0),

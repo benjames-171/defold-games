@@ -8,7 +8,7 @@ function init(self)
 	self.type = math.random(1, data.level)
 	self.power = self.type * 5
 	self.energy = 10 + (self.type * 15)
-	anim = "enemy"..tostring(self.type)
+	local anim = "enemy"..tostring(self.type)
 	msg.post("#sprite", "play_animation", {id = hash(anim)})
 end
 
@@ -27,12 +27,12 @@ local function attack(self)
 	msg.post("/common/player", "hit", {power = self.power})
 end
 
-local function trymove(self, move)
-	local pos = data.world2tile(go.get_position() + move)
+local function trymove(self, m)
+	local pos = data.world2tile(go.get_position() + m)
 	local t = tilemap.get_tile("/level#tilemap", "world", pos.x, pos.y)
 	
 	if t <= 80 then
-		pos = go.get_position() + move
+		pos = go.get_position() + m
 		if pos.x == data.playerpos.x and pos.y == data.playerpos.y then
 			attack(self)
 		else
@@ -53,14 +53,14 @@ local function ai(self)
 	local v = physics.raycast(go.get_position(), data.playerpos, {hash("world")})
 
 	if math.abs(pos.x - data.playerpos.x) <= THRESH and math.abs(pos.y - data.playerpos.y) <= THRESH and v == nil then
-		local move = vmath.vector3()
-		if pos.x > data.playerpos.x then move.x = -data.TILE_SIZE
-		elseif pos.x < data.playerpos.x then move.x = data.TILE_SIZE
+		local m = vmath.vector3()
+		if pos.x > data.playerpos.x then m.x = -data.TILE_SIZE
+		elseif pos.x < data.playerpos.x then m.x = data.TILE_SIZE
 		end
-		if pos.y > data.playerpos.y then move.y = -data.TILE_SIZE
-		elseif pos.y < data.playerpos.y then move.y = data.TILE_SIZE
+		if pos.y > data.playerpos.y then m.y = -data.TILE_SIZE
+		elseif pos.y < data.playerpos.y then m.y = data.TILE_SIZE
 		end
-		trymove(self, move)
+		trymove(self, m)
 		msg.post("/common/player", "spotted")
 		msg.post("#alert", "enable")
 	else

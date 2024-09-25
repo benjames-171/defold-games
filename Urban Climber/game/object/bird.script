@@ -5,7 +5,7 @@ local SPEED = 6
 local EGG_DROP = 0.4
 local THRESH = 40
 
-function reset(self)
+local function reset(self)
 	local pos = go.get_position()
 	local target = vmath.vector3()
 

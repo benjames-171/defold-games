@@ -2,135 +2,85 @@ tile_set: "/game/core/game.tilesource"
 layers {
   id: "layer1"
   z: 0.0
-  is_visible: 1
   cell {
     x: 0
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 1
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 2
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 3
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 4
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 5
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 6
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 7
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 8
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 9
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 10
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 11
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 12
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 13
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 14
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
   cell {
     x: 15
     y: 0
     tile: 31
-    h_flip: 0
-    v_flip: 0
-    rotate90: 0
   }
 }
 material: "/builtins/materials/tile_map.material"
-blend_mode: BLEND_MODE_ALPHA

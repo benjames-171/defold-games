@@ -1,3 +1,5 @@
+local data = require "main.data"
+
 go.property("lock", 0)
 
 function init(self)

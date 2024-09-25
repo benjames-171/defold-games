@@ -1,5 +1,5 @@
 local function generate(self)
-	sx, sy, width, height = tilemap.get_bounds("/level#tilemap")
+	local sx, sy, width, height = tilemap.get_bounds("/level#tilemap")
 
 	local buff = buffer.create(width * height, {{name=hash("rgba"), type = buffer.VALUE_TYPE_UINT8, count = 4}})
 	local stream = buffer.get_stream(buff, hash("rgba"))

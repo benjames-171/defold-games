@@ -1,16 +1,8 @@
 local data = require "main.data"
 
-local function moveup(self)
-	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, self.origin + vmath.vector3(0,8,0), go.EASING_INOUTQUAD, 1, 0, movedown)
-end
-
-function movedown(self)
-	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, self.origin + vmath.vector3(0,-8,0), go.EASING_INOUTQUAD, 1, 0, moveup)
-end
-
 function init(self)
 	self.origin = go.get_position()
-	moveup(self)
+	go.animate(".", "position", go.PLAYBACK_LOOP_PINGPONG, self.origin + vmath.vector3(0,16,0), go.EASING_INOUTQUAD, 1)
 	msg.post("#player", "disable")
 end
 
@@ -37,8 +29,8 @@ function on_message(self, message_id, message, sender)
 		start(self)
 	elseif message_id == hash("reset") then
 		go.set_position(self.origin)
+		go.animate(".", "position", go.PLAYBACK_LOOP_PINGPONG, self.origin + vmath.vector3(0,16,0), go.EASING_INOUTQUAD, 1)
 		msg.post("#player", "disable")
-		moveup(self)
 	end
 end
 

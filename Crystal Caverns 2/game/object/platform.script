@@ -14,7 +14,7 @@ end
 
 local function nav(self)
 	local pos = go.get_position()
-	tpos = data.world2tile(pos)
+	local tpos = data.world2tile(pos)
 	
 	local t = tilemap.get_tile("/level#tilemap", "back", tpos.x, tpos.y)
 

@@ -1,6 +1,6 @@
 local data = require "main.data"
 
-function flashpos(self, node)
+local function flashpos(self, node)
 	gui.set_color(node, data.hex2rgba("#6df7c1"))
 	gui.animate(node, gui.PROP_COLOR, data.hex2rgba("#1e8875"), gui.EASING_LINEAR, 0.5, 0, flashpos)
 end
@@ -9,7 +9,9 @@ function init(self)
 	msg.post(".", "acquire_input_focus")
 	self.tick = 0
 	self.current = ""
-	sx, sy, self.mapw, self.maph = tilemap.get_bounds("/level#tilemap")
+	local _, _, w, h = tilemap.get_bounds("/level#tilemap")
+	self.mapw = w
+	self.maph = h
 	flashpos(self, gui.get_node("position"))
 end
 

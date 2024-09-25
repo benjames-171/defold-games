@@ -1,27 +1,18 @@
 image: "/assets/png/boss1.png"
 tile_width: 32
 tile_height: 32
-tile_margin: 0
-tile_spacing: 0
-collision: ""
-material_tag: "tile"
 animations {
   id: "boss1a"
   start_tile: 1
   end_tile: 6
   playback: PLAYBACK_ONCE_BACKWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "boss1b"
   start_tile: 1
   end_tile: 6
-  playback: PLAYBACK_ONCE_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "halo"
@@ -29,9 +20,5 @@ animations {
   end_tile: 9
   playback: PLAYBACK_LOOP_PINGPONG
   fps: 15
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 extrude_borders: 2
-inner_padding: 0
-sprite_trim_mode: SPRITE_TRIM_MODE_OFF

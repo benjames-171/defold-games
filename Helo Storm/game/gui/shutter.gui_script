@@ -1,3 +1,5 @@
+local data = require "main.data"
+
 local function disablenode (self, node)
 	gui.set_enabled(node, false)
 	data.state = data.STATE_PLAYING
@@ -24,7 +26,7 @@ local function slidein(self)
 	gui.set_enabled(node, true)
 	gui.animate(node, gui.PROP_POSITION, vmath.vector3(512, 286, 0), gui.EASING_INOUTQUAD, 0.5, 2)
 
-	local node = gui.get_node("bottom")
+	node = gui.get_node("bottom")
 	gui.set_enabled(node, true)
 	gui.animate(node, gui.PROP_POSITION, vmath.vector3(512, 290, 0), gui.EASING_INOUTQUAD, 0.5, 2, complete)
 end

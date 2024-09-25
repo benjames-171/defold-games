@@ -1,18 +1,12 @@
 image: "/assets/png/pixel.png"
 tile_width: 1
 tile_height: 1
-tile_margin: 0
-tile_spacing: 0
-collision: ""
-material_tag: "tile"
 animations {
   id: "orange"
   start_tile: 2
   end_tile: 2
   playback: PLAYBACK_NONE
   fps: 0
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "red"
@@ -20,8 +14,6 @@ animations {
   end_tile: 1
   playback: PLAYBACK_NONE
   fps: 0
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "yellow"
@@ -29,8 +21,5 @@ animations {
   end_tile: 3
   playback: PLAYBACK_NONE
   fps: 0
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 extrude_borders: 2
-inner_padding: 0

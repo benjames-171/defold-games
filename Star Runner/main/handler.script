@@ -1,18 +1,7 @@
 local data = require "main.data"
-local lock = require "main.lock"
-
-local function domaincheck()
-	local v = true
-
-	lock.add_domain("v6p9d9t4.ssl.hwcdn.net")
-
-	if not lock.verify_domain() then v = false end
-
-	return v
-end
 
 function init(self)
-	if domaincheck() then msg.post(".", "acquire_input_focus") end
+	msg.post(".", "acquire_input_focus")
 	msg.post("handler#menu", "load")
 	msg.post("@render:", "clear_color", {color = data.hex2rgba("#2b0f54")})
 end

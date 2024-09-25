@@ -1,10 +1,7 @@
 image: "/assets/png/tiles.png"
 tile_width: 8
 tile_height: 8
-tile_margin: 0
-tile_spacing: 0
 collision: "/assets/png/tiles.png"
-material_tag: "tile"
 convex_hulls {
   index: 0
   count: 8
@@ -1293,8 +1290,6 @@ animations {
   end_tile: 178
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "2"
@@ -1302,8 +1297,6 @@ animations {
   end_tile: 180
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "3"
@@ -1311,8 +1304,6 @@ animations {
   end_tile: 182
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "4"
@@ -1320,8 +1311,6 @@ animations {
   end_tile: 184
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "5"
@@ -1329,8 +1318,6 @@ animations {
   end_tile: 186
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "6"
@@ -1338,8 +1325,6 @@ animations {
   end_tile: 188
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "7"
@@ -1347,8 +1332,6 @@ animations {
   end_tile: 190
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "8"
@@ -1356,53 +1339,36 @@ animations {
   end_tile: 192
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "arrow"
   start_tile: 2
   end_tile: 2
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "arrow-d"
   start_tile: 196
   end_tile: 196
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "arrow-h"
   start_tile: 197
   end_tile: 197
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "arrow-v"
   start_tile: 195
   end_tile: 195
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "axe"
   start_tile: 198
   end_tile: 205
   playback: PLAYBACK_LOOP_FORWARD
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "dart"
@@ -1410,35 +1376,23 @@ animations {
   end_tile: 15
   playback: PLAYBACK_LOOP_FORWARD
   fps: 15
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "dialog"
   start_tile: 30
   end_tile: 30
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "elf"
   start_tile: 150
   end_tile: 150
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "explode"
   start_tile: 219
   end_tile: 224
-  playback: PLAYBACK_ONCE_FORWARD
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "fireball"
@@ -1446,44 +1400,29 @@ animations {
   end_tile: 207
   playback: PLAYBACK_LOOP_PINGPONG
   fps: 15
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "flame"
   start_tile: 154
   end_tile: 160
-  playback: PLAYBACK_ONCE_FORWARD
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "food-icon"
   start_tile: 6
   end_tile: 6
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "glow"
   start_tile: 218
   end_tile: 218
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "hp-icon"
   start_tile: 4
   end_tile: 4
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "keeper"
@@ -1491,26 +1430,18 @@ animations {
   end_tile: 218
   playback: PLAYBACK_LOOP_FORWARD
   fps: 3
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "key"
   start_tile: 19
   end_tile: 19
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "key-grey"
   start_tile: 13
   end_tile: 13
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "onfire"
@@ -1518,8 +1449,6 @@ animations {
   end_tile: 216
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "portal"
@@ -1527,62 +1456,42 @@ animations {
   end_tile: 240
   playback: PLAYBACK_LOOP_FORWARD
   fps: 10
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "shop1"
   start_tile: 17
   end_tile: 17
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "shop2"
   start_tile: 29
   end_tile: 29
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "shop3"
   start_tile: 28
   end_tile: 28
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "shop4"
   start_tile: 80
   end_tile: 80
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "shot-icon"
   start_tile: 5
   end_tile: 5
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "spike"
   start_tile: 144
   end_tile: 144
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "wade"
@@ -1590,27 +1499,17 @@ animations {
   end_tile: 166
   playback: PLAYBACK_LOOP_FORWARD
   fps: 6
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "warrior"
   start_tile: 151
   end_tile: 151
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "wizard"
   start_tile: 149
   end_tile: 149
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 extrude_borders: 2
-inner_padding: 0
-sprite_trim_mode: SPRITE_TRIM_MODE_OFF

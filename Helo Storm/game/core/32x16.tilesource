@@ -1,10 +1,7 @@
 image: "/assets/png/32x16.png"
 tile_width: 32
 tile_height: 16
-tile_margin: 0
-tile_spacing: 0
 collision: "/assets/png/32x16.png"
-material_tag: "tile"
 convex_hulls {
   index: 0
   count: 11
@@ -115,18 +112,12 @@ animations {
   start_tile: 4
   end_tile: 7
   playback: PLAYBACK_LOOP_FORWARD
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "enemy1"
   start_tile: 8
   end_tile: 8
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "enemy2"
@@ -134,8 +125,6 @@ animations {
   end_tile: 10
   playback: PLAYBACK_LOOP_FORWARD
   fps: 24
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "enemy3"
@@ -143,17 +132,12 @@ animations {
   end_tile: 12
   playback: PLAYBACK_LOOP_FORWARD
   fps: 8
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "enemy4"
   start_tile: 15
   end_tile: 15
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "enemy5"
@@ -161,8 +145,6 @@ animations {
   end_tile: 17
   playback: PLAYBACK_LOOP_FORWARD
   fps: 4
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "enemy6"
@@ -170,17 +152,12 @@ animations {
   end_tile: 14
   playback: PLAYBACK_LOOP_FORWARD
   fps: 6
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "enemy7a"
   start_tile: 18
   end_tile: 18
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "enemy7b"
@@ -188,26 +165,18 @@ animations {
   end_tile: 19
   playback: PLAYBACK_LOOP_FORWARD
   fps: 15
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "gamepad"
   start_tile: 21
   end_tile: 21
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "heli"
   start_tile: 1
   end_tile: 1
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "jeep"
@@ -215,18 +184,11 @@ animations {
   end_tile: 3
   playback: PLAYBACK_LOOP_FORWARD
   fps: 8
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 animations {
   id: "silo"
   start_tile: 20
   end_tile: 20
   playback: PLAYBACK_NONE
-  fps: 30
-  flip_horizontal: 0
-  flip_vertical: 0
 }
 extrude_borders: 2
-inner_padding: 0
-sprite_trim_mode: SPRITE_TRIM_MODE_OFF

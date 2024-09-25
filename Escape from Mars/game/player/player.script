@@ -318,16 +318,16 @@ function update(self, dt)
 end
 
 local function bresenham(self, x1, y1, x2, y2)
-	delta_x = x2 - x1
-	ix = delta_x > 0 and 1 or -1
+	local delta_x = x2 - x1
+	local ix = delta_x > 0 and 1 or -1
 	delta_x = 2 * math.abs(delta_x)
 
-	delta_y = y2 - y1
-	iy = delta_y > 0 and 1 or -1
+	local delta_y = y2 - y1
+	local iy = delta_y > 0 and 1 or -1
 	delta_y = 2 * math.abs(delta_y)
 
 	if delta_x >= delta_y then
-		error = delta_y - delta_x / 2
+		local error = delta_y - delta_x / 2
 
 		while x1 ~= x2 do
 			if (error > 0) or ((error == 0) and (ix > 0)) then
@@ -341,7 +341,7 @@ local function bresenham(self, x1, y1, x2, y2)
 			table.insert (self.path, vmath.vector3(x1, y1, Z_DEPTH))
 		end
 	else
-		error = delta_x - delta_y / 2
+		local error = delta_x - delta_y / 2
 
 		while y1 ~= y2 do
 			if (error > 0) or ((error == 0) and (iy > 0)) then

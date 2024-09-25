@@ -1,12 +1,6 @@
-local data = require ("main.data")
+local data = require "main.data"
 
-function init(self)
-	self.loaded = 0
-	msg.post(".", "acquire_input_focus")
-	loadlevel(self)
-end
-
-function loadlevel (self)
+local function loadlevel (self)
 	if self.loaded > 0 then
 		msg.post (string.format("loader#level%d", self.loaded), "unload")
 	end
@@ -15,10 +9,16 @@ function loadlevel (self)
 	self.loaded = data.level
 end
 
+function init(self)
+	self.loaded = 0
+	msg.post(".", "acquire_input_focus")
+	loadlevel(self)
+end
+
 function on_message(self, message_id, message,sender)
-	if(message_id == hash("new_level"))then
-		loadlevel(self, message.level)
-	elseif message_id == hash("proxy_loaded")then	
+	if message_id == hash("new_level") then
+		loadlevel(self)
+	elseif message_id == hash("proxy_loaded") then
 		msg.post(sender, "enable")	
 	elseif message_id == hash("debug") then
 		print(sender)
