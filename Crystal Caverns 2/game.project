@@ -26,6 +26,7 @@ scale_mode = fit
 [physics]
 debug = 0
 gravity_y = -200.0
+max_collision_object_count = 192
 
 [spine]
 max_count = 0
