@@ -44,9 +44,6 @@ game_binding = /main/game.input_bindingc
 [sprite]
 subpixels = 0
 
-[native_extension]
-app_manifest = /main/generated.appmanifest
-
 [tilemap]
 max_tile_count = 4096
 

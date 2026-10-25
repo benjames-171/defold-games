@@ -44,9 +44,3 @@ game_binding = /main/game.input_bindingc
 [sprite]
 subpixels = 0
 
-[physics]
-debug = 0
-
-[native_extension]
-app_manifest = /generated.appmanifest
-

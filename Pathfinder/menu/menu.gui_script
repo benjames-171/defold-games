@@ -31,7 +31,7 @@ function init(self)
 	data.setstring("controls")
 	data.setstring("credits")
 
-	gui.set_text(gui.get_node("v"), sys.get_config("project.version"))
+	gui.set_text(gui.get_node("v"), sys.get_config_string("project.version"))
 end
 
 function update(self, dt)
@@ -103,7 +103,7 @@ local function input(self, action_id, action)
 			data.sfx = not data.sfx
 			icons(self)
 		end
-	else
+	elseif action.x then
 		if gui.pick_node(gui.get_node("start-bg"), action.x, action.y) then
 			self.handpos = 1
 		elseif gui.pick_node(gui.get_node("controls-bg"), action.x, action.y) then

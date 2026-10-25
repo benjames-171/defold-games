@@ -69,7 +69,7 @@ local function input(self, action_id, action)
 		end
 	elseif (action_id == hash("exit") or action_id == hash("start")) and action.pressed then
 		close(self)
-	else
+	elseif action.x then
 		if gui.pick_node(gui.get_node("continue-bg"), action.x, action.y) then
 			self.handpos = 1
 		elseif gui.pick_node(gui.get_node("restart-bg"), action.x, action.y) then

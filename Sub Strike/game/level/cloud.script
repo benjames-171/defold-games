@@ -9,7 +9,7 @@ function init(self)
 	if self.large then self.speed = self.speed * 0.1
 	else self.speed = self.speed * 0.05
 	end
-	sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0.75))
+	go.set("#sprite", "tint", vmath.vector4(1,1,1,0.75))
 end
 
 function update(self, dt)

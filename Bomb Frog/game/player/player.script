@@ -82,9 +82,9 @@ local function blink(self)
 		if self.invul == 0 then
 			msg.post("#co", "enable")
 		elseif self.invul % 6 < 3 then
-			sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+			go.set("#sprite", "tint", vmath.vector4(1,1,1,1))
 		else
-			sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0))
+			go.set("#sprite", "tint", vmath.vector4(1,1,1,0))
 		end
 	end
 end

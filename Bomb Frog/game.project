@@ -5,7 +5,6 @@ render = /render/custom.renderc
 [display]
 width = 1280
 height = 720
-fullscreen = 1
 
 [graphics]
 default_texture_min_filter = nearest

@@ -1,0 +1,13 @@
+.internal
+build
+.externalToolBuilders
+.DS_Store
+Thumbs.db
+pspbrwse.jbf
+.lock-wscript
+*.pyc
+*.der
+.project
+.cproject
+builtins
+/.editor_settings

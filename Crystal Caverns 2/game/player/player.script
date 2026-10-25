@@ -156,8 +156,8 @@ local function flash(self)
 		self.invul = self.invul - 1
 		if self.invul == 0 then
 			--
-		elseif self.invul % 6 < 3 then sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
-		else sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0))
+		elseif self.invul % 6 < 3 then go.set("#sprite", "tint", vmath.vector4(1,1,1,1))
+		else go.set("#sprite", "tint", vmath.vector4(1,1,1,0))
 		end
 	end
 end

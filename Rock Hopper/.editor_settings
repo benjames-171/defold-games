@@ -1,0 +1,26 @@
+{
+  :code {
+    :breakpoints [
+    ]
+  }
+  :scene {
+    :resource-settings {
+    }
+  }
+  :workflow {
+    :open-tabs [
+      [
+      ]
+    ]
+    :recent-files [
+      [
+        "/menu/menu.gui_script"
+        :code
+      ]
+      [
+        "/render/custom.render_script"
+        :code
+      ]
+    ]
+  }
+}

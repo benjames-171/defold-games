@@ -8,8 +8,8 @@ end
 
 function update(self, dt)
 	local a = math.random(40,70)/100
-	sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,a))
-	sprite.set_constant("#sprite1", "tint", vmath.vector4(1,1,1,a))
+	go.set("#sprite", "tint", vmath.vector4(1,1,1,a))
+	go.set("#sprite1", "tint", vmath.vector4(1,1,1,a))
 end
 
 function on_message(self, message_id, message, sender)

@@ -1,8 +1,0 @@
-font: "/assets/font/8-bit-pusab.ttf"
-material: "/builtins/fonts/font.material"
-size: 16
-antialias: 0
-outline_alpha: 1.0
-outline_width: 4.0
-all_chars: true
-characters: " !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"

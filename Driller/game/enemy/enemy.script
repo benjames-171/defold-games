@@ -14,7 +14,7 @@ function init(self)
 	end
 
 	msg.post("#sprite", "play_animation", {id = hash(tostring(math.random(1, 9)))})
-	sprite.set_constant("#burst", "tint", vmath.vector4(1,1,1,0))
+	go.set("#burst", "tint", vmath.vector4(1,1,1,0))
 	sprite.set_hflip("#sprite", self.velx < 0)
 end
 
@@ -40,8 +40,8 @@ local function dead(self)
 end
 
 local function burst(self)
-	if self.burst % 16 < 8 then sprite.set_constant("#burst", "tint", vmath.vector4(1,1,1,0))
-	else sprite.set_constant("#burst", "tint", vmath.vector4(1,1,1,1))
+	if self.burst % 16 < 8 then go.set("#burst", "tint", vmath.vector4(1,1,1,0))
+	else go.set("#burst", "tint", vmath.vector4(1,1,1,1))
 	end
 	if self.burst % 16 == 8 then
 		data.energy = data.energy - 5

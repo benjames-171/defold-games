@@ -29,7 +29,7 @@ local function generate(self)
 	end
 
 	local resource_path = go.get("#sprite", "texture0")
-	local header = {width = width, height = height, type = resource.TEXTURE_TYPE_2D, format = resource.TEXTURE_FORMAT_RGBA, num_mip_maps = 1}
+	local header = {width = width, height = height, type = graphics.TEXTURE_TYPE_2D, format = graphics.TEXTURE_FORMAT_RGBA, num_mip_maps = 1}
 	resource.set_texture(resource_path, header, buff)
 
 	msg.post("view#game", "minimap_size", {size = vmath.vector3(width, height, 0), offset = vmath.vector3(sx, sy, 0)})

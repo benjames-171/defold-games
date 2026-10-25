@@ -1,4 +1,0 @@
-function init(self)
-	particlefx.play("#pfx")
-end
-

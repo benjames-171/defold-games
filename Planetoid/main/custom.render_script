@@ -7,10 +7,10 @@ function init(self)
 	self.particle_pred = render.predicate({"particle"})
 
 	self.clear_color = vmath.vector4()
-	self.clear_color.x = sys.get_config("render.clear_color_red", 0)
-	self.clear_color.y = sys.get_config("render.clear_color_green", 0)
-	self.clear_color.z = sys.get_config("render.clear_color_blue", 0)
-	self.clear_color.w = sys.get_config("render.clear_color_alpha", 0)
+	self.clear_color.x = sys.get_config_number("render.clear_color_red", 0)
+	self.clear_color.y = sys.get_config_number("render.clear_color_green", 0)
+	self.clear_color.z = sys.get_config_number("render.clear_color_blue", 0)
+	self.clear_color.w = sys.get_config_number("render.clear_color_alpha", 0)
 
 	self.view = vmath.matrix4()
 
@@ -18,7 +18,6 @@ function init(self)
 	data.SCR_H = render.get_height()
 	data.CANV_W = data.SCR_W / data.PIXEL_SIZE
 	data.CANV_H = data.SCR_H / data.PIXEL_SIZE
-	data.WORLD_W = data.CANV_W * 8
 end
 
 function update(self)
@@ -28,7 +27,7 @@ function update(self)
 	local sx = 0
 	local sy = 0
 	local ar = w/h
-	
+
 	if ar > ASPECT_RATIO then
 		sx = (w - (h * ASPECT_RATIO)) / 2
 		w = h * ASPECT_RATIO
@@ -38,17 +37,17 @@ function update(self)
 	end
 
 	render.set_depth_mask(true)
-	render.clear({[render.BUFFER_COLOR_BIT] = self.clear_color, [render.BUFFER_DEPTH_BIT] = 1, [render.BUFFER_STENCIL_BIT] = 0})
-	
+	render.clear({[graphics.BUFFER_TYPE_COLOR0_BIT] = self.clear_color, [graphics.BUFFER_TYPE_DEPTH_BIT] = 1, [graphics.BUFFER_TYPE_STENCIL_BIT] = 0})
+
 	render.set_viewport(math.ceil(sx), math.ceil(sy), math.ceil(w), math.ceil(h))
 	render.set_view(self.view)
 
 	render.set_depth_mask(false)
-	render.disable_state(render.STATE_DEPTH_TEST)
-	render.disable_state(render.STATE_STENCIL_TEST)
-	render.enable_state(render.STATE_BLEND)
-	render.set_blend_func(render.BLEND_SRC_ALPHA, render.BLEND_ONE_MINUS_SRC_ALPHA)
-	render.disable_state(render.STATE_CULL_FACE)
+	render.disable_state(graphics.STATE_DEPTH_TEST)
+	render.disable_state(graphics.STATE_STENCIL_TEST)
+	render.enable_state(graphics.STATE_BLEND)
+	render.set_blend_func(graphics.BLEND_FACTOR_SRC_ALPHA, graphics.BLEND_FACTOR_ONE_MINUS_SRC_ALPHA)
+	render.disable_state(graphics.STATE_CULL_FACE)
 
 	render.set_projection(vmath.matrix4_orthographic(0, render.get_width() / data.PIXEL_SIZE, 0, render.get_height() / data.PIXEL_SIZE, -1, 1))
 
@@ -59,10 +58,10 @@ function update(self)
 	render.set_view(vmath.matrix4())
 	render.set_projection(vmath.matrix4_orthographic(0, render.get_window_width(), 0, render.get_window_height(), -1, 1))
 
-	render.enable_state(render.STATE_STENCIL_TEST)
+	render.enable_state(graphics.STATE_STENCIL_TEST)
 	render.draw(self.gui_pred)
 	render.draw(self.text_pred)
-	render.disable_state(render.STATE_STENCIL_TEST)
+	render.disable_state(graphics.STATE_STENCIL_TEST)
 
 	render.set_depth_mask(false)
 end

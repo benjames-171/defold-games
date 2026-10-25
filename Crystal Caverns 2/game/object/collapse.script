@@ -7,7 +7,7 @@ function init(self)
 end
 
 local function respawn(self, url, property)
-	sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0))
+	go.set("#sprite", "tint", vmath.vector4(1,1,1,0))
 	go.animate("#sprite", "tint.w", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_LINEAR, 1)
 	go.set_position(self.origin)
 	msg.post("#co", "enable")

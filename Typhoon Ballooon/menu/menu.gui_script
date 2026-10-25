@@ -11,7 +11,7 @@ function init(self)
 	msg.post(".", "acquire_input_focus")
 	self.node = gui.get_node("container")
 	gui.set_position(self.node, vmath.vector3(data.SCR_W/2, (data.SCR_H/2), 0))
-	gui.set_text(gui.get_node("v"), sys.get_config("project.version"))
+	gui.set_text(gui.get_node("v"), sys.get_config_string("project.version"))
 	data.state = data.STATE_MENU
 end
 

@@ -16,8 +16,8 @@ local function reset(self)
 	msg.post("#sprite", "disable")
 	msg.post("#sprite-exhaust", "disable")
 	msg.post("#co", "disable")
-	sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0))
-	sprite.set_constant("#sprite-exhaust", "tint", vmath.vector4(1,1,1,0))
+	go.set("#sprite", "tint", vmath.vector4(1,1,1,0))
+	go.set("#sprite-exhaust", "tint", vmath.vector4(1,1,1,0))
 end
 
 function init(self)
@@ -58,10 +58,10 @@ function update(self, dt)
 		end
 
 		if self.flash == 2 then
-			sprite.set_constant("#sprite", "tint", vmath.vector4(8,8,8,1))
+			go.set("#sprite", "tint", vmath.vector4(8,8,8,1))
 			self.flash = 1
 		elseif self.flash == 1 then
-			sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+			go.set("#sprite", "tint", vmath.vector4(1,1,1,1))
 			self.flash = 0
 		end
 	elseif data.bosshp <= 0 then

@@ -60,7 +60,7 @@ local function wake(self)
 
 		if self.time <= 100 then
 			local a = (100-self.time) / 100
-			sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,a))
+			go.set("#sprite", "tint", vmath.vector4(1,1,1,a))
 		end
 
 		if self.time == 0 then

@@ -1,0 +1,59 @@
+{
+  :code {
+    :breakpoints [
+    ]
+  }
+  :scene {
+    :resource-settings {
+    }
+  }
+  :search-in-files {
+    :exts ""
+    :include-libraries true
+    :term "sprite.set_constant"
+  }
+  :workflow {
+    :open-tabs [
+      [
+      ]
+    ]
+    :recent-files [
+      [
+        "/game/player/player.script"
+        :code
+      ]
+      [
+        "/game/object/torch.script"
+        :code
+      ]
+      [
+        "/game/object/highlight.script"
+        :code
+      ]
+      [
+        "/game/object/collapse.script"
+        :code
+      ]
+      [
+        "/game/enemy/bosses/boss3.script"
+        :code
+      ]
+      [
+        "/game/enemy/bosses/boss2.script"
+        :code
+      ]
+      [
+        "/game/enemy/bosses/boss1.script"
+        :code
+      ]
+      [
+        "/custom/custom.render_script"
+        :code
+      ]
+      [
+        "/game.project"
+        :form
+      ]
+    ]
+  }
+}

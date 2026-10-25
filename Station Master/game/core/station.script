@@ -56,7 +56,7 @@ local function addmodule(self, type)
 	local t = 119 + (type*2)
 	if pos.y ~= 12 then t = t + 1 end
 	tilemap.set_tile("#tilemap", "main", pos.x, pos.y, t)
-	msg.post("effects", "trigger", {pos = data.tile2world(pos)})
+	msg.post("effects", "trig", {pos = data.tile2world(pos)})
 end
 
 local function addhub(self)

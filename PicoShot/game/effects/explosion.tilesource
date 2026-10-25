@@ -1,9 +1,0 @@
-image: "/assets/png/explosion24.png"
-tile_width: 24
-tile_height: 24
-animations {
-  id: "anim"
-  start_tile: 1
-  end_tile: 6
-  fps: 15
-}

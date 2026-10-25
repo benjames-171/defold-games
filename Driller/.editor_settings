@@ -1,0 +1,35 @@
+{
+  :code {
+    :breakpoints [
+    ]
+  }
+  :scene {
+    :resource-settings {
+    }
+  }
+  :search-in-files {
+    :exts ""
+    :include-libraries true
+    :term "sprite.set_constant"
+  }
+  :workflow {
+    :open-tabs [
+      [
+      ]
+    ]
+    :recent-files [
+      [
+        "/game/enemy/enemy.script"
+        :code
+      ]
+      [
+        "/game.project"
+        :form
+      ]
+      [
+        "/render/custom.render_script"
+        :code
+      ]
+    ]
+  }
+}

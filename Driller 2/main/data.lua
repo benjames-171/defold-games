@@ -10,6 +10,7 @@ M.STATE_GAMEOVER = 6
 M.state = M.STATE_MENU
 
 M.TILE_SIZE = 16
+M.PIXEL_SIZE = 2
 
 M.level = 1
 M.maxlevel = 1

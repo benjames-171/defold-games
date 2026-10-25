@@ -1,0 +1,250 @@
+{
+  :code {
+    :breakpoints [
+    ]
+  }
+  :scene {
+    :resource-settings {
+      "/game/core/common.collection" {
+        :camera {
+          :focus-point [
+            562.3595081565354
+            380.76794251127023
+            0.0
+          ]
+          :fov-x 1640.1224251515587
+          :fov-y 1022.1052794422757
+          :position [
+            562.3595081565354
+            380.76794251127023
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+      "/game/gui/complete.gui" {
+        :camera {
+          :focus-point [
+            512.0
+            384.0
+            0.0
+          ]
+          :fov-x 2244.6139534883723
+          :fov-y 1126.4
+          :position [
+            512.0
+            384.0
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+      "/game/gui/game.gui" {
+        :camera {
+          :focus-point [
+            512.0
+            384.0
+            0.0
+          ]
+          :fov-x 2244.6139534883723
+          :fov-y 1126.4
+          :position [
+            512.0
+            384.0
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+      "/game/gui/pause.gui" {
+        :camera {
+          :focus-point [
+            512.0
+            384.0
+            0.0
+          ]
+          :fov-x 2244.6139534883723
+          :fov-y 1126.4
+          :position [
+            512.0
+            384.0
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+      "/game/gui/shutter.gui" {
+        :camera {
+          :focus-point [
+            512.0
+            384.0
+            0.0
+          ]
+          :fov-x 1784.5581395348838
+          :fov-y 1126.4
+          :position [
+            512.0
+            384.0
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+      "/main/game.collection" {
+        :camera {
+          :focus-point [
+            0.0
+            0.0
+            0.0
+          ]
+          :fov-x 3.4854651162790726
+          :fov-y 2.200000000000002
+          :position [
+            0.0
+            0.0
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+      "/main/main.atlas" {
+        :camera {
+          :focus-point [
+            276.66404566988376
+            160.31709122193533
+            0.0
+          ]
+          :fov-x 118.39045931069384
+          :fov-y 59.41111306036277
+          :position [
+            276.66404566988376
+            160.31709122193533
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+      "/main/main.collection" {
+        :camera {
+          :focus-point [
+            0.0
+            0.0
+            0.0
+          ]
+          :fov-x 3.4854651162790726
+          :fov-y 2.200000000000002
+          :position [
+            0.0
+            0.0
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+    }
+  }
+  :workflow {
+    :open-tabs [
+      [
+        [
+          "/game/core/common.collection"
+          :scene
+        ]
+      ]
+    ]
+    :recent-files [
+      [
+        "/game/gui/game.gui"
+        :scene
+      ]
+      [
+        "/main/main.atlas"
+        :scene
+      ]
+      [
+        "/game/gui/pause.gui"
+        :scene
+      ]
+      [
+        "/game/gui/complete.gui"
+        :scene
+      ]
+      [
+        "/main/main.collection"
+        :scene
+      ]
+      [
+        "/main/game.collection"
+        :scene
+      ]
+      [
+        "/game/gui/shutter.gui"
+        :scene
+      ]
+      [
+        "/menu/menu.gui_script"
+        :code
+      ]
+      [
+        "/main/custom.render_script"
+        :code
+      ]
+      [
+        "/game.project"
+        :form
+      ]
+      [
+        "/game/core/common.collection"
+        :scene
+      ]
+    ]
+  }
+}

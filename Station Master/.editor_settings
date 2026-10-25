@@ -1,0 +1,70 @@
+{
+  :code {
+    :breakpoints [
+    ]
+  }
+  :scene {
+    :resource-settings {
+      "/game/core/game.collection" {
+        :camera {
+          :focus-point [
+            320.0000054765669
+            180.00000547656668
+            0.0
+          ]
+          :fov-x 12068.14312694787
+          :fov-y 5500.000012048447
+          :position [
+            320.0000054765669
+            180.00000547656668
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+    }
+  }
+  :search-in-files {
+    :exts ""
+    :include-libraries true
+    :term "PIXEL_"
+  }
+  :workflow {
+    :open-tabs [
+      [
+        [
+          "/render/custom.render_script"
+          :code
+        ]
+      ]
+    ]
+    :recent-files [
+      [
+        "/game/effects/create.script"
+        :code
+      ]
+      [
+        "/game/core/game.collection"
+        :scene
+      ]
+      [
+        "/main/data.lua"
+        :code
+      ]
+      [
+        "/game/core/station.script"
+        :code
+      ]
+      [
+        "/render/custom.render_script"
+        :code
+      ]
+    ]
+  }
+}

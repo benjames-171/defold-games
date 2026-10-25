@@ -20,8 +20,8 @@ local function reset(self)
 	msg.post("#sprite", "disable")
 	msg.post("#halo", "disable")
 	msg.post("#co", "disable")
-	sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,0))
-	sprite.set_constant("#halo", "tint", vmath.vector4(1,1,1,0))
+	go.set("#sprite", "tint", vmath.vector4(1,1,1,0))
+	go.set("#halo", "tint", vmath.vector4(1,1,1,0))
 	sprite.play_flipbook("#sprite", "boss1a")
 end
 
@@ -39,7 +39,7 @@ local function switch(self)
 	if self.open then
 		self.open = false
 		sprite.play_flipbook("#sprite", "boss1a")
-		sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+		go.set("#sprite", "tint", vmath.vector4(1,1,1,1))
 		go.animate("#halo", "tint.w", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_LINEAR, 0.5)
 	else
 		self.open = true
@@ -72,9 +72,9 @@ function update(self, dt)
 				factory.create("#bullet-factory", nil, nil, {move = m})
 			end
 			if self.flash then
-				sprite.set_constant("#sprite", "tint", vmath.vector4(8,8,8,1))
+				go.set("#sprite", "tint", vmath.vector4(8,8,8,1))
 				self.flash = false
-			else sprite.set_constant("#sprite", "tint", vmath.vector4(1,1,1,1))
+			else go.set("#sprite", "tint", vmath.vector4(1,1,1,1))
 			end
 		else
 			self.radius = self.radius + OUTSPEED

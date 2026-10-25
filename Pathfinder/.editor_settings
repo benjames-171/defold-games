@@ -1,0 +1,57 @@
+{
+  :code {
+    :breakpoints [
+    ]
+  }
+  :scene {
+    :resource-settings {
+      "/menu/menu.gui" {
+        :camera {
+          :focus-point [
+            709.4462481655175
+            300.98987784827585
+            0.0
+          ]
+          :fov-x 2060.3560028044944
+          :fov-y 935.5698176000001
+          :position [
+            709.4462481655175
+            300.98987784827585
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+    }
+  }
+  :workflow {
+    :open-tabs [
+      [
+      ]
+    ]
+    :recent-files [
+      [
+        "/render/custom.render_script"
+        :code
+      ]
+      [
+        "/game/gui/pause.gui_script"
+        :code
+      ]
+      [
+        "/menu/menu.gui"
+        :scene
+      ]
+      [
+        "/menu/menu.gui_script"
+        :code
+      ]
+    ]
+  }
+}

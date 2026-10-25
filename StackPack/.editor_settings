@@ -1,0 +1,35 @@
+{
+  :code {
+    :breakpoints [
+    ]
+  }
+  :scene {
+    :resource-settings {
+    }
+  }
+  :search-in-files {
+    :exts ""
+    :include-libraries true
+    :term "set_con"
+  }
+  :workflow {
+    :open-tabs [
+      [
+      ]
+    ]
+    :recent-files [
+      [
+        "/render/custom.render_script"
+        :code
+      ]
+      [
+        "/game/gui/map.script"
+        :code
+      ]
+      [
+        "/game/player/player.script"
+        :code
+      ]
+    ]
+  }
+}

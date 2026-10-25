@@ -1,0 +1,97 @@
+{
+  :code {
+    :breakpoints [
+    ]
+  }
+  :scene {
+    :resource-settings {
+      "/game/core/common.collection" {
+        :camera {
+          :focus-point [
+            140.0
+            0.0
+            0.0
+          ]
+          :fov-x 4563.806343906513
+          :fov-y 2508.000000000001
+          :position [
+            140.0
+            0.0
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+      "/menu/menu.collection" {
+        :camera {
+          :focus-point [
+            302.3438469781412
+            294.97340882103884
+            0.0
+          ]
+          :fov-x 3346.8476755889046
+          :fov-y 1839.230970346563
+          :position [
+            302.3438469781412
+            294.97340882103884
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+    }
+  }
+  :search-in-files {
+    :exts ""
+    :include-libraries true
+    :term "set_con"
+  }
+  :workflow {
+    :open-tabs [
+      [
+      ]
+    ]
+    :recent-files [
+      [
+        "/game/enemy/ghost.script"
+        :code
+      ]
+      [
+        "/game/core/common.collection"
+        :scene
+      ]
+      [
+        "/menu/menu.collection"
+        :scene
+      ]
+      [
+        "/game/player/player.script"
+        :code
+      ]
+      [
+        "/game.project"
+        :form
+      ]
+      [
+        "/main/handler.script"
+        :code
+      ]
+      [
+        "/render/custom.render_script"
+        :code
+      ]
+    ]
+  }
+}

@@ -1,0 +1,115 @@
+{
+  :code {
+    :breakpoints [
+    ]
+  }
+  :scene {
+    :resource-settings {
+      "/game/core/game.collection" {
+        :camera {
+          :focus-point [
+            140.01300384276055
+            274.93930930641443
+            -0.25
+          ]
+          :fov-x 1388.4421816659467
+          :fov-y 822.87490766624
+          :position [
+            140.01300384276055
+            274.93930930641443
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+      "/game/core/game.tilesource" {
+        :camera {
+          :focus-point [
+            54.73384619195046
+            64.26939442724458
+            0.0
+          ]
+          :fov-x 266.93674798761606
+          :fov-y 158.20288
+          :position [
+            54.73384619195046
+            64.26939442724458
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+      "/game/core/level.tilemap" {
+        :camera {
+          :focus-point [
+            112.0
+            120.0
+            0.5
+          ]
+          :fov-x 534.5386996904026
+          :fov-y 316.80000000000007
+          :position [
+            112.0
+            120.0
+            5000.0
+          ]
+          :projection :orthographic
+          :rotation [
+            0.0
+            0.0
+            0.0
+            1.0
+          ]
+        }
+      }
+    }
+  }
+  :workflow {
+    :open-tabs [
+      [
+      ]
+    ]
+    :recent-files [
+      [
+        "/main/custom.render_script"
+        :code
+      ]
+      [
+        "/generated.appmanifest"
+        :code
+      ]
+      [
+        "/menu/menu.gui_script"
+        :code
+      ]
+      [
+        "/game.project"
+        :form
+      ]
+      [
+        "/game/core/game.collection"
+        :scene
+      ]
+      [
+        "/game/core/level.tilemap"
+        :scene
+      ]
+      [
+        "/game/core/game.tilesource"
+        :scene
+      ]
+    ]
+  }
+}
